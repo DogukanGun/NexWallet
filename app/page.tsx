@@ -25,8 +25,8 @@ export default function Home() {
 
   const knowledgeBases = [
     { name: "Cookie.dao", icon: "/icons/cookiefun.png", active: true },
+    { name: "The Graph", icon: "/icons/graph.png", active: true },
     { name: "ChainLink", icon: "/icons/chainlink.svg", comingSoon: true },
-    { name: "The Graph", icon: "/icons/graph.png", comingSoon: true },
   ];
 
   const walletIntegrations = [
@@ -62,7 +62,7 @@ export default function Home() {
               className="mb-8"
             >
               <h1 className="text-7xl font-extrabold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-lg">
-                Welcome to NexWallet
+                Welcome to NexAI
               </h1>
               <p className="text-2xl mb-8 font-light text-white drop-shadow-md">
                 Manage your wallet by speaking with AI
@@ -139,20 +139,23 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="relative group"
               >
-                <div className={`p-6 rounded-xl bg-gradient-to-b from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 hover:border-orange-500/50 ${chain.comingSoon ? 'opacity-70' : ''}`}>
+                <div className={`p-6 rounded-xl bg-gradient-to-b from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 hover:border-orange-500/50 ${chain.comingSoon ? 'opacity-70' : ''}`} style={{ width: '150px', height: '200px' }}>
                   <div className="flex flex-col items-center">
                     <Image
                       src={chain.icon}
                       alt={`${chain.name} logo`}
-                      width={64}
-                      height={64}
+                      width={50}
+                      height={50}
+                      className="object-cover mb-2"
                     />
-                    <h3 className="text-lg font-semibold text-white mb-2">{chain.name}</h3>
-                    {chain.comingSoon && (
-                      <span className="text-sm px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full">
-                        Coming Soon
-                      </span>
-                    )}
+                    <div className="mt-2 text-center">
+                      <h3 className="text-lg font-semibold text-white mb-2">{chain.name}</h3>
+                      {chain.comingSoon && (
+                        <span className="text-sm px-2 py-1 bg-orange-500/20 text-orange-300 rounded-full whitespace-nowrap">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -189,20 +192,23 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="relative group"
               >
-                <div className={`p-6 rounded-xl bg-gradient-to-b from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 hover:border-orange-500/50 ${kb.comingSoon ? 'opacity-70' : ''}`}>
+                <div className={`p-6 rounded-xl bg-gradient-to-b from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 hover:border-orange-500/50 ${kb.comingSoon ? 'opacity-70' : ''}`} style={{ width: '150px', height: '200px' }}>
                   <div className="flex flex-col items-center">
                     <Image
                       src={kb.icon}
                       alt={`${kb.name} logo`}
-                      width={64}
-                      height={64}
+                      width={50}
+                      height={50}
+                      className="object-cover mb-2"
                     />
-                    <h3 className="text-lg font-semibold text-white mb-2">{kb.name}</h3>
-                    {kb.comingSoon && (
-                      <span className="text-sm px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full">
-                        Coming Soon
-                      </span>
-                    )}
+                    <div className="mt-2 text-center">
+                      <h3 className="text-lg font-semibold text-white mb-2">{kb.name}</h3>
+                      {kb.comingSoon && (
+                        <span className="text-sm px-2 py-1 bg-orange-500/20 text-orange-300 rounded-full whitespace-nowrap">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -239,20 +245,23 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="relative group"
               >
-                <div className={`p-6 rounded-xl bg-gradient-to-b from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 hover:border-orange-500/50 ${wallet.comingSoon ? 'opacity-70' : ''}`}>
+                <div className={`p-6 rounded-xl bg-gradient-to-b from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 hover:border-orange-500/50 ${wallet.comingSoon ? 'opacity-70' : ''}`} style={{ width: '150px', height: '200px' }}>
                   <div className="flex flex-col items-center">
                     <Image
                       src={wallet.icon}
                       alt={`${wallet.name} logo`}
-                      width={64}
-                      height={64}
+                      width={50}
+                      height={50}
+                      className="object-cover mb-2"
                     />
-                    <h3 className="text-lg font-semibold text-white mb-2">{wallet.name}</h3>
-                    {wallet.comingSoon && (
-                      <span className="text-sm px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full">
-                        Coming Soon
-                      </span>
-                    )}
+                    <div className="mt-2 text-center">
+                      <h3 className="text-lg font-semibold text-white mb-2">{wallet.name}</h3>
+                      {wallet.comingSoon && (
+                        <span className="text-sm px-2 py-1 bg-orange-500/20 text-orange-300 rounded-full whitespace-nowrap">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>

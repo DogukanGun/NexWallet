@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useModal } from "../hooks/useModal";
-import { buttonClass } from "../components/ButtonClass";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import {
   createTransferInstruction,
@@ -28,10 +27,11 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const { openModal, closeModal, setModalContent } = useModal();
   const { address, isConnected } = useAppKitAccount();
   const { open, close } = useAppKit();
+  const [isLoading, setIsLoading] = useState(false);
   const { walletProvider } = useAppKitProvider<Provider>("solana");
   const { connection } = useAppKitConnection();
   const { enqueueSnackbar } = useSnackbar();
-  const { user } = usePrivy();
+  const { user, ready } = usePrivy();
 
   const hasEmbeddedWallet = useConfigStore().chains.some(chain => chain.isEmbedded);
   const hasUserWallet = useConfigStore().chains.some(chain => !chain.isEmbedded);
@@ -42,7 +42,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         console.error("No wallet address found");
         return;
       }
-      const identifier = hasEmbeddedWallet ?  user ? user.id : "" : address!;
+      const identifier = hasEmbeddedWallet ? (user ? user.id : "") : address || "";
       const checkUsercodeRes = await apiService.checkUsercode(accessCode, identifier);
       if (checkUsercodeRes.exists) {
         setIsAllowed(true);
@@ -108,8 +108,14 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
       try {
-        const identifier = hasEmbeddedWallet ?  user ? user.id : "" : address!;
-        const response = await apiService.checkUser(identifier);
+        setIsLoading(true);
+        if(ready && hasEmbeddedWallet && !user){
+          return;
+        }
+        if(hasUserWallet && !address){
+          return;
+        }
+        const response = await apiService.checkUser(address ?? "", user?.id ?? "");
         if (response.isAllowed) {
           setIsAllowed(true);
         } else {
@@ -118,17 +124,16 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
       } catch (error) {
         console.error("Error checking subscription status:", error);
         setShowPopup(true);
+      } finally {
+        setIsLoading(false);
       }
     };
     checkSubscriptionStatus();
-  }, []);
+  }, [ready,hasEmbeddedWallet,hasUserWallet]);
 
   useEffect(() => {
     if (showPopup) {
-      setModalContent(
-        <PopupComponent handleCheckCode={handleCheckCode} handleSubscribe={handleSubscribe} />,
-      );
-      openModal();
+      openModal(<PopupComponent handleCheckCode={handleCheckCode} handleSubscribe={handleSubscribe} />);
     } else {
       closeModal();
     }
@@ -140,7 +145,12 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
     };
   }, [showPopup, closeModal, handleCheckCode, handleSubscribe, openModal, setModalContent]);
 
-  return <>{isAllowed && children}</>;
+  return (
+    <>
+      {isLoading && <div className="loading-icon">Loading...</div>}
+      {isAllowed && children}
+    </>
+  );
 };
 
 export default SubscriptionWrapper;

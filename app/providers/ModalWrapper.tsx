@@ -6,7 +6,7 @@ import Modal from "../components/Modal";
 interface ModalContextValue {
   closeModal: () => void;
   setModalContent: (content: React.ReactNode) => void;
-  openModal: () => void;
+  openModal: (content: React.ReactNode) => void;
   isOpen: boolean;
 }
 
@@ -16,12 +16,14 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [modalContent, setModalContent] = React.useState<React.ReactNode>(null);
 
-  const openModal = () => {
+  const openModal = (content: React.ReactNode) => {
+    setModalContent(content);
     setIsOpen(true);
   };
 
   const closeModal = () => {
     setIsOpen(false);
+    setModalContent(null);
   };
 
   return (

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "ESLint",
+          "version": "7.32.0",
+          "informationUri": "https://eslint.org",
+          "rules": {
+            "no-unused-vars": {
+              "id": "no-unused-vars",
+              "shortDescription": {
+                "text": "Disallow unused variables."
+              },
+              "fullDescription": {
+                "text": "Variables that are declared but not used anywhere in the code."
+              }
+            }
+            // Add more rules as needed
+          }
+        }
+      },
+      "results": [
+        {
+          "ruleId": "no-unused-vars",
+          "message": {
+            "text": "Variable 'x' is defined but never used."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/index.js"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 5,
+                  "endLine": 1,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        }
+        // Add more results as needed
+      ]
+    }
+  ]
+} 

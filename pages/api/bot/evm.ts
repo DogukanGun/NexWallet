@@ -7,7 +7,7 @@ import { HumanMessage } from "@langchain/core/messages";
 import { Coinbase } from "@coinbase/coinbase-sdk/dist/coinbase/coinbase";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    const { walletData, text, isOnchain } = req.body;
+    const { walletData, text, isOnchain, chain } = req.body;
 
     const wallet = await prisma.arbitrumWallets.findFirst({
         where: {
@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         apiKeyName: process.env.CDP_API_KEY_NAME,
         apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
         mnemonicPhrase: wallet.mnemonic ?? undefined,
-        networkId: Coinbase.networks.BaseMainnet,
+        networkId: chain === 'base' ? Coinbase.networks.BaseMainnet : Coinbase.networks.EthereumMainnet,
     };
     const agentkit = await CdpAgentkit.configureWithWallet(config);
     const cdpToolkit = new CdpToolkit(agentkit);

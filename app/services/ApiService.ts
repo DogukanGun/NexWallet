@@ -137,11 +137,11 @@ class ApiService {
     });
   }
 
-  async checkUser(identifier: string): Promise<{ isAllowed: boolean }> {
+  async checkUser(identifier: string, did: string): Promise<{ isAllowed: boolean }> {
     return this.fetchWithToken("/api/user/check", { 
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userWallet: identifier }),
+      body: JSON.stringify({ userWallet: identifier, did }),
     });
   }
 
@@ -188,11 +188,11 @@ class ApiService {
     });
   }
 
-  async postBotBase(text: string, id: string): Promise<BotResponse> {
-    return this.fetchWithToken("/api/bot/base", {
+  async postBotEvm(text: string, id: string, chain: string = 'base'): Promise<BotResponse> {
+    return this.fetchWithToken("/api/bot/evm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text.split("op")[0], walletData:id }),
+      body: JSON.stringify({ text: text.split("op")[0], walletData:id, chain: chain }),
     });
   }
 

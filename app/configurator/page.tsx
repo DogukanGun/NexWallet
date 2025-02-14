@@ -15,10 +15,20 @@ import Cookies from 'js-cookie';
 import { enqueueSnackbar } from "notistack";
 import Accordion from "../components/Accordion";
 import { WarningModal } from "./components/WarningMode";
+import TelegramNoticeModal from '../components/TelegramNoticeModal';
+import RoadmapModal from '../components/RoadmapModal';
 
+export enum ChainId {
+  BASE = "base",
+  SOLANA = "solana", 
+  ETHEREUM = "ethereum",
+  ARBITRUM = "arbitrum",
+  POLYGON = "polygon",
+  AVALANCHE = "avalanche"
+}
 
 export interface AppChain {
-  id: string;
+  id: ChainId;
   name: string;
   isEmbedded: boolean;
   disabled: boolean | undefined;
@@ -46,42 +56,42 @@ const knowledgeBases: KnowledgeBase[] = [
 
 const chains: AppChain[] = [
   {
-    id: "solana",
+    id: ChainId.SOLANA,
     name: "Solana",
     isEmbedded: false,
     disabled: false,
     icon: "/icons/solana.svg",
   },
   {
-    id: "base",
+    id: ChainId.BASE,
     name: "Base",
     disabled: false,
     isEmbedded: true,
     icon: "/icons/base.svg",
   },
   {
-    id: "ethereum",
+    id: ChainId.ETHEREUM,
     name: "Ethereum",
     isEmbedded: true,
-    disabled: true,
+    disabled: false,
     icon: "/icons/ethereum.svg",
   },
   {
-    id: "arbitrum",
+    id: ChainId.ARBITRUM,
     name: "Arbitrum",
     isEmbedded: true,
     disabled: true,
     icon: "/icons/arbitrum.svg",
   },
   {
-    id: "polygon",
+    id: ChainId.POLYGON,
     name: "Polygon",
     disabled: true,
     isEmbedded: false,
     icon: "/icons/polygon.svg",
   },
   {
-    id: "avalanche",
+    id: ChainId.AVALANCHE,
     name: "Avalanche",
     disabled: true,
     isEmbedded: false,
@@ -134,6 +144,8 @@ export default function Home() {
   const [openSection, setOpenSection] = useState<number | null>(1);
   const [selectedConnectionType, setSelectedConnectionType] = useState<string>("apiKeys");
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [showTelegramNotice, setShowTelegramNotice] = useState(false);
+  const [showRoadmap, setShowRoadmap] = useState(false);
 
   const handleChainSelection = (chainId: string) => {
     const selectedChain = chains.find(chain => chain.id === chainId);
@@ -340,7 +352,9 @@ export default function Home() {
     };
   }, []);
 
-  
+  const handleTelegramClick = () => {
+    setShowTelegramNotice(true);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar">
@@ -359,8 +373,8 @@ export default function Home() {
         <BaseExplanationModal
           onClose={() => {
             setSelectedChains((prev) => {
-              if (prev.map(chain => chain.id).includes("base")) {
-                return prev.filter((chain) => chain.id !== "base");
+              if (prev.map(chain => chain.id).includes(ChainId.BASE)) {
+                return prev.filter((chain) => chain.id !== ChainId.BASE);
               }
               return prev;
             });
@@ -376,7 +390,7 @@ export default function Home() {
       <div className="w-full h-screen bg-black rounded-none p-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
-            NexAI Wallet
+            NexAI Wallet Configurator
           </h1>
         </div>
 
@@ -577,36 +591,42 @@ export default function Home() {
           </Accordion>
 
           <Accordion
-            title="5. Agent Point System"
+            title="5. Choose Your Character"
             isOpen={openSection === 5}
             onToggle={() => setOpenSection(openSection === 5 ? null : 5)}
             isValid={true}
           >
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-white">Join the Agent Point System</h2>
+              <h2 className="text-2xl font-bold mb-4 text-white">Choose Your Character</h2>
               <p className="text-gray-300 mb-4">
-                Would you like to join our Agent Point System to earn rewards and benefits?
+                Select a character for your agent. The agent will talk to you like these characters:
               </p>
               <div className={cardContainerClass}>
                 <button
-                  onClick={() => handleConnectionSelection("join")}
-                  className={`
-                    ${selectedConnectionType === "join" ? selectedButtonClass : buttonClass}
-                    ${cardClass}
-                  `}
+                  onClick={() => {}}
+                  className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
+                  disabled
                 >
-                  <span className={buttonTextClass}>Yes, I want to join!</span>
+                  <span className={buttonTextClass}>Elon Musk</span>
                 </button>
                 <button
-                  onClick={() => handleConnectionSelection("noJoin")}
-                  className={`
-                    ${selectedConnectionType === "noJoin" ? selectedButtonClass : buttonClass}
-                    ${cardClass}
-                  `}
+                  onClick={() => {}}
+                  className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
+                  disabled
                 >
-                  <span className={buttonTextClass}>No, thanks.</span>
+                  <span className={buttonTextClass}>Donald Trump</span>
+                </button>
+                <button
+                  onClick={() => {}}
+                  className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
+                  disabled
+                >
+                  <span className={buttonTextClass}>Andrew Tate</span>
                 </button>
               </div>
+              <p className="text-gray-300 mt-4">
+                Choose wisely! Your agent will embody the personality of the selected character.
+              </p>
             </div>
           </Accordion>
 
@@ -624,6 +644,20 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <TelegramNoticeModal
+        isOpen={showTelegramNotice}
+        onClose={() => setShowTelegramNotice(false)}
+        onViewRoadmap={() => {
+          setShowTelegramNotice(false);
+          setShowRoadmap(true);
+        }}
+      />
+
+      <RoadmapModal
+        isOpen={showRoadmap}
+        onClose={() => setShowRoadmap(false)}
+      />
     </div>
   );
 }

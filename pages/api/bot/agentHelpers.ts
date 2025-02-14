@@ -10,7 +10,7 @@ export interface LLMConfig {
 }
 
 export const createAgent = (llmConfig: LLMConfig, tools: StructuredToolInterface[], messageModifier: string, isOnchain: boolean) => {
-    const llm = isOnchain ? new ChatOpenAI(llmConfig) : new ChatOpenAI({
+    const llm = !isOnchain ? new ChatOpenAI(llmConfig) : new ChatOpenAI({
         model: "llama",
         apiKey: "GAIA",
     }, {

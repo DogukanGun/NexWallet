@@ -16,6 +16,7 @@ import WalletButton from "../../components/WalletButton";
 import { useRouter } from "next/navigation";
 import { useConfigStore } from "../../store/configStore";
 import { usePrivy } from "@privy-io/react-auth";
+import { ChainId } from "@/app/configurator/page";
 
 interface ChatPageProps {
   initialChatId?: string;
@@ -96,7 +97,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   };
 
   const handleBaseAi = async (text: string) => {
-    const res = await apiService.postBotBase(text, user?.id ?? "");
+    const res = await apiService.postBotEvm(text, user?.id ?? "",stores.chains[0].id);
     if (res.text) {
       addMessage({ role: "assistant", content: res.text, id: chatId });
       setMessages([...messages]);
@@ -115,9 +116,9 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
 
     try {
       const { text, op } = await apiService.postChat(input, messages, stores.chains, stores.knowledgeBase);
-      if (op === "solana") {
+      if (op === ChainId.SOLANA) {
         handleSolAi(text);
-      } else if (op === "base") {
+      } else if (op === ChainId.BASE) {
         handleBaseAi(text);
       } else {
         addMessage({ role: "assistant", content: text, id: chatId });

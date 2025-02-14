@@ -4,11 +4,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { buttonClass } from "./ButtonClass";
 import { useAppKitAccount } from "../config";
 import WalletButton from "./WalletButton";
+import TelegramNoticeModal from './TelegramNoticeModal';
+import RoadmapModal from './RoadmapModal';
+import { useState } from "react";
 
 const Navbar = () => {
   const path = usePathname();
   const { isConnected } = useAppKitAccount();
   const router = useRouter();
+  const [showTelegramNotice, setShowTelegramNotice] = useState(false);
+  const [showRoadmap, setShowRoadmap] = useState(false);
 
   return (
     <div className="drawer">
@@ -54,10 +59,26 @@ const Navbar = () => {
                     href="/app"
                     className="px-6 py-2 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(251,146,60,0.5)] hover:shadow-[0_0_20px_rgba(251,146,60,0.7)] transition-all duration-300"
                   >
-                    Launch App
+                    Launch NexWallet
                   </Link>
                 </li>
               )}
+              <li className="flex items-center">
+                <button
+                  onClick={() => setShowTelegramNotice(true)}
+                  className="px-6 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] transition-all duration-300"
+                >
+                  Add to Telegram
+                </button>
+              </li>
+              <li className="flex items-center">
+                <button
+                  onClick={() => setShowRoadmap(true)}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-[0_0_20px_rgba(168,85,247,0.7)] transition-all duration-300"
+                >
+                  Roadmap
+                </button>
+              </li>
               {path !== "/" && (
                 <li className="flex items-center">
                   <WalletButton />
@@ -124,6 +145,18 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Add the modals */}
+      <TelegramNoticeModal
+        isOpen={showTelegramNotice}
+        onClose={() => setShowTelegramNotice(false)}
+        onViewRoadmap={() => setShowRoadmap(true)}
+      />
+
+      <RoadmapModal
+        isOpen={showRoadmap}
+        onClose={() => setShowRoadmap(false)}
+      />
     </div>
   );
 };
