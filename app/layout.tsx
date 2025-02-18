@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "NexWallet",
   description: "AI powered wallet for the future",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/n.png",
   },
 };
 
