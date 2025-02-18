@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useConfigStore } from '../store/configStore'
 import { useRouter } from 'next/navigation'
-import { ChainId } from '../configurator/page'
+import { ChainId } from '../configurator/data'
 
 interface Agent {
   id: string

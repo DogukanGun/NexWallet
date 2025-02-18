@@ -1,6 +1,6 @@
 "use client";
 
-import { Message, useChat } from "ai/react";
+import { Message, useChat } from "@ai-sdk/react";
 import React, { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
@@ -16,7 +16,8 @@ import WalletButton from "../../components/WalletButton";
 import { useRouter } from "next/navigation";
 import { useConfigStore } from "../../store/configStore";
 import { usePrivy } from "@privy-io/react-auth";
-import { ChainId } from "@/app/configurator/page";
+import { ChainId } from "@/app/configurator/data";
+import { TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
 
 interface ChatPageProps {
   initialChatId?: string;
@@ -67,7 +68,11 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   }, [setMessages, initialChatId]);
 
   const addMessage = (innerMessage: Message) => {
-    messages.push(innerMessage);
+    const uiMessage: UIMessage = {
+      ...innerMessage,
+      parts: [{ type: 'text', text: innerMessage.content } as TextUIPart]
+    };
+    messages.push(uiMessage);
     window.dispatchEvent(new Event("storage"));
     setMessages([...messages]);
   };

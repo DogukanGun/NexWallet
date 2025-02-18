@@ -55,53 +55,111 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
     }
   };
 
-  const handleSubscribe = async () => {
+  const handleSubscribeWithUSDC = async () => {
     const env = process.env.NODE_ENV;
     if (!isConnected || address === undefined) {
       open();
       enqueueSnackbar("Please connect with a wallet that has funding.", { variant: "error" });
       return;
     }
-    const recipientAddress = new PublicKey("2B8gzcafXieWkB2SL9Esnj7h16ECDnsd5msbg42qn1BS");
+
     const senderAddress = new PublicKey(address);
-    const usdcMint = new PublicKey(
-      env == "development"
-        ? "Es9vMFrzaCERMaVSPyY9KaSk4uKygHNKx5o7pCjHjJ1i"
-        : "EPjFWdd5AuLkZkdr9vNdD8xpLdmrQFAhQ5ABw4gMiHQm",
-    );
-    const userUSDCAddress = await getAssociatedTokenAddress(usdcMint, senderAddress);
-    const recipientUSDCAddress = await getAssociatedTokenAddress(usdcMint, recipientAddress);
-    const amount = 10 * 10 ** 6; // USDC has 6 decimal places
-    const transferInstruction = createTransferInstruction(
-      userUSDCAddress,
-      recipientUSDCAddress,
-      recipientAddress,
-      amount,
-      [],
-      TOKEN_PROGRAM_ID,
-    );
-    const transaction = new Transaction().add(transferInstruction);
-    const hash = await connection?.getLatestBlockhash();
-    transaction.recentBlockhash = hash?.blockhash;
-    transaction.feePayer = senderAddress;
-    const signature = await walletProvider.signAndSendTransaction(transaction);
-    if (signature) {
-      setShowPopup(false);
-      const res = await fetch("/api/user/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          address: address,
-          transactionSignature: signature,
-        }),
-      });
-      if (res.ok) {
-        setIsAllowed(true);
-      } else {
-        console.error("Failed to register subscription:", await res.text());
-      }
+    const recipientAddress = new PublicKey("2B8gzcafXieWkB2SL9Esnj7h16ECDnsd5msbg42qn1BS");
+
+    try {
+      const usdcMint = new PublicKey(
+        env == "development"
+          ? "Es9vMFrzaCERMaVSPyY9KaSk4uKygHNKx5o7pCjHjJ1i"
+          : "EPjFWdd5AuLkZkdr9vNdD8xpLdmrQFAhQ5ABw4gMiHQm",
+      );
+      const userUSDCAddress = await getAssociatedTokenAddress(usdcMint, senderAddress);
+      const recipientUSDCAddress = await getAssociatedTokenAddress(usdcMint, recipientAddress);
+      const amount = 10 * 10 ** 6; // USDC has 6 decimal places
+
+      const transferInstruction = createTransferInstruction(
+        userUSDCAddress,
+        recipientUSDCAddress,
+        senderAddress,
+        amount,
+        [],
+        TOKEN_PROGRAM_ID,
+      );
+
+      const transaction = new Transaction().add(transferInstruction);
+      const hash = await connection?.getLatestBlockhash();
+      transaction.recentBlockhash = hash?.blockhash;
+      transaction.feePayer = senderAddress;
+      
+      const signature = await walletProvider.signAndSendTransaction(transaction);
+      await handlePaymentSuccess(signature);
+    } catch (error) {
+      console.error("USDC Payment failed:", error);
+      enqueueSnackbar("USDC Payment failed. Please try again.", { variant: "error" });
+    }
+  };
+
+  const handleSubscribeWithODP = async () => {
+    const env = process.env.NODE_ENV;
+    if (!isConnected || address === undefined) {
+      open();
+      enqueueSnackbar("Please connect with a wallet that has funding.", { variant: "error" });
+      return;
+    }
+
+    const senderAddress = new PublicKey(address);
+    const recipientAddress = new PublicKey("2B8gzcafXieWkB2SL9Esnj7h16ECDnsd5msbg42qn1BS");
+
+    try {
+      const odpMint = new PublicKey(
+        env === "development"
+          ? "0x16ef92Ab3B19ca73DAe6321b05062f0F7E6537C1"
+          : "0x16ef92Ab3B19ca73DAe6321b05062f0F7E6537C1"
+      );
+
+      const userODPAddress = await getAssociatedTokenAddress(odpMint, senderAddress);
+      const recipientODPAddress = await getAssociatedTokenAddress(odpMint, recipientAddress);
+      const odpAmount = 5000 * 10 ** 9; // ODP has 9 decimal places
+
+      const transferInstruction = createTransferInstruction(
+        userODPAddress,
+        recipientODPAddress,
+        senderAddress,
+        odpAmount,
+        [],
+        TOKEN_PROGRAM_ID,
+      );
+
+      const transaction = new Transaction().add(transferInstruction);
+      const hash = await connection?.getLatestBlockhash();
+      transaction.recentBlockhash = hash?.blockhash;
+      transaction.feePayer = senderAddress;
+      
+      const signature = await walletProvider.signAndSendTransaction(transaction);
+      await handlePaymentSuccess(signature);
+    } catch (error) {
+      console.error("ODP Payment failed:", error);
+      enqueueSnackbar("ODP Payment failed. Please try again.", { variant: "error" });
+    }
+  };
+
+  const handlePaymentSuccess = async (signature: string) => {
+    setShowPopup(false);
+    const res = await fetch("/api/user/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        address: address,
+        transactionSignature: signature,
+      }),
+    });
+    if (res.ok) {
+      setIsAllowed(true);
+      enqueueSnackbar("Subscription payment successful!", { variant: "success" });
+    } else {
+      console.error("Failed to register subscription:", await res.text());
+      enqueueSnackbar("Failed to register subscription", { variant: "error" });
     }
   };
 
@@ -133,7 +191,13 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
 
   useEffect(() => {
     if (showPopup) {
-      openModal(<PopupComponent handleCheckCode={handleCheckCode} handleSubscribe={handleSubscribe} />);
+      openModal(
+        <PopupComponent 
+          handleCheckCode={handleCheckCode} 
+          handleSubscribeWithUSDC={handleSubscribeWithUSDC}
+          handleSubscribeWithODP={handleSubscribeWithODP}
+        />
+      );
     } else {
       closeModal();
     }
@@ -143,7 +207,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         closeModal();
       }
     };
-  }, [showPopup, closeModal, handleCheckCode, handleSubscribe, openModal, setModalContent]);
+  }, [showPopup, closeModal, handleCheckCode, handleSubscribeWithUSDC, handleSubscribeWithODP, openModal]);
 
   return (
     <>

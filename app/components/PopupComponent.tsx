@@ -3,59 +3,55 @@
 import { useState } from "react";
 
 interface PopupComponentProps {
-  handleSubscribe: () => void;
-  handleCheckCode: (accessCode: string) => void;
+  handleCheckCode: (code: string) => void;
+  handleSubscribeWithUSDC: () => void;
+  handleSubscribeWithODP: () => void;
 }
 
-const PopupComponent: React.FC<PopupComponentProps> = ({ handleSubscribe, handleCheckCode }) => {
-  const [accessCode, setAccessCode] = useState<string>("");
+const PopupComponent: React.FC<PopupComponentProps> = ({
+  handleCheckCode,
+  handleSubscribeWithUSDC,
+  handleSubscribeWithODP,
+}) => {
+  const [accessCode, setAccessCode] = useState("");
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 p-6 rounded-xl max-w-md w-full mx-4">
-        <h3 className="text-xl font-bold text-white mb-4">
-          Premium Access Required
-        </h3>
-        <p className="text-gray-300 mb-4">
-          To continue using this feature, you need to either:
-        </p>
-        <ul className="list-disc list-inside text-gray-300 mb-6">
-          <li>Pay $10 in cryptocurrency</li>
-          <li>Enter a special access code</li>
-        </ul>
-
-        <button
-          onClick={handleSubscribe}
-          className="w-full bg-blue-600 text-white font-semibold rounded-full py-2 hover:bg-blue-700 transition duration-300 mb-4"
-        >
-          Subscribe Now
-        </button>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-700"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-900 text-gray-400">Or</span>
-          </div>
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+      <h2 className="text-2xl font-bold mb-4">Subscribe to Access</h2>
+      
+      <div className="space-y-4">
+        <div className="subscription-options space-y-4">
+          <button
+            onClick={handleSubscribeWithUSDC}
+            className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          >
+            Subscribe with 10 USDC
+          </button>
+          
+          <button
+            onClick={handleSubscribeWithODP}
+            className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition"
+          >
+            Subscribe with 5,000 ODP
+          </button>
         </div>
 
-        <div className="mt-4">
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              placeholder="Enter your access code"
-              className="flex-1 bg-gray-800 border border-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:border-blue-500 transition duration-300"
-              value={accessCode}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAccessCode(e.target.value)}
-            />
-            <button
-              onClick={() => handleCheckCode(accessCode)}
-              className="bg-blue-600 text-white font-semibold rounded-full px-6 py-2 hover:bg-blue-700 transition duration-300"
-            >
-              Verify
-            </button>
-          </div>
+        <div className="mt-6">
+          <p className="text-center text-gray-600 mb-2">- OR -</p>
+          <p className="text-sm mb-2">Enter your access code:</p>
+          <input
+            type="text"
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value)}
+            className="w-full px-3 py-2 border rounded mb-2"
+            placeholder="Enter access code"
+          />
+          <button
+            onClick={() => handleCheckCode(accessCode)}
+            className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+          >
+            Submit Code
+          </button>
         </div>
       </div>
     </div>

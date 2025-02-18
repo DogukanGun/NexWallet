@@ -81,6 +81,7 @@ export async function voltrWithdrawStrategy(
       instructionDiscriminator,
     },
     {
+      manager: vaultAccount.manager,
       vault,
       vaultAssetMint,
       strategy,

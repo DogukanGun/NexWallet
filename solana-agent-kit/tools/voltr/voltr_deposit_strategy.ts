@@ -29,6 +29,8 @@ export async function voltrDepositStrategy(
     .getAccountInfo(new PublicKey(vaultAssetMint))
     .then((account) => account?.owner);
 
+  const manager = vaultAccount.manager;
+
   if (
     !assetTokenProgram ||
     !(
@@ -81,6 +83,7 @@ export async function voltrDepositStrategy(
       instructionDiscriminator,
     },
     {
+      manager,
       vault,
       vaultAssetMint,
       strategy: strategy,

@@ -1,6 +1,6 @@
 import { Message } from "ai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import { AppChain } from "../configurator/page";
+import { AppChain } from "../configurator/data";
 
 type FetchOptions = RequestInit & {
   headers?: Record<string, string>;

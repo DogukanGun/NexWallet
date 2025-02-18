@@ -16,7 +16,7 @@ export default function TelegramNoticeModal({ isOpen, onClose, onViewRoadmap }: 
           <Dialog.Title className="text-xl font-bold mb-4 text-white">Coming Soon!</Dialog.Title>
           
           <p className="text-gray-300 mb-6">
-            Telegram integration is currently in development. Soon you'll be able to interact with your AI assistant directly through Telegram!
+            Telegram integration is currently in development. Soon you&apos;ll be able to interact with your AI assistant directly through Telegram!
           </p>
           
           <div className="flex gap-4">

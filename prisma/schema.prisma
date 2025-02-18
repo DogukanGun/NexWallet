@@ -67,36 +67,41 @@ model WalletInteraction {
 }
 
 model Chains {
-  id: String @id;
-  name: String;
-  isEmbedded: Boolean @default(false);
-  disabled: Boolean @default(false)
-  icon: String;
+  id          String   @id
+  name        String
+  isEmbedded  Boolean  @default(false)
+  disabled    Boolean  @default(false)
+  icon        String
+  Agents      Agents[]
 }
 
 model LlmProviders {
-  id: String @id;
-  name: String;
-  disabled: Boolean @default(false)
+  id          String   @id
+  name        String
+  disabled    Boolean  @default(false)
+  Agents      Agents[]
 }
 
 model KnowledgeBases {
-  id: String @id;
-  name: String;
-  disabled: Boolean @default(false)
+  id          String   @id
+  name        String
+  disabled    Boolean  @default(false)
+  Agents      Agents[]
 }
 
 model Agents {
-  id: String @id;
-  name: String;
-  chains: Chains[];
-  llmProviders: LlmProviders[];
-  knowledgeBases: KnowledgeBases[];
-  isOnPointSystem: Boolean @default(false)
+  id              String           @id
+  name            String
+  chains          Chains[]
+  llmProviders    LlmProviders[]
+  knowledgeBases  KnowledgeBases[]
+  isOnPointSystem Boolean          @default(false)
+  points          AgentPoints[]
 }
 
 model AgentPoints {
-  id: String @id;
-  agentId: String;
-  points: Int;
+  id        String  @id
+  agentId   String
+  points    Int
+  agent     Agents  @relation(fields: [agentId], references: [id])
 }
