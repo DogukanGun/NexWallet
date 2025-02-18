@@ -48,6 +48,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         setIsAllowed(true);
         setShowPopup(false);
       } else {
+        enqueueSnackbar("Invalid access code", { variant: "error" });
         console.error("Invalid access code");
       }
     } catch (e) {
@@ -143,7 +144,6 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   };
 
   const handlePaymentSuccess = async (signature: string) => {
-    setShowPopup(false);
     const res = await fetch("/api/user/register", {
       method: "POST",
       headers: {
@@ -196,6 +196,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
           handleCheckCode={handleCheckCode} 
           handleSubscribeWithUSDC={handleSubscribeWithUSDC}
           handleSubscribeWithODP={handleSubscribeWithODP}
+          onClose={closeModal}
         />
       );
     } else {
@@ -207,7 +208,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         closeModal();
       }
     };
-  }, [showPopup, closeModal, handleCheckCode, handleSubscribeWithUSDC, handleSubscribeWithODP, openModal]);
+  }, [showPopup]);
 
   return (
     <>

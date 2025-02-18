@@ -30,7 +30,7 @@ const handler = async(req: NextApiRequest, res: NextApiResponse) => {
                 })
                 console.log("usercodeResponse", usercodeResponse)
                 if(!usercodeResponse){
-                    return res.status(404).json({ exists: false });
+                    return res.status(200).json({ exists: false });
                 }
                 
                 const registerUserResponse = await prisma.registeredUsers.create({
@@ -46,7 +46,7 @@ const handler = async(req: NextApiRequest, res: NextApiResponse) => {
                 return res.status(200).json({ exists: true });
 
             } else {
-                return res.status(404).json({ exists: false });
+                return res.status(200).json({ exists: false });
             }
         } catch (error) {
             return res.status(500).json({ error: 'Internal server error' });
