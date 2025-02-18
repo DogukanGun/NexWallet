@@ -89,7 +89,7 @@ class ApiService {
   }
 
 
-  async getUserCodes(): Promise<UserCode[]> {
+  async getUserCodes(): Promise<{code: UserCode[], timestamp: string}> {
     return this.fetchWithToken("/api/user/codes", { method: "GET" });
   }
 

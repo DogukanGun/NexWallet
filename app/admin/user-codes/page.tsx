@@ -85,7 +85,7 @@ const UserCode = () => {
     const fetchData = async () => {
       try {
         const response = await apiService.getUserCodes();
-        const data: UserCodeType[] = response;
+        const data: UserCodeType[] = response.code;
         setRows(data);
       } catch (error) {
         enqueueSnackbar("Error fetching user codes:", { variant: "error" });

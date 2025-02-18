@@ -50,7 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const token = jwt.sign({ walletAddress }, process.env.SECRET_KEY!, { expiresIn: '1h' });
 
-        res.status(200).json({ message: 'Authorized', token });
+        res.status(200).json({ message: 'Authorized', token, isAdmin: true });
         return
     }else if (req.method === 'GET') {
         const authHeader = req.headers.authorization;
@@ -76,7 +76,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
-        res.status(200).json({ message: 'Authorized' });
+        res.status(200).json({ message: 'Authorized', isAdmin: true });
         return
     } else {
         res.status(405).json({ error: 'Method not allowed' });

@@ -6,14 +6,25 @@ import { withAdmin } from '@/middleware/withAdmin';
 
 const handler = async(req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
-        const codes = await prisma.specialUserCodes.findMany();
-        res.status(200).json({ code: codes });
-        return;
+        // Add cache control headers to prevent caching
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        
+        const codes = await prisma.specialUserCodes.findMany(
+            {
+                select:{
+                    code: true,
+                    used_by: true,
+                    is_used: true,
+                    id: true,
+                }
+            }
+        );
+        return res.status(200).json({ code: codes, timestamp: new Date().toISOString() });
     } else {
          // Handle POST request
         res.setHeader('Allow', ['GET']);
-        res.status(405).end(`Method ${req.method} Not Allowed`);
-        return;
+        return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
 }
 

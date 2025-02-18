@@ -1,7 +1,7 @@
+"use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { enqueueSnackbar } from "notistack";
-import { RegisteredUsers } from "@prisma/client";
 import Loader from "../components/LoaderIcon";
 import { apiService } from "../services/ApiService";
 
@@ -14,15 +14,16 @@ export function withAuth<T extends object>(WrappedComponent: React.ComponentType
     useEffect(() => {
       const fetchUser = async () => {
         try {
+          console.log(localStorage.getItem("token"));
           if (!localStorage.getItem("token")) {
             enqueueSnackbar("User is not authenticated", { variant: "error" });
             router.replace("/");
             return;
           }
           const response = await apiService.checkAdmin(localStorage.getItem("token")!);
-
+          console.log("response", response);
           if (!response.isAdmin) {
-            enqueueSnackbar("User is not authenticated", { variant: "error" });
+            enqueueSnackbar("User is not authenticated - You are not an admin", { variant: "error" });
             router.replace("/");
           }
 
