@@ -15,17 +15,44 @@ const Navbar = () => {
   const [showTelegramNotice, setShowTelegramNotice] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
 
+  // Add function to close drawer
+  const closeDrawer = () => {
+    const drawer = document.getElementById('my-drawer-3') as HTMLInputElement;
+    if (drawer) {
+      drawer.checked = false;
+    }
+  };
+
+  // Add function to handle Telegram button click
+  const handleTelegramClick = () => {
+    closeDrawer();
+    setShowTelegramNotice(true);
+  };
+
+  // Add function to handle Roadmap button click
+  const handleRoadmapClick = () => {
+    closeDrawer();
+    setShowRoadmap(true);
+  };
+
+  // Add function to handle navigation
+  const handleNavigation = (route: string) => {
+    closeDrawer();
+    router.push(route);
+  };
+
   return (
     <div className="drawer">
-      <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
+      <input id="my-drawer-3" type="checkbox" className="drawer-toggle hidden z-[100]" />
+      <div className="drawer-content flex flex-col pt-16">
         {/* Navbar */}
-        <div className="navbar backdrop-blur-md bg-black/30 border-b border-gray-700/50 text-white shadow-lg w-full fixed top-0 z-50">
+        <div className="navbar backdrop-blur-md bg-black/30 border-b border-gray-700/50 text-white shadow-lg w-full fixed top-0">
           <div className="flex-none lg:hidden">
             <label
               htmlFor="my-drawer-3"
               aria-label="open sidebar"
               className="btn btn-square btn-ghost text-white hover:bg-orange-500/20"
+              onClick={() => setShowTelegramNotice(false)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -100,57 +127,83 @@ const Navbar = () => {
       </div>
       
       {/* Sidebar */}
-      {isConnected && (
-        <div className="drawer-side">
-          <label
-            htmlFor="my-drawer-3"
-            aria-label="close sidebar"
-            className="drawer-overlay"
-          ></label>
-          <div className="menu min-h-full w-80 bg-gradient-to-b from-gray-900 to-black border-r border-gray-800/50 p-4">
-            <div className="flex flex-col gap-4">
-              {path === "/" && (
-                <>
-                  <Link
-                    href="/voice"
-                    className="px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/20 transition duration-300 text-center"
-                  >
-                    Launch App with Voice
-                  </Link>
-                  <Link
-                    href="/chat"
-                    className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold rounded-xl border border-gray-700 hover:border-orange-500/50 transition duration-300 text-center"
-                  >
-                    Launch App with Chat
-                  </Link>
-                </>
-              )}
-              {path === "/chat" && (
+      <div className="drawer-side lg:hidden z-[100]">
+        <label
+          htmlFor="my-drawer-3"
+          aria-label="close sidebar"
+          className="drawer-overlay"
+        ></label>
+        <div className="menu min-h-full w-80 bg-gradient-to-b from-gray-900 to-black border-r border-gray-800/50 p-4">
+          <div className="flex justify-end mb-4">
+            <label
+              htmlFor="my-drawer-3"
+              className="btn btn-square btn-ghost text-white hover:bg-orange-500/20"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="inline-block h-6 w-6 stroke-current"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </label>
+          </div>
+          
+          <div className="flex flex-col gap-4">
+            {path === "/" && (
+              <>
                 <Link
-                  href="/voice"
+                  href="/app"
+                  onClick={() => closeDrawer()}
                   className="px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/20 transition duration-300 text-center"
                 >
-                  Switch to Voice
+                  Launch NexWallet
                 </Link>
-              )}
-              {path === "/voice" && (
-                <Link
-                  href="/chat"
-                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/20 transition duration-300 text-center"
-                >
-                  Switch to Chat
-                </Link>
-              )}
-            </div>
+              </>
+            )}
+            <button
+              onClick={handleTelegramClick}
+              className="px-6 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-500/20 transition duration-300 text-center"
+            >
+              Add to Telegram
+            </button>
+            <button
+              onClick={handleRoadmapClick}
+              className="px-6 py-3 bg-gradient-to-r from-purple-400 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/20 transition duration-300 text-center"
+            >
+              Roadmap
+            </button>
+            {path !== "/" && (
+              <div onClick={closeDrawer}>
+                <WalletButton />
+              </div>
+            )}
+            {path !== '/' && path !== '/app' && (
+              <button
+                onClick={() => handleNavigation('/app')}
+                className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold rounded-xl border border-gray-700 hover:border-orange-500/50 transition duration-300 text-center"
+              >
+                Go Back to App
+              </button>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Add the modals */}
       <TelegramNoticeModal
         isOpen={showTelegramNotice}
         onClose={() => setShowTelegramNotice(false)}
-        onViewRoadmap={() => setShowRoadmap(true)}
+        onViewRoadmap={() => {
+          setShowTelegramNotice(false);
+          setShowRoadmap(true);
+        }}
       />
 
       <RoadmapModal

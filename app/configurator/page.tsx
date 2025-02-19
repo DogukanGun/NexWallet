@@ -225,12 +225,12 @@ export default function Home() {
   const selectedButtonClass =
     "px-3 py-1.5 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 text-sm";
 
-  const cardContainerClass = "grid grid-cols-2 gap-4 min-h-[160px]";
-  const cardClass = "h-[45px] flex items-center justify-center w-full relative";
+  const cardContainerClass = "grid grid-cols-2 gap-2 min-h-[160px]";
+  const cardClass = "h-[40px] flex items-center justify-center w-full relative";
   const buttonContentClass =
-    "absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-[140px]";
-  const iconClass = "w-5 h-5 mr-3";
-  const buttonTextClass = "text-sm";
+    "absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-[120px]";
+  const iconClass = "w-4 h-4 mr-2";
+  const buttonTextClass = "text-xs";
 
   const isStepValid = (step: number) => {
     switch (step) {
@@ -336,7 +336,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar">
+    <div className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar pb-20 overflow-x-hidden">
       {showPaymentModal && (
         <PaymentRequiredModal
           provider={selectedProvider}
@@ -366,32 +366,32 @@ export default function Home() {
         <WarningModal onClose={() => setShowWarningModal(false)} />
       )}
 
-      <div className="w-full h-screen bg-black rounded-none p-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
+      <div className="w-full min-h-screen bg-black rounded-none p-4 overflow-y-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
             NexAI Wallet Configurator
           </h1>
         </div>
 
-        <div className="space-y-4 max-w-3xl mx-auto">
+        <div className="space-y-4 max-w-3xl mx-auto relative z-0">
           <Accordion
             title="1. Select Chains"
             isOpen={openSection === 1}
             onToggle={() => setOpenSection(openSection === 1 ? null : 1)}
             isValid={isStepValid(1)}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Select Chains</h2>
+            <div className="flex flex-col space-y-4">
+              <h2 className="text-xl font-bold text-white text-left">Select Chains</h2>
               <div className="relative">
                 <button
                   onClick={toggleDropdown}
-                  className={`${buttonClass} mb-4 flex items-center bg-gray-200 text-black`}
+                  className={`${buttonClass} mb-4 flex items-center bg-gray-200 text-black w-full justify-between px-3`}
                 >
                   Filter Chain {activeFilter ? `(${activeFilter === 'embedded' ? 'Embedded' : 'Browser'})` : ''}
-                  <span className="ml-2">{isDropdownOpen ? '▼' : '▲'}</span>
+                  <span>{isDropdownOpen ? '▼' : '▲'}</span>
                 </button>
                 {isDropdownOpen && (
-                  <div ref={dropdownRef} className="absolute bg-white shadow-lg rounded-md mt-2 z-10">
+                  <div ref={dropdownRef} className="absolute bg-white shadow-lg rounded-md mt-2">
                     <div
                       onClick={() => handleWalletTypeSelection(true)}
                       className={`w-full text-left px-4 py-2 text-black hover:bg-gray-200 cursor-pointer`}
@@ -407,47 +407,47 @@ export default function Home() {
                   </div>
                 )}
               </div>
-            </div>
-            <div>
-              <div className={cardContainerClass}>
-                {chains
-                  .filter(chain => {
-                    if (activeFilter === "embedded") return chain.isEmbedded;
-                    if (activeFilter === "browser") return !chain.isEmbedded;
-                    return true; // Show all if no filter is active
-                  })
-                  .map((chain) => (
-                    <button
-                      key={chain.id}
-                      onClick={() => !chain.disabled && handleChainSelection(chain.id)}
-                      className={`
-                        ${chain.disabled
-                          ? "opacity-50 cursor-not-allowed"
-                          : selectedChains.some(selectedChain => selectedChain.id === chain.id)
-                            ? selectedButtonClass
-                            : buttonClass
-                        }
-                        ${cardClass}
-                      `}
-                      disabled={chain.disabled}
-                    >
-                      <div className={buttonContentClass}>
-                        <Image
-                          src={chain.icon}
-                          alt={`${chain.name} icon`}
-                          width={20}
-                          height={20}
-                          className={iconClass}
-                        />
-                        <span className={buttonTextClass}>{chain.name}</span>
-                      </div>
-                      {chain.disabled && (
-                        <span className="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full text-white">
-                          Coming Soon
-                        </span>
-                      )}
-                    </button>
-                  ))}
+              <div>
+                <div className={cardContainerClass}>
+                  {chains
+                    .filter(chain => {
+                      if (activeFilter === "embedded") return chain.isEmbedded;
+                      if (activeFilter === "browser") return !chain.isEmbedded;
+                      return true; // Show all if no filter is active
+                    })
+                    .map((chain) => (
+                      <button
+                        key={chain.id}
+                        onClick={() => !chain.disabled && handleChainSelection(chain.id)}
+                        className={`
+                          ${chain.disabled
+                            ? "opacity-50 cursor-not-allowed"
+                            : selectedChains.some(selectedChain => selectedChain.id === chain.id)
+                              ? selectedButtonClass
+                              : buttonClass
+                          }
+                          ${cardClass}
+                        `}
+                        disabled={chain.disabled}
+                      >
+                        <div className={buttonContentClass}>
+                          <Image
+                            src={chain.icon}
+                            alt={`${chain.name} icon`}
+                            width={20}
+                            height={20}
+                            className={iconClass}
+                          />
+                          <span className={buttonTextClass}>{chain.name}</span>
+                        </div>
+                        {chain.disabled && (
+                          <span className="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full text-white">
+                            Coming Soon
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                </div>
               </div>
             </div>
           </Accordion>
@@ -459,7 +459,7 @@ export default function Home() {
             isValid={isStepValid(2)}
           >
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-white">Knowledge Bases</h2>
+              <h2 className="text-xl font-bold mb-4 text-white text-left">Knowledge Bases</h2>
               <div className={cardContainerClass}>
                 {knowledgeBases.map((kb) => (
                   <button
@@ -499,7 +499,7 @@ export default function Home() {
             isValid={isStepValid(3)}
           >
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-white">Select LLM Provider</h2>
+              <h2 className="text-xl font-bold mb-4 text-white text-left">Select LLM Provider</h2>
               <div className={cardContainerClass}>
                 {llmProviders.map((provider) => {
                   const isDisabled = (provider.id === "llama_onchain" && selectedChains.some(chain => chain.id === "solana")) ||
@@ -538,7 +538,7 @@ export default function Home() {
             isValid={isStepValid(4)}
           >
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-white">Select Agent Type</h2>
+              <h2 className="text-xl font-bold mb-4 text-white text-left">Select Agent Type</h2>
               <div className={cardContainerClass}>
                 {agentTypes.map((type) => (
                   <button
@@ -576,7 +576,7 @@ export default function Home() {
             isValid={true}
           >
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-white">Choose Your Character</h2>
+              <h2 className="text-xl font-bold mb-4 text-white text-left">Choose Your Character</h2>
               <p className="text-gray-300 mb-4">
                 Select a character for your agent. The agent will talk to you like these characters:
               </p>
@@ -608,19 +608,22 @@ export default function Home() {
               </p>
             </div>
           </Accordion>
+        </div>
+      </div>
 
-          <div className="flex justify-end mt-8">
-            <button
-              onClick={handleStart}
-              className={`${primaryButtonClass} ${!isStepValid(1) || !isStepValid(3) || !isStepValid(4)
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-                }`}
-              disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
-            >
-              Create and Start
-            </button>
-          </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-black py-4 px-4 border-t border-gray-800">
+        <div className="flex justify-center">
+          <button
+            onClick={handleStart}
+            className={`${primaryButtonClass} w-full max-w-xs ${
+              !isStepValid(1) || !isStepValid(3) || !isStepValid(4)
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
+            disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
+          >
+            Create and Start
+          </button>
         </div>
       </div>
 
