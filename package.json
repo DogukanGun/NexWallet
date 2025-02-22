@@ -16,6 +16,7 @@
   "dependencies": {
     "@3land/listings-sdk": "^0.0.6",
     "@ai-sdk/openai": "^1.0.11",
+    "@ashswap/ash-sdk-js": "^2.2.0",
     "@bonfida/spl-name-service": "^3.0.7",
     "@cks-systems/manifest-sdk": "0.1.59",
     "@coinbase/agentkit": "^0.1.1",
@@ -54,6 +55,9 @@
     "@mui/material-nextjs": "^6.3.1",
     "@mui/x-charts": "^7.24.1",
     "@mui/x-data-grid": "^7.24.1",
+    "@multiversx/sdk-core": "^13.17.2",
+    "@multiversx/sdk-network-providers": "^2.9.3",
+    "@multiversx/sdk-wallet": "^4.6.0",
     "@nivo/bar": "^0.88.0",
     "@nivo/core": "^0.88.0",
     "@nivo/pie": "^0.88.0",
