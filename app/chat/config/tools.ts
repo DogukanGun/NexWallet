@@ -60,6 +60,12 @@ const BridgeComponent: FC = () => {
   return React.createElement('div', { id: 'debridgeWidget' });
 };
 
+const ComingSoonComponent: FC = () => {
+  return React.createElement('div', { 
+    className: 'flex items-center justify-center h-full text-gray-400 text-lg'
+  }, 'Coming Soon');
+};
+
 export interface ToolConfig {
   id: string;
   name: string;
@@ -81,14 +87,14 @@ export const tools: ToolConfig[] = [
     id: 'swap',
     name: 'Swap',
     description: 'Swap your tokens',
-    component: (): ReactElement => React.createElement('div', null, 'Swap Component'),
+    component: ComingSoonComponent,
     icon: React.createElement(Wallet, { className: "w-6 h-6" })
   },
   {
     id: 'buy',
     name: 'Buy Crypto',
     description: 'Buy cryptocurrency with fiat',
-    component: (): ReactElement => React.createElement('div', null, 'Buy Crypto Component'),
+    component: ComingSoonComponent,
     icon: React.createElement(CreditCard, { className: "w-6 h-6" })
   }
 ];
