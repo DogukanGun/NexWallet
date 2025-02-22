@@ -18,6 +18,8 @@ import { useConfigStore } from "../../store/configStore";
 import { usePrivy } from "@privy-io/react-auth";
 import { ChainId } from "@/app/configurator/data";
 import { TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
+import { Tools } from './tools/Tools';
+import { ToolConfig } from '../config/tools';
 
 interface ChatPageProps {
   initialChatId?: string;
@@ -45,6 +47,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const router = useRouter();
   const stores = useConfigStore();
   const [showWalletModal, setShowWalletModal] = React.useState(false);
+  const [selectedTool, setSelectedTool] = React.useState<ToolConfig | null>(null);
 
   useEffect(() => {
     const loadHistoricalMessages = () => {
@@ -171,22 +174,28 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       )}
       <RequireConfig>
         <SubscriptionWrapper>
-          <ChatLayout
-            chatId={chatId}
-            messages={messages}
-            input={input}
-            handleInputChange={handleInputChange}
-            handleSubmit={onSubmit}
-            isLoading={isLoading}
-            loadingSubmit={loadingSubmit}
-            error={error}
-            stop={stop}
-            navCollapsedSize={10}
-            defaultLayout={[30, 160]}
-            formRef={formRef}
-            setMessages={setMessages}
-            setInput={setInput}
-          />
+          <div className="w-full h-full">
+            <ChatLayout
+              chatId={chatId}
+              messages={messages}
+              input={input}
+              handleInputChange={handleInputChange}
+              handleSubmit={onSubmit}
+              isLoading={isLoading}
+              loadingSubmit={loadingSubmit}
+              error={error}
+              stop={stop}
+              navCollapsedSize={10}
+              defaultLayout={[30, 160]}
+              formRef={formRef}
+              setMessages={setMessages}
+              setInput={setInput}
+            />
+            <Tools
+              onToolSelect={setSelectedTool}
+              selectedTool={selectedTool}
+            />
+          </div>
         </SubscriptionWrapper>
       </RequireConfig>
     </main>

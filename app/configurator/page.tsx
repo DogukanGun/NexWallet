@@ -76,6 +76,13 @@ const chains: AppChain[] = [
     isEmbedded: false,
     icon: "/icons/avalanche.svg",
   },
+  {
+    id: ChainId.METAVERS,
+    name: "Metavers",
+    isEmbedded: false,
+    disabled: false,
+    icon: "/icons/metavers.svg",
+  },
 ];
 
 const llmProviders = [
