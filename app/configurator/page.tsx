@@ -637,9 +637,9 @@ export default function Home() {
       <TelegramNoticeModal
         isOpen={showTelegramNotice}
         onClose={() => setShowTelegramNotice(false)}
-        onViewRoadmap={() => {
+        onConfirm={() => {
           setShowTelegramNotice(false);
-          setShowRoadmap(true);
+          window.open("https://t.me/Nexarb_Test_Solana_Bot", "_blank");
         }}
       />
 

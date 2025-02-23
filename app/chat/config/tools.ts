@@ -70,7 +70,8 @@ export interface ToolConfig {
   id: string;
   name: string;
   description: string;
-  component: FC<{}>;
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  component: FC<{}>; // Keep as FC<{}> and ignore the linting error
   icon: ReactElement;
 }
 
