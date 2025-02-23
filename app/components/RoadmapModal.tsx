@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface RoadmapItem {
   title: string;
-  status: 'completed' | 'in-progress' | 'planned';
+  status: 'completed' | 'in-progress' | 'planned' | 'testnet';
   description: string;
 }
 
@@ -15,7 +15,7 @@ const roadmapItems: RoadmapItem[] = [
   },
   {
     title: 'Telegram Integration',
-    status: 'in-progress',
+    status: 'testnet',
     description: 'Connect and interact with your AI assistant through Telegram'
   },
   {
@@ -58,7 +58,7 @@ export default function RoadmapModal({ isOpen, onClose }: RoadmapModalProps) {
                     <div className="block">
                       <h4 className="text-base text-white mb-2">{item.title}</h4>
                       <p className="text-sm text-gray-600 max-w-xs mb-4">{item.description}</p>
-                      <span className={`text-sm px-3 py-1 rounded-full inline-block ${item.status === 'completed' ? 'bg-green-500/20 text-green-400' : item.status === 'in-progress' ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-700/50 text-gray-400'}`}>
+                      <span className={`text-sm px-3 py-1 rounded-full inline-block ${item.status === 'completed' ? 'bg-green-500/20 text-green-400' : item.status === 'in-progress' ? 'bg-blue-500/20 text-blue-400' : item.status === 'testnet' ? 'bg-pink-500/20 text-pink-400' :   'bg-gray-700/50 text-gray-400'}`}>
                         {item.status.replace('-', ' ')}
                       </span>
                     </div>

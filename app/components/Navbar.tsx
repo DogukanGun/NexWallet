@@ -92,10 +92,11 @@ const Navbar = () => {
               )}
               <li className="flex items-center">
                 <button
-                  onClick={() => setShowTelegramNotice(true)}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] transition-all duration-300"
+                  onClick={handleTelegramClick}
+                  className="px-6 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] transition-all duration-300 relative"
                 >
-                  Add to Telegram
+                  Chat in Telegram
+                  <span className="absolute -top-2 -right-2 bg-pink-500 text-xs px-1.5 py-0.5 rounded-full font-semibold">BETA</span>
                 </button>
               </li>
               <li className="flex items-center">
@@ -169,9 +170,10 @@ const Navbar = () => {
             )}
             <button
               onClick={handleTelegramClick}
-              className="px-6 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-500/20 transition duration-300 text-center"
+              className="px-6 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] transition-all duration-300 text-center relative"
             >
-              Add to Telegram
+              Chat in Telegram
+              <span className="absolute -top-2 -right-2 bg-pink-500 text-xs px-1.5 py-0.5 rounded-full font-semibold">BETA</span>
             </button>
             <button
               onClick={handleRoadmapClick}
@@ -200,9 +202,9 @@ const Navbar = () => {
       <TelegramNoticeModal
         isOpen={showTelegramNotice}
         onClose={() => setShowTelegramNotice(false)}
-        onViewRoadmap={() => {
+        onConfirm={() => {
           setShowTelegramNotice(false);
-          setShowRoadmap(true);
+          window.open("https://t.me/Nexarb_Test_Solana_Bot", "_blank");
         }}
       />
 
