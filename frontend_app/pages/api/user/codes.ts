@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/app/helper/PrismaHelper';
-import { generateRandomString } from '@/lib/random';
 import { withAdmin } from '@/middleware/withAdmin';
 
 
