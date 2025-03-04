@@ -9,7 +9,8 @@ from llm.cdp.coinbase_agentkit import AgentKit, AgentKitConfig, cdp_api_action_p
     wallet_action_provider, pyth_action_provider, erc20_action_provider, cdp_wallet_action_provider
 from llm.cdp.coinbase_agentkit import EthAccountWalletProvider, EthAccountWalletProviderConfig
 
-def initialize_cdp_agent(on_transaction_sign: Callable[[str], None],smart_wallet_address:str,chain_id:str) -> [CompiledGraph,Dict[str,str]]:
+def initialize_cdp_agent(on_transaction_sign: Callable[[str], None],smart_wallet_address:str,chain_id:str) -> \
+        [CompiledGraph,Dict[str,str]]:
     """Initialize the agent with CDP Agentkit."""
     # Initialize LLM
     llm = ChatOpenAI(model="gpt-4o-mini")
