@@ -137,11 +137,11 @@ class ApiService {
     });
   }
 
-  async checkUser(identifier: string, did: string): Promise<{ isAllowed: boolean }> {
+  async checkUser(identifier: string): Promise<{ isAllowed: boolean }> {
     return this.fetchWithToken("/api/user/check", { 
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userWallet: identifier, did }),
+      body: JSON.stringify({ userWallet: identifier }),
     });
   }
 

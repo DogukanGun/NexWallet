@@ -2,7 +2,7 @@ import { createSolanaTools } from "@/solana-agent-kit";
 import { SolanaAgentKit } from "../../../solana-agent-kit/agent"
 import { NextApiRequest, NextApiResponse } from "next";
 import { withAuth } from "@/middleware/withAuth";
-import { createAgent } from "./agentHelpers";
+import { createAgent } from "../../../frontend_agent/agentHelpers";
 import { HumanMessage } from "@langchain/core/messages";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {

@@ -6,7 +6,8 @@ export enum ChainId {
     ARBITRUM = "arbitrum",
     POLYGON = "polygon",
     AVALANCHE = "avalanche",
-    METAVERS = "metavers"
+    OPTIMISM = "optimism",
+    STARKNET = "starknet",
 }
 
 export interface AppChain {

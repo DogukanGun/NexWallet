@@ -1,90 +1,69 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/app/helper/PrismaHelper';
-import { generateRandomString } from '@/lib/random';
 import { withAdmin } from '@/middleware/withAdmin';
 
-
 const handler = async(req: NextApiRequest, res: NextApiResponse) => {
-    if (req.method === 'GET') {
-        const randomCode = generateRandomString();
-        try{
-            const code = await prisma.specialUserCodes.create({
-                data: {
-                    code: randomCode,
-                    used_by: ""
-                }
-            })
-            res.status(200).json({ code: code.code });
-            return;
-        }catch(e){
-            res.status(500).json({ error: 'Internal server error' });
-            return;
-        }
-    } else if (req.method === 'DELETE') {
-        try{
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ error: 'Authorization token required' });
+    }
+
+    try {
+        let url = `${process.env.BACKEND_API_URL}/auth/code`;
+        let method = req.method;
+        let body = null;
+
+        if (req.method === 'GET') {
+            // Generate a new code
+            method = 'POST'; // Using POST for code generation in backend
+            url = `${url}/generate`;
+        } else if (req.method === 'DELETE') {
+            // Delete a code
             const { id } = req.body;
             if (!id) {
-                res.status(400).json({ error: 'ID is required' });
-                return;
+                return res.status(400).json({ error: 'ID is required' });
             }
-            const deleteResponse = await prisma.specialUserCodes.delete({
-                where: {
-                    id: Number(id),
-                },
-            })
-            console.log(deleteResponse);
-            res.status(200).json({ success: true });
-            return;
-        }catch(e){
-            console.log(e);
-            res.status(501).json({ error: 'Internal server errorr', detail: e });
-            return;
-        }
-    } else if (req.method === 'PUT') {
-        try{
+            body = JSON.stringify({ id });
+        } else if (req.method === 'PUT') {
+            // Mark code as used
             const { id } = req.body;
-            const markAsUsedResponse = await prisma.specialUserCodes.update({
-                where: {
-                    id: Number(id),
-                },
-                data: {
-                    is_used: true,
-                },
-            })
-            res.status(200).json({ success: true });
-            return;
-        }catch(e){
-            res.status(500).json({ error: 'Internal server error' });
-            return;
-        }
-    } else {
-        const { code } = req.body;
-        if (!code) {
-            return res.status(400).json({ error: 'Code is required' });
-        }
-    
-        if (req.method === 'GET') {
-            // Handle any other HTTP method
-            res.setHeader('Allow', ['POST']);
-            res.status(405).end(`Method ${req.method} Not Allowed`);
-            return;
-        }
-        try {
-            const userCode = await prisma.specialUserCodes.findFirst({
-                where: {
-                    code: code,
-                    is_used: false,
-                },
-            });
-    
-            if (userCode) {
-                return res.status(200).json({ exists: true });
-            } else {
-                return res.status(404).json({ exists: false });
+            if (!id) {
+                return res.status(400).json({ error: 'ID is required' });
             }
-        } catch (error) {
-            return res.status(500).json({ error: 'Internal server error' });
+            url = `${url}/use`;
+            body = JSON.stringify({ id });
+        } else if (req.method === 'POST') {
+            // Check if code exists
+            const { code } = req.body;
+            if (!code) {
+                return res.status(400).json({ error: 'Code is required' });
+            }
+            url = `${url}/verify`;
+            body = JSON.stringify({ code });
+        } else {
+            res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+            return res.status(405).end(`Method ${req.method} Not Allowed`);
         }
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body,
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            return res.status(response.status).json(data);
+        }
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error('Error handling code operation:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 

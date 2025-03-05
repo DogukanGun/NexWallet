@@ -16,6 +16,7 @@ import { apiService } from "../services/ApiService";
 import PopupComponent from "../components/PopupComponent";
 import { useConfigStore } from "../store/configStore";
 import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
 
 type SubscriptionWrapperProps = {
   children: ReactNode;
@@ -24,25 +25,22 @@ type SubscriptionWrapperProps = {
 const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) => {
   const [isAllowed, setIsAllowed] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const { openModal, closeModal, setModalContent } = useModal();
+  const { openModal, closeModal } = useModal();
   const { address, isConnected } = useAppKitAccount();
-  const { open, close } = useAppKit();
+  const { open } = useAppKit();
   const [isLoading, setIsLoading] = useState(false);
   const { walletProvider } = useAppKitProvider<Provider>("solana");
   const { connection } = useAppKitConnection();
   const { enqueueSnackbar } = useSnackbar();
-  const { user, ready } = usePrivy();
-
-  const hasEmbeddedWallet = useConfigStore().chains.some(chain => chain.isEmbedded);
-  const hasUserWallet = useConfigStore().chains.some(chain => !chain.isEmbedded);
+  const router = useRouter();
 
   const handleCheckCode = async (accessCode: string) => {
     try {
-      if (hasUserWallet && !address) {
+      if (!address) {
         console.error("No wallet address found");
         return;
       }
-      const identifier = hasEmbeddedWallet ? (user ? user.id : "") : address || "";
+      const identifier = address;
       const checkUsercodeRes = await apiService.checkUsercode(accessCode, identifier);
       if (checkUsercodeRes.exists) {
         setIsAllowed(true);
@@ -99,50 +97,6 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
     }
   };
 
-  const handleSubscribeWithODP = async () => {
-    const env = process.env.NODE_ENV;
-    if (!isConnected || address === undefined) {
-      open();
-      enqueueSnackbar("Please connect with a wallet that has funding.", { variant: "error" });
-      return;
-    }
-
-    const senderAddress = new PublicKey(address);
-    const recipientAddress = new PublicKey("2B8gzcafXieWkB2SL9Esnj7h16ECDnsd5msbg42qn1BS");
-
-    try {
-      const odpMint = new PublicKey(
-        env === "development"
-          ? "0x16ef92Ab3B19ca73DAe6321b05062f0F7E6537C1"
-          : "0x16ef92Ab3B19ca73DAe6321b05062f0F7E6537C1"
-      );
-
-      const userODPAddress = await getAssociatedTokenAddress(odpMint, senderAddress);
-      const recipientODPAddress = await getAssociatedTokenAddress(odpMint, recipientAddress);
-      const odpAmount = 5000 * 10 ** 9; // ODP has 9 decimal places
-
-      const transferInstruction = createTransferInstruction(
-        userODPAddress,
-        recipientODPAddress,
-        senderAddress,
-        odpAmount,
-        [],
-        TOKEN_PROGRAM_ID,
-      );
-
-      const transaction = new Transaction().add(transferInstruction);
-      const hash = await connection?.getLatestBlockhash();
-      transaction.recentBlockhash = hash?.blockhash;
-      transaction.feePayer = senderAddress;
-      
-      const signature = await walletProvider.signAndSendTransaction(transaction);
-      await handlePaymentSuccess(signature);
-    } catch (error) {
-      console.error("ODP Payment failed:", error);
-      enqueueSnackbar("ODP Payment failed. Please try again.", { variant: "error" });
-    }
-  };
-
   const handlePaymentSuccess = async (signature: string) => {
     const res = await fetch("/api/user/register", {
       method: "POST",
@@ -162,18 +116,15 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
       enqueueSnackbar("Failed to register subscription", { variant: "error" });
     }
   };
-
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
       try {
         setIsLoading(true);
-        if(ready && hasEmbeddedWallet && !user){
+        if(!address){
           return;
         }
-        if(hasUserWallet && !address){
-          return;
-        }
-        const response = await apiService.checkUser(address ?? "", user?.id ?? "");
+
+        const response = await apiService.checkUser(address);
         if (response.isAllowed) {
           setIsAllowed(true);
         } else {
@@ -187,7 +138,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
       }
     };
     checkSubscriptionStatus();
-  }, [ready,hasEmbeddedWallet,hasUserWallet]);
+  }, [address]);
 
   useEffect(() => {
     if (showPopup) {
@@ -195,8 +146,10 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         <PopupComponent 
           handleCheckCode={handleCheckCode} 
           handleSubscribeWithUSDC={handleSubscribeWithUSDC}
-          handleSubscribeWithODP={handleSubscribeWithODP}
-          onClose={closeModal}
+          onClose={()=>{
+            closeModal();
+            router.push("/app");
+          }}
         />
       );
     } else {

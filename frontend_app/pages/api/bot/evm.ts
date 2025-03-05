@@ -1,7 +1,7 @@
 import { CdpAgentkit } from "@coinbase/cdp-agentkit-core";
 import { CdpToolkit } from "@coinbase/cdp-langchain";
 import { NextApiRequest, NextApiResponse } from "next";
-import { createAgent } from "./agentHelpers";
+import { createAgent } from "../../../frontend_agent/agentHelpers";
 import { prisma } from '@/app/helper/PrismaHelper';
 import { HumanMessage } from "@langchain/core/messages";
 import { Coinbase } from "@coinbase/coinbase-sdk/dist/coinbase/coinbase";

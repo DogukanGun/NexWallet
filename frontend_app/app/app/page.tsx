@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useConfigStore } from '../store/configStore'
 import { useRouter } from 'next/navigation'
 import { ChainId } from '../configurator/data'
+import Image from 'next/image'
 
 interface Agent {
   id: string
@@ -12,7 +13,6 @@ interface Agent {
   description: string
   poweredBy: string
   isWalletRequired: boolean,
-  requiresPrivy?: boolean
 }
 
 export default function Home() {
@@ -23,7 +23,6 @@ export default function Home() {
       name: 'Solana AI Bot',
       description: 'Interact with Solana blockchain, manage tokens, and get real-time information. Works in text and voice mode.',
       poweredBy: 'SendAI',
-      requiresPrivy: false,
       isWalletRequired: true
     },
     {
@@ -31,28 +30,26 @@ export default function Home() {
       name: 'Base AI Bot',
       description: 'Navigate Base network, handle transactions, and access DeFi protocols. Works in text mode only.',
       poweredBy: 'OpenAI',
-      requiresPrivy: true,
-      isWalletRequired: false
+      isWalletRequired: true
     },
     {
       id: '3',
       name: 'Ethereum AI Bot',
       description: 'Manage Ethereum assets, interact with smart contracts, and explore the ecosystem. Works in text mode only.',
       poweredBy: 'Coinbase Agent Kit',
-      requiresPrivy: true,
-      isWalletRequired: false
+      isWalletRequired: true
     },
     {
       id: '4',
       name: 'Base with Llama 3.1',
       description: 'Coming Soon. Interact with Base network using Llama 3.1. Works in text mode only.',
       poweredBy: 'Gaia OnChain',
-      requiresPrivy: true,
-      isWalletRequired: false
+      isWalletRequired: true
     }
   ])
 
   const setConfig = useConfigStore((state) => state.setConfig)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const handleAgentSelect = (agent: Agent) => {
     const config = {
@@ -68,9 +65,36 @@ export default function Home() {
     router.push("/chat");
   }
 
+  const handleTwitterLogin = () => {
+    // Implement Twitter OAuth flow here
+    console.log("Initiating X login");
+    // This would typically redirect to your OAuth endpoint
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar">
       <div className="container mx-auto px-4 py-8">
+        {/* User Authentication Section */}
+        <section className="mb-12 flex justify-between items-center">
+          <h1 className="text-4xl font-bold text-white">
+            NexAI <span className="text-purple-400">Agents</span>
+          </h1>
+          
+          <button
+            onClick={handleTwitterLogin}
+            className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 text-white font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-gray-700/20 border border-gray-700"
+          >
+            <span>Login with</span>
+            <Image 
+              src="/icons/x.png" 
+              alt="X" 
+              width={20} 
+              height={20}
+              className="w-5 h-5"
+            />
+          </button>
+        </section>
+
         {/* Main Actions Section */}
         <section className="mb-12">
           <h2 className="text-3xl font-bold mb-6 text-white">
@@ -113,24 +137,14 @@ export default function Home() {
                   <span className="text-sm text-gray-400">
                     Powered by {agent.poweredBy}
                   </span>
-                  {agent.requiresPrivy && (
-                    <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                      Requires Privy Login
-                    </span>
-                  )}
                   {agent.isWalletRequired && (
                     <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
                       Requires Wallet
                     </span>
                   )}
                 </div>
-                {agent.description.includes('Coming Soon') && (
-                  <span className="absolute top-3 right-3 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                    Coming Soon
-                  </span>
-                )}
                 {agent.name === 'Base with Llama 3.1' && (
-                  <span className="absolute top-3 right-24 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                  <span className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
                     On Chain Bot
                   </span>
                 )}

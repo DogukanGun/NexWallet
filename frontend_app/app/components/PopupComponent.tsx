@@ -5,14 +5,12 @@ import { useState } from "react";
 interface PopupComponentProps {
   handleCheckCode: (code: string) => void;
   handleSubscribeWithUSDC: () => void;
-  handleSubscribeWithODP: () => void;
   onClose: () => void;
 }
 
 const PopupComponent: React.FC<PopupComponentProps> = ({
   handleCheckCode,
   handleSubscribeWithUSDC,
-  handleSubscribeWithODP,
   onClose,
 }) => {
   const [accessCode, setAccessCode] = useState("");
@@ -28,13 +26,6 @@ const PopupComponent: React.FC<PopupComponentProps> = ({
               className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
             >
               Subscribe with 10 USDC
-            </button>
-            
-            <button
-              onClick={handleSubscribeWithODP}
-              className="w-full px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition duration-300"
-            >
-              Subscribe with 5,000 ODP
             </button>
           </div>
 

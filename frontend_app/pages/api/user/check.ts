@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/app/helper/PrismaHelper';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -9,7 +8,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        console.log("req.body", req.body);
         const { userWallet, did } = req.body;
 
         // Check if both userWallet and did are null
@@ -17,36 +15,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: 'Both userWallet and did cannot be null' });
         }
 
-        // Construct the where clause properly for Prisma
-        const where = did && userWallet
-            ? {
-                OR: [
-                    { user_wallet: userWallet },
-                    { user_wallet: did }
-                ]
-            }
-            : { user_wallet: did || userWallet };
-
-        console.log('Query where clause:', where);
-        
-        const user = await prisma.registeredUsers.findFirst({
-            where,
-            select: {
-                user_wallet: true
-            }
+        const response = await fetch(`${process.env.BACKEND_API_URL}/auth/check`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userWallet, did }),
         });
 
-        console.log('Found user:', user);
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            return res.status(response.status).json(data);
         }
 
-        return res.status(200).json({ 
-            message: 'User check successful', 
-            isAllowed: user.user_wallet !== null && user.user_wallet !== undefined 
-        });
-
+        return res.status(200).json(data);
     } catch (error) {
         console.error('Error in user check:', error);
         return res.status(500).json({ 

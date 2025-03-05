@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import jwt from 'jsonwebtoken';
 
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         const { walletAddress } = req.body;
 
@@ -10,9 +8,26 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             return res.status(400).json({ error: 'Wallet address is required' });
         }
 
-        const token = jwt.sign({ walletAddress }, process.env.SECRET_KEY!, { expiresIn: '1h' });
+        try {
+            const response = await fetch(`${process.env.BACKEND_API_URL}/auth/token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ walletAddress }),
+            });
 
-        return res.status(200).json({ token });
+            const data = await response.json();
+            
+            if (!response.ok) {
+                return res.status(response.status).json(data);
+            }
+
+            return res.status(200).json(data);
+        } catch (error) {
+            console.error('Error calling backend:', error);
+            return res.status(500).json({ error: 'Failed to generate token' });
+        }
     } else {
         res.setHeader('Allow', ['POST']);
         return res.status(405).end(`Method ${req.method} Not Allowed`);

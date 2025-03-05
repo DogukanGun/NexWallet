@@ -1,33 +1,32 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/app/helper/PrismaHelper';
-
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method === 'GET') {
-        // Handle GET request
+    if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
-        res.status(405).end(`Method ${req.method} Not Allowed`);
+        return res.status(405).end(`Method ${req.method} Not Allowed`);
+    }
 
-    } else {
-        const dbResForTransaction = await prisma.transaction.create({
-            data:{
-                transaction_hash: req.body.signature,
+    try {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                signature: req.body.signature,
                 user_wallet: req.body.user_wallet
-            }
-        })
-        if(dbResForTransaction.id === null) {
-            res.status(500).json({ error: 'Failed to register subscription', details: dbResForTransaction });
-            return;
+            }),
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            return res.status(response.status).json(data);
         }
-        const dbResForRegisterUser = await prisma.registeredUsers.create({
-            data:{
-                user_wallet: req.body.user_wallet
-            }
-        })
-        if(dbResForRegisterUser.id === null) {
-            res.status(500).json({ error: 'Failed to register subscription', details: dbResForRegisterUser });
-            return;
-        }
-        res.status(200).json({ message: 'Subscription registered successfully', user: dbResForRegisterUser });
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error('Error calling backend:', error);
+        return res.status(500).json({ error: 'Failed to register subscription' });
     }
 }

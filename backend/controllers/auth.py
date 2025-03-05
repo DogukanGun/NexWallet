@@ -118,4 +118,112 @@ async def create_wallet(request: Request, db: Session = Depends(get_db), admin_p
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+@router.post("/code/check")
+async def check_code(request: Request, db: Session = Depends(get_db)):
+    data = await request.json()
+    code = data.get("code")
+    wallet_address = data.get("walletAddress")
+    
+    if not code:
+        raise HTTPException(status_code=400, detail="Code is required")
+    
+    try:
+        # Find the code
+        user_code = db.query(SpecialUserCode).filter(
+            SpecialUserCode.code == code,
+            SpecialUserCode.is_used == False
+        ).first()
+        
+        if not user_code:
+            return {"exists": False}
+        
+        # Mark code as used
+        user_code.is_used = True
+        user_code.used_by = wallet_address
+        
+        # Register the user
+        registered_user = RegisteredUser(user_wallet=wallet_address)
+        db.add(registered_user)
+        db.commit()
+        
+        return {"exists": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/code/generate")
+async def generate_code(db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
+    import random
+    import string
+    
+    # Generate a random code
+    random_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Create the code in the database
+    code = SpecialUserCode(code=random_code, used_by="")
+    db.add(code)
+    db.commit()
+    
+    return {"code": code.code}
+
+@router.delete("/code")
+async def delete_code(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
+    data = await request.json()
+    code_id = data.get("id")
+    
+    if not code_id:
+        raise HTTPException(status_code=400, detail="ID is required")
+    
+    try:
+        code = db.query(SpecialUserCode).filter(SpecialUserCode.id == code_id).first()
+        if not code:
+            raise HTTPException(status_code=404, detail="Code not found")
+        
+        db.delete(code)
+        db.commit()
+        
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/code/use")
+async def use_code(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
+    data = await request.json()
+    code_id = data.get("id")
+    
+    if not code_id:
+        raise HTTPException(status_code=400, detail="ID is required")
+    
+    try:
+        code = db.query(SpecialUserCode).filter(SpecialUserCode.id == code_id).first()
+        if not code:
+            raise HTTPException(status_code=404, detail="Code not found")
+        
+        code.is_used = True
+        db.commit()
+        
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/code/verify")
+async def verify_code(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
+    data = await request.json()
+    code_value = data.get("code")
+    
+    if not code_value:
+        raise HTTPException(status_code=400, detail="Code is required")
+    
+    try:
+        code = db.query(SpecialUserCode).filter(
+            SpecialUserCode.code == code_value,
+            SpecialUserCode.is_used == False
+        ).first()
+        
+        if code:
+            return {"exists": True}
+        else:
+            return {"exists": False}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 

@@ -81,7 +81,7 @@ export const tools: ToolConfig[] = [
     id: 'bridge',
     name: 'Bridge',
     description: 'Bridge your tokens across different chains',
-    component: BridgeComponent,
+    component: ComingSoonComponent,
     icon: React.createElement(ArrowLeftRight, { className: "w-6 h-6" })
   },
   {

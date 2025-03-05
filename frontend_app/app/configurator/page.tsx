@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { buttonClass } from "../components/ButtonClass";
+import { buttonClass, selectedButtonClass } from "../components/ButtonClass";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useConfigStore } from '../store/configStore';
@@ -9,10 +9,6 @@ import PaymentRequiredModal from "../components/PaymentRequiredModal";
 import { apiService } from "../services/ApiService";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { updateLocalToken } from "@/lib/jwt";
-import BaseExplanationModal from "../components/BaseExplanationModalProps";
-import { usePrivy } from "@privy-io/react-auth";
-import Cookies from 'js-cookie';
-import { enqueueSnackbar } from "notistack";
 import Accordion from "../components/Accordion";
 import { WarningModal } from "./components/WarningMode";
 import TelegramNoticeModal from '../components/TelegramNoticeModal';
@@ -25,12 +21,7 @@ const knowledgeBases: KnowledgeBase[] = [
     id: "cookieDao",
     name: "Cookie Dao",
     disabled: false,
-  },
-  {
-    id: "eigenlayer",
-    name: "Eigenlayer",
-    disabled: false,
-  },
+  }
 ];
 
 const chains: AppChain[] = [
@@ -59,8 +50,22 @@ const chains: AppChain[] = [
     id: ChainId.ARBITRUM,
     name: "Arbitrum",
     isEmbedded: true,
-    disabled: true,
+    disabled: false,
     icon: "/icons/arbitrum.svg",
+  },
+  {
+    id: ChainId.OPTIMISM,
+    name: "Optimism",
+    disabled: false,
+    isEmbedded: false,
+    icon: "/icons/optimism.svg",
+  },
+  {
+    id: ChainId.STARKNET,
+    name: "StarkNet",
+    disabled: true,
+    isEmbedded: false,
+    icon: "/icons/starknet.svg",
   },
   {
     id: ChainId.POLYGON,
@@ -68,21 +73,8 @@ const chains: AppChain[] = [
     disabled: true,
     isEmbedded: false,
     icon: "/icons/polygon.svg",
-  },
-  {
-    id: ChainId.AVALANCHE,
-    name: "Avalanche",
-    disabled: true,
-    isEmbedded: false,
-    icon: "/icons/avalanche.svg",
-  },
-  {
-    id: ChainId.METAVERS,
-    name: "Metavers",
-    isEmbedded: false,
-    disabled: false,
-    icon: "/icons/metavers.svg",
-  },
+  }
+
 ];
 
 const llmProviders = [
@@ -122,8 +114,6 @@ export default function Home() {
   const [selectedProvider, setSelectedProvider] = useState('');
   const { address, isConnected } = useAppKitAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const [showArbitrumModal, setShowArbitrumModal] = useState(false);
-  const { getAccessToken, user } = usePrivy();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -132,19 +122,10 @@ export default function Home() {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showTelegramNotice, setShowTelegramNotice] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleChainSelection = (chainId: string) => {
     const selectedChain = chains.find(chain => chain.id === chainId);
-
-    if (chainId === "base") {
-      if (selectedChains.some(chain => chain.id === selectedChain!.id)) {
-        setSelectedChains((prev) => prev.filter((chain) => chain.id !== chainId));
-        return;
-      }
-      setShowArbitrumModal(true);
-      return;
-    }
-
     setSelectedChains((prev) =>
       prev.some(chain => chain.id === selectedChain!.id) ? prev.filter((chain) => chain.id !== chainId) : [...prev, selectedChain!],
     );
@@ -219,7 +200,7 @@ export default function Home() {
       return;
     }
 
-    const res = await apiService.updateToken(hasUserWallet ? address! : user ? user.id : "");
+    const res = await apiService.updateToken(hasUserWallet ? address! : "");
     updateLocalToken(res.token);
 
     if (selectedAgentType === "voice") {
@@ -229,8 +210,6 @@ export default function Home() {
     }
   };
 
-  const selectedButtonClass =
-    "px-3 py-1.5 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 text-sm";
 
   const cardContainerClass = "grid grid-cols-2 gap-2 min-h-[160px]";
   const cardClass = "h-[40px] flex items-center justify-center w-full relative";
@@ -283,33 +262,6 @@ export default function Home() {
     );
   };
 
-  const onAuthenticated = async () => {
-    try {
-      const accessToken = await getAccessToken();
-      const response = await fetch('/api/user/wallet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok && accessToken) {
-        Cookies.set('accessToken', accessToken, { expires: 7 });
-        console.log('Access token saved in cookie:', accessToken);
-        enqueueSnackbar('Privy token is valid, welcome to NexAI!', { variant: 'success' });
-        setSelectedChains((prev) => [...prev, chains.find(chain => chain.id === "base")!]);
-        setShowArbitrumModal(false);
-      } else {
-        console.error('Error in API response:', data);
-      }
-    } catch (error) {
-      console.error('Error signing message:', error);
-    }
-  };
-
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
@@ -322,24 +274,48 @@ export default function Home() {
     } else {
       setActiveFilter(filterType);
     }
-    setIsDropdownOpen(false);
+    setIsDropdownOpen(false); // Close the dropdown after selection
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
+  const handleTwitterLogin = () => {
+    // Implement Twitter OAuth flow here
+    console.log("Initiating X login");
+    // This would typically redirect to your OAuth endpoint
+    setShowLoginModal(false);
+  }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handleTelegramClick = () => {
-    setShowTelegramNotice(true);
+  const TwitterLoginModal = ({ onClose }: { onClose: () => void }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4 border border-gray-700">
+          <h3 className="text-xl font-bold text-white mb-4">Connect with X</h3>
+          <p className="text-gray-300 mb-6">
+            Connect your X account to save your agent configurations and access additional features.
+          </p>
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={handleTwitterLogin}
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-black hover:bg-gray-900 text-white font-medium rounded-lg transition-all duration-300 border border-gray-700"
+            >
+              <span>Login with</span>
+              <Image 
+                src="/icons/x.png" 
+                alt="X" 
+                width={20} 
+                height={20}
+                className="w-5 h-5"
+              />
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transition duration-300"
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -355,20 +331,6 @@ export default function Home() {
           onClose={() => setShowWalletModal(false)}
         />
       )}
-      {showArbitrumModal && (
-        <BaseExplanationModal
-          onClose={() => {
-            setSelectedChains((prev) => {
-              if (prev.map(chain => chain.id).includes(ChainId.BASE)) {
-                return prev.filter((chain) => chain.id !== ChainId.BASE);
-              }
-              return prev;
-            });
-            setShowArbitrumModal(false);
-          }}
-          onAuthenticated={onAuthenticated}
-        />
-      )}
       {showWarningModal && (
         <WarningModal onClose={() => setShowWarningModal(false)} />
       )}
@@ -378,9 +340,26 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
             NexAI Wallet Configurator
           </h1>
+          
+          {/* X Login Button */}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 text-white font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-gray-700/20 border border-gray-700"
+            >
+              <span>Login with</span>
+              <Image 
+                src="/icons/x.png" 
+                alt="X" 
+                width={20} 
+                height={20}
+                className="w-5 h-5"
+              />
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4 max-w-3xl mx-auto relative z-0">
+        <div className="space-y-4 max-w-3xl mx-auto">
           <Accordion
             title="1. Select Chains"
             isOpen={openSection === 1}
@@ -389,12 +368,13 @@ export default function Home() {
           >
             <div className="flex flex-col space-y-4">
               <h2 className="text-xl font-bold text-white text-left">Select Chains</h2>
-              <div className="relative">
+              <div className="">
                 <button
                   onClick={toggleDropdown}
-                  className={`${buttonClass} mb-4 flex items-center bg-gray-200 text-black w-full justify-between px-3`}
+                  className={`${buttonClass} mb-4 flex items-center ${activeFilter ? 'bg-blue-500 text-black' : 'bg-gray-200 text-black'} w-full justify-between px-3`}
                 >
                   Filter Chain {activeFilter ? `(${activeFilter === 'embedded' ? 'Embedded' : 'Browser'})` : ''}
+                  {activeFilter && <span className="ml-2">✔️</span>}
                   <span>{isDropdownOpen ? '▼' : '▲'}</span>
                 </button>
                 {isDropdownOpen && (
@@ -647,6 +627,10 @@ export default function Home() {
         isOpen={showRoadmap}
         onClose={() => setShowRoadmap(false)}
       />
+
+      {showLoginModal && (
+        <TwitterLoginModal onClose={() => setShowLoginModal(false)} />
+      )}
     </div>
   );
 }
