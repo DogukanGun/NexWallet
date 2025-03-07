@@ -2,6 +2,12 @@ import { AppChain } from '../configurator/data'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+interface UserData {
+  id: string;
+  username: string;
+  name: string;
+}
+
 interface ConfigState {
   chains: AppChain[]
   llmProvider: string
@@ -11,10 +17,13 @@ interface ConfigState {
   isPremiumVerified: boolean
   knowledgeBase: string[]
   isPointSystemJoined: boolean
+  isAuthenticated: boolean
+  userData: UserData | null;
   setConfig: (config: { chains: AppChain[]; llmProvider: string; agentType: string; isPointSystemJoined: boolean }) => void
   clearConfig: () => void
   setPremiumVerified: (verified: boolean) => void
   getFeatures: () => { value: string; label: string; }[]
+  setIsAuthenticated: (auth: boolean, userData?: UserData | null) => void
 }
 
 export const useConfigStore = create<ConfigState>()(
@@ -28,6 +37,8 @@ export const useConfigStore = create<ConfigState>()(
       isPremiumVerified: false,
       knowledgeBase: [],
       isPointSystemJoined: false,
+      isAuthenticated: false,
+      userData: null,
       setConfig: (config) => 
         set({ ...config, isConfigured: true }),
       clearConfig: () => 
@@ -39,7 +50,9 @@ export const useConfigStore = create<ConfigState>()(
           isOnchain: false,
           isPremiumVerified: false,
           knowledgeBase: [],
-          isPointSystemJoined: false
+          isPointSystemJoined: false,
+          isAuthenticated: false,
+          userData: null,
         }),
       setPremiumVerified: (verified) =>
         set({ isPremiumVerified: verified }),
@@ -57,6 +70,12 @@ export const useConfigStore = create<ConfigState>()(
           features.push({ value: "Point System", label: "Joined Point System" });
         }
         return features;
+      },
+      setIsAuthenticated: (auth, userData) => {
+        set({ isAuthenticated: auth, userData });
+        // Save to session storage
+        sessionStorage.setItem('isAuthenticated', JSON.stringify(auth));
+        sessionStorage.setItem('userData', JSON.stringify(userData));
       },
     }),
     {

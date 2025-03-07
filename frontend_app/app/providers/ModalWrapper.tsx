@@ -2,6 +2,7 @@
 import React from "react";
 import { createContext } from "react";
 import Modal from "../components/Modal";
+import { AuthProvider } from "../context/AuthContext";
 
 interface ModalContextValue {
   closeModal: () => void;
@@ -27,11 +28,13 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal, isOpen, setModalContent }}>
-      {children}
-      <Modal isOpen={isOpen} onClose={closeModal}>
-        {modalContent}
-      </Modal>
-    </ModalContext.Provider>
+    <AuthProvider>
+      <ModalContext.Provider value={{ openModal, closeModal, isOpen, setModalContent }}>
+        {children}
+        <Modal isOpen={isOpen} onClose={closeModal}>
+          {modalContent}
+        </Modal>
+      </ModalContext.Provider>
+    </AuthProvider>
   );
 }

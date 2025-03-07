@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useConfigStore } from '../store/configStore'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ChainId } from '../configurator/data'
-import Image from 'next/image'
+import AuthProvider from '../providers/AuthProvider'
+import useAuthModal from '../hooks/useAuthModal'
 
 interface Agent {
   id: string
@@ -15,8 +16,15 @@ interface Agent {
   isWalletRequired: boolean,
 }
 
+interface UserData {
+  id: string;
+  username: string;
+  name: string;
+}
+
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [predefinedAgents, setPredefinedAgents] = useState<Agent[]>([
     {
       id: '1',
@@ -48,8 +56,9 @@ export default function Home() {
     }
   ])
 
-  const setConfig = useConfigStore((state) => state.setConfig)
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { setConfig, setIsAuthenticated, isAuthenticated, userData } = useConfigStore();
+  const { handleLogout } = useAuthModal();
+  
 
   const handleAgentSelect = (agent: Agent) => {
     const config = {
@@ -65,106 +74,113 @@ export default function Home() {
     router.push("/chat");
   }
 
-  const handleTwitterLogin = () => {
-    // Implement Twitter OAuth flow here
-    console.log("Initiating X login");
-    // This would typically redirect to your OAuth endpoint
-  }
+  const handleLogoutClick = () => {
+    handleLogout();
+  };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar">
-      <div className="container mx-auto px-4 py-8">
-        {/* User Authentication Section */}
-        <section className="mb-12 flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-white">
-            NexAI <span className="text-purple-400">Agents</span>
-          </h1>
+    <AuthProvider>
+      <main className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar">
+        <div className="container mx-auto px-4 py-8">
           
-          <button
-            onClick={handleTwitterLogin}
-            className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 text-white font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-gray-700/20 border border-gray-700"
-          >
-            <span>Login with</span>
-            <Image 
-              src="/icons/x.png" 
-              alt="X" 
-              width={20} 
-              height={20}
-              className="w-5 h-5"
-            />
-          </button>
-        </section>
-
-        {/* Main Actions Section */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-white">
-            Create Your AI Agent
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Configurator Card */}
-            <Link href="/configurator" 
-                  className="block h-[200px] p-6 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 hover:border-purple-500 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
-              <h3 className="text-xl font-semibold mb-4 text-purple-400">Configurator</h3>
-              <p className="text-gray-300 text-sm">Create and customize your own AI agent</p>
-            </Link>
-
-            {/* Import Agent Card (Disabled) */}
-            <div className="relative h-[200px] p-6 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700 cursor-not-allowed">
-              <div className="absolute top-3 right-3">
-                <span className="bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                  Coming Soon
-                </span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-400">Import Agent</h3>
-              <p className="text-gray-500 text-sm">Import your existing AI agent configuration</p>
+          <section className="mb-12 flex justify-between items-center">
+            <h1 className="text-4xl font-bold text-white">
+              NexAI <span className="text-purple-400">Agents</span>
+            </h1>
+            
+            {/* User authentication status */}
+            <div>
+              {isAuthenticated && 
+                <div className="flex items-center">
+                  {userData && (
+                    <span className="text-gray-300 mr-3">
+                      @{userData.username}
+                    </span>
+                  )}
+                  <button 
+                    onClick={handleLogoutClick}
+                    className="px-3 py-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 flex items-center"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 mr-2">
+                      <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                    </svg>
+                    Sign Out
+                  </button>
+                </div>
+              }
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Predefined Agents Section */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-white">
-            Predefined Agents
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {predefinedAgents.map((agent) => (
-              <div key={agent.id} 
-                   className={`relative h-[200px] p-6 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 hover:border-purple-500 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 ${agent.description.includes('Coming Soon') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                   onClick={() => handleAgentSelect(agent)}>
-                <h3 className="text-xl font-semibold mb-4 text-purple-400">{agent.name}</h3>
-                <p className="text-gray-300 text-sm mb-8">{agent.description}</p>
-                <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                  <span className="text-sm text-gray-400">
-                    Powered by {agent.poweredBy}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold mb-6 text-white">
+              Create Your AI Agent
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Configurator Card */}
+              <Link href="/configurator" 
+                    className="block h-[200px] p-6 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 hover:border-purple-500 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
+                <h3 className="text-xl font-semibold mb-4 text-purple-400">Configurator</h3>
+                <p className="text-gray-300 text-sm">Create and customize your own AI agent</p>
+              </Link>
+
+              {/* Import Agent Card (Disabled) */}
+              <div className="relative h-[200px] p-6 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700 cursor-not-allowed">
+                <div className="absolute top-3 right-3">
+                  <span className="bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                    Coming Soon
                   </span>
-                  {agent.isWalletRequired && (
-                    <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                      Requires Wallet
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-400">Import Agent</h3>
+                <p className="text-gray-500 text-sm">Import your existing AI agent configuration</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Predefined Agents Section */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold mb-6 text-white">
+              Predefined Agents
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {predefinedAgents.map((agent) => (
+                <div key={agent.id} 
+                     className={`relative h-[200px] p-6 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 hover:border-purple-500 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 ${agent.description.includes('Coming Soon') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     onClick={() => handleAgentSelect(agent)}>
+                  <h3 className="text-xl font-semibold mb-4 text-purple-400">{agent.name}</h3>
+                  <p className="text-gray-300 text-sm mb-8">{agent.description}</p>
+                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      Powered by {agent.poweredBy}
+                    </span>
+                    {agent.isWalletRequired && (
+                      <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                        Requires Wallet
+                      </span>
+                    )}
+                  </div>
+                  {agent.name === 'Base with Llama 3.1' && (
+                    <span className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                      On Chain Bot
                     </span>
                   )}
                 </div>
-                {agent.name === 'Base with Llama 3.1' && (
-                  <span className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                    On Chain Bot
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
 
-        {/* Saved Agents Section */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-white">
-            Saved Agents
-          </h2>
-          <div className="h-[200px] p-6 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 flex items-center justify-center">
-            <p className="text-gray-300 text-sm text-center">
-              Your saved agents will appear here
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
+          {/* Saved Agents Section */}
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold mb-6 text-white">
+              Saved Agents
+            </h2>
+            <div className="h-[200px] p-6 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 flex items-center justify-center">
+              <p className="text-gray-300 text-sm text-center">
+                Your saved agents will appear here
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </AuthProvider>
   )
 }

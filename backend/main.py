@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controllers import auth,agent_controller
+from controllers import auth,agent_controller, twitter_controller
+from starlette.middleware.sessions import SessionMiddleware
+
 app = FastAPI(
     title="API Project",
     description="Work in progress",
@@ -9,13 +11,16 @@ app = FastAPI(
 )
 routers = [
     auth.router,
-    agent_controller.router
+    agent_controller.router,
+    twitter_controller.router
 ]
+
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+                   allow_credentials=True)
+app.add_middleware(SessionMiddleware, secret_key='your_secret_key')
 
 for router in routers:  # routers_test
     app.include_router(router)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
-                   allow_credentials=True)
 
 @app.get("/")
 def read_root():

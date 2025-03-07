@@ -10,6 +10,7 @@ import PrivyProviders from "./components/PrivyProvider";
 import React from 'react';
 import { LoadingProvider } from './context/LoadingContext';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import AuthProvider from "./providers/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,9 +42,11 @@ export default function RootLayout({
           <WalletProvider>
             <ModalProvider>
               <PrivyProviders>
+                <AuthProvider>
                 <LoadingProvider>
                   <InnerLayout>{children}</InnerLayout>
                 </LoadingProvider>
+                </AuthProvider>
               </PrivyProviders>
             </ModalProvider>
           </WalletProvider>

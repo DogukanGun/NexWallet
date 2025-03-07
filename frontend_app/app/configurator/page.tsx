@@ -14,7 +14,14 @@ import { WarningModal } from "./components/WarningMode";
 import TelegramNoticeModal from '../components/TelegramNoticeModal';
 import RoadmapModal from '../components/RoadmapModal';
 import { AppChain, ChainId, KnowledgeBase } from "./data";
+import AuthProvider from '../providers/AuthProvider';
+import useAuthModal from '../hooks/useAuthModal';
 
+interface UserData {
+  id: string;
+  username: string;
+  name: string;
+}
 
 const knowledgeBases: KnowledgeBase[] = [
   {
@@ -74,7 +81,6 @@ const chains: AppChain[] = [
     isEmbedded: false,
     icon: "/icons/polygon.svg",
   }
-
 ];
 
 const llmProviders = [
@@ -104,7 +110,7 @@ const primaryButtonClass =
 
 const totalSteps = 5; // Update total steps to include the new step
 
-export default function Home() {
+export default function Configurator() {
   const router = useRouter();
   const [selectedChains, setSelectedChains] = useState<typeof chains[number][]>([]);
   const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<typeof knowledgeBases[number][]>([]);
@@ -123,6 +129,10 @@ export default function Home() {
   const [showTelegramNotice, setShowTelegramNotice] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isAuthenticated, userData } = useConfigStore();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { handleLogout } = useAuthModal();
 
   const handleChainSelection = (chainId: string) => {
     const selectedChain = chains.find(chain => chain.id === chainId);
@@ -209,7 +219,6 @@ export default function Home() {
       router.push("/chat");
     }
   };
-
 
   const cardContainerClass = "grid grid-cols-2 gap-2 min-h-[160px]";
   const cardClass = "h-[40px] flex items-center justify-center w-full relative";
@@ -298,10 +307,10 @@ export default function Home() {
               className="flex items-center justify-center gap-2 px-4 py-3 bg-black hover:bg-gray-900 text-white font-medium rounded-lg transition-all duration-300 border border-gray-700"
             >
               <span>Login with</span>
-              <Image 
-                src="/icons/x.png" 
-                alt="X" 
-                width={20} 
+              <Image
+                src="/icons/x.png"
+                alt="X"
+                width={20}
                 height={20}
                 className="w-5 h-5"
               />
@@ -318,319 +327,406 @@ export default function Home() {
     );
   };
 
+  const handleLogoutClick = () => {
+    handleLogout();
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+  };
+
+  const handleLogin = () => {
+    // Redirect to the login endpoint
+    window.location.href = '/login';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar pb-20 overflow-x-hidden">
-      {showPaymentModal && (
-        <PaymentRequiredModal
-          provider={selectedProvider}
-          onClose={() => setShowPaymentModal(false)}
-        />
-      )}
-      {showWalletModal && (
-        <WalletRequiredModal
-          onClose={() => setShowWalletModal(false)}
-        />
-      )}
-      {showWarningModal && (
-        <WarningModal onClose={() => setShowWarningModal(false)} />
-      )}
-
-      <div className="w-full min-h-screen bg-black rounded-none p-4 overflow-y-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
-            NexAI Wallet Configurator
+    <AuthProvider>
+      <div className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar pb-20 overflow-x-hidden">
+        <section className="mb-12 flex justify-center items-center">
+          <h1 className="text-4xl font-bold text-white">
+            Configurator
           </h1>
-          
-          {/* X Login Button */}
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 text-white font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-gray-700/20 border border-gray-700"
-            >
-              <span>Login with</span>
-              <Image 
-                src="/icons/x.png" 
-                alt="X" 
-                width={20} 
-                height={20}
-                className="w-5 h-5"
-              />
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-4 max-w-3xl mx-auto">
-          <Accordion
-            title="1. Select Chains"
-            isOpen={openSection === 1}
-            onToggle={() => setOpenSection(openSection === 1 ? null : 1)}
-            isValid={isStepValid(1)}
-          >
-            <div className="flex flex-col space-y-4">
-              <h2 className="text-xl font-bold text-white text-left">Select Chains</h2>
-              <div className="">
+          {/* Display welcome message if authenticated */}
+        </section>
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-white mb-4">Authentication Required</h3>
+              <p className="text-gray-300 mb-6">
+                You need to authenticate with X to access the configurator. Please log in to continue.
+              </p>
+              <div className="flex justify-end">
                 <button
-                  onClick={toggleDropdown}
-                  className={`${buttonClass} mb-4 flex items-center ${activeFilter ? 'bg-blue-500 text-black' : 'bg-gray-200 text-black'} w-full justify-between px-3`}
+                  onClick={handleLogin}
+                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
                 >
-                  Filter Chain {activeFilter ? `(${activeFilter === 'embedded' ? 'Embedded' : 'Browser'})` : ''}
-                  {activeFilter && <span className="ml-2">✔️</span>}
-                  <span>{isDropdownOpen ? '▼' : '▲'}</span>
+                  Login with X
                 </button>
-                {isDropdownOpen && (
-                  <div ref={dropdownRef} className="absolute bg-white shadow-lg rounded-md mt-2">
-                    <div
-                      onClick={() => handleWalletTypeSelection(true)}
-                      className={`w-full text-left px-4 py-2 text-black hover:bg-gray-200 cursor-pointer`}
-                    >
-                      Embedded Wallet
-                    </div>
-                    <div
-                      onClick={() => handleWalletTypeSelection(false)}
-                      className={`w-full text-left px-4 py-2 text-black hover:bg-gray-200 cursor-pointer`}
-                    >
-                      Browser Wallet
-                    </div>
-                  </div>
-                )}
+                <button
+                  onClick={closeAuthModal}
+                  className="ml-2 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition duration-300"
+                >
+                  Close
+                </button>
               </div>
+            </div>
+          </div>
+        )}
+        {showPaymentModal && (
+          <PaymentRequiredModal
+            provider={selectedProvider}
+            onClose={() => setShowPaymentModal(false)}
+          />
+        )}
+        {showWalletModal && (
+          <WalletRequiredModal
+            onClose={() => setShowWalletModal(false)}
+          />
+        )}
+        {showWarningModal && (
+          <WarningModal onClose={() => setShowWarningModal(false)} />
+        )}
+
+        <div className="w-full min-h-screen bg-black rounded-none p-4 overflow-y-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
+              NexAI Wallet Configurator
+            </h1>
+
+            {/* X Login Button */}
+            {isAuthenticated && userData ? (
+              <div className="flex items-center justify-center">
+                {userData && (
+                  <span className="text-gray-300 mr-3">
+                    @{userData.username}
+                  </span>
+                )}
+                <button
+                  onClick={handleLogoutClick}
+                  className="px-3 py-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 flex items-center"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 mr-2">
+                    <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                  </svg>
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 text-white font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-gray-700/20 border border-gray-700"
+                >
+                  <span>Login with</span>
+                  <Image
+                    src="/icons/x.png"
+                    alt="X"
+                    width={20}
+                    height={20}
+                    className="w-5 h-5"
+                  />
+                </button>
+              </div>
+            )}
+
+          </div>
+
+          <div className="space-y-4 max-w-3xl mx-auto">
+            <Accordion
+              title="1. Select Chains"
+              isOpen={openSection === 1}
+              onToggle={() => setOpenSection(openSection === 1 ? null : 1)}
+              isValid={isStepValid(1)}
+            >
+              <div className="flex flex-col space-y-4">
+                <h2 className="text-xl font-bold text-white text-left">Select Chains</h2>
+                <div className="">
+                  <button
+                    onClick={toggleDropdown}
+                    className={`${buttonClass} mb-4 flex items-center ${activeFilter ? 'bg-blue-500 text-black' : 'bg-gray-200 text-black'} w-full justify-between px-3`}
+                  >
+                    Filter Chain {activeFilter ? `(${activeFilter === 'embedded' ? 'Embedded' : 'Browser'})` : ''}
+                    {activeFilter && <span className="ml-2">✔️</span>}
+                    <span>{isDropdownOpen ? '▼' : '▲'}</span>
+                  </button>
+                  {isDropdownOpen && (
+                    <div ref={dropdownRef} className="absolute bg-white shadow-lg rounded-md mt-2">
+                      <div
+                        onClick={() => handleWalletTypeSelection(true)}
+                        className={`w-full text-left px-4 py-2 text-black hover:bg-gray-200 cursor-pointer`}
+                      >
+                        Embedded Wallet
+                      </div>
+                      <div
+                        onClick={() => handleWalletTypeSelection(false)}
+                        className={`w-full text-left px-4 py-2 text-black hover:bg-gray-200 cursor-pointer`}
+                      >
+                        Browser Wallet
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <div className={cardContainerClass}>
+                    {chains
+                      .filter(chain => {
+                        if (activeFilter === "embedded") return chain.isEmbedded;
+                        if (activeFilter === "browser") return !chain.isEmbedded;
+                        return true; // Show all if no filter is active
+                      })
+                      .map((chain) => (
+                        <button
+                          key={chain.id}
+                          onClick={() => !chain.disabled && handleChainSelection(chain.id)}
+                          className={`
+                            ${chain.disabled
+                              ? "opacity-50 cursor-not-allowed"
+                              : selectedChains.some(selectedChain => selectedChain.id === chain.id)
+                                ? selectedButtonClass
+                                : buttonClass
+                            }
+                            ${cardClass}
+                          `}
+                          disabled={chain.disabled}
+                        >
+                          <div className={buttonContentClass}>
+                            <Image
+                              src={chain.icon}
+                              alt={`${chain.name} icon`}
+                              width={20}
+                              height={20}
+                              className={iconClass}
+                            />
+                            <span className={buttonTextClass}>{chain.name}</span>
+                          </div>
+                          {chain.disabled && (
+                            <span className="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full text-white">
+                              Coming Soon
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </Accordion>
+
+            <Accordion
+              title="2. Knowledge Bases"
+              isOpen={openSection === 2}
+              onToggle={() => setOpenSection(openSection === 2 ? null : 2)}
+              isValid={isStepValid(2)}
+            >
               <div>
+                <h2 className="text-xl font-bold mb-4 text-white text-left">Knowledge Bases</h2>
                 <div className={cardContainerClass}>
-                  {chains
-                    .filter(chain => {
-                      if (activeFilter === "embedded") return chain.isEmbedded;
-                      if (activeFilter === "browser") return !chain.isEmbedded;
-                      return true; // Show all if no filter is active
-                    })
-                    .map((chain) => (
+                  {knowledgeBases.map((kb) => (
+                    <button
+                      key={kb.id}
+                      onClick={() => {
+                        const knowledgeBase = knowledgeBases.find(k => k.id === kb.id);
+                        setSelectedKnowledgeBases((prev) =>
+                          prev.some(kb => kb.id === knowledgeBase!.id)
+                            ? prev.filter(kb => kb.id !== knowledgeBase!.id)
+                            : knowledgeBase ? [...prev, knowledgeBase] : prev
+                        );
+                      }}
+                      className={`
+                        ${selectedKnowledgeBases.some(selectedKb => selectedKb.id === kb.id) ? selectedButtonClass : buttonClass}
+                        ${cardClass}
+                      `}
+                    >
+                      <span className={buttonTextClass}>
+                        {kb.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Accordion>
+
+            <Accordion
+              title="3. Select LLM Provider"
+              isOpen={openSection === 3}
+              onToggle={() => {
+                if (selectedChains.length === 0) {
+                  setShowWarningModal(true);
+                } else {
+                  setOpenSection(openSection === 3 ? null : 3);
+                }
+              }}
+              isValid={isStepValid(3)}
+            >
+              <div>
+                <h2 className="text-xl font-bold mb-4 text-white text-left">Select LLM Provider</h2>
+                <div className={cardContainerClass}>
+                  {llmProviders.map((provider) => {
+                    const isDisabled = (provider.id === "llama_onchain" && selectedChains.some(chain => chain.id === "solana")) ||
+                      (provider.id === "claude" && (selectedChains.some(chain => chain.id === "base") || selectedChains.some(chain => chain.id === "ethereum"))) ||
+                      (selectedChains.length === 0); // Disable if no chains are selected
+
+                    return (
                       <button
-                        key={chain.id}
-                        onClick={() => !chain.disabled && handleChainSelection(chain.id)}
+                        key={provider.id}
+                        onClick={() => handleLLMSelection(provider.id)}
                         className={`
-                          ${chain.disabled
-                            ? "opacity-50 cursor-not-allowed"
-                            : selectedChains.some(selectedChain => selectedChain.id === chain.id)
-                              ? selectedButtonClass
-                              : buttonClass
-                          }
+                          ${isDisabled ? "opacity-50 cursor-not-allowed" : selectedLLM === provider.id ? selectedButtonClass : buttonClass}
                           ${cardClass}
                         `}
-                        disabled={chain.disabled}
+                        disabled={isDisabled}
                       >
                         <div className={buttonContentClass}>
-                          <Image
-                            src={chain.icon}
-                            alt={`${chain.name} icon`}
-                            width={20}
-                            height={20}
-                            className={iconClass}
-                          />
-                          <span className={buttonTextClass}>{chain.name}</span>
+                          <span className={buttonTextClass}>{provider.name}</span>
                         </div>
-                        {chain.disabled && (
+                        {provider.disabled && (
                           <span className="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full text-white">
                             Coming Soon
                           </span>
                         )}
                       </button>
-                    ))}
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          </Accordion>
+            </Accordion>
 
-          <Accordion
-            title="2. Knowledge Bases"
-            isOpen={openSection === 2}
-            onToggle={() => setOpenSection(openSection === 2 ? null : 2)}
-            isValid={isStepValid(2)}
-          >
-            <div>
-              <h2 className="text-xl font-bold mb-4 text-white text-left">Knowledge Bases</h2>
-              <div className={cardContainerClass}>
-                {knowledgeBases.map((kb) => (
-                  <button
-                    key={kb.id}
-                    onClick={() => {
-                      const knowledgeBase = knowledgeBases.find(k => k.id === kb.id);
-                      setSelectedKnowledgeBases((prev) =>
-                        prev.some(kb => kb.id === knowledgeBase!.id)
-                          ? prev.filter(kb => kb.id !== knowledgeBase!.id)
-                          : knowledgeBase ? [...prev, knowledgeBase] : prev
-                      );
-                    }}
-                    className={`
-                      ${selectedKnowledgeBases.some(selectedKb => selectedKb.id === kb.id) ? selectedButtonClass : buttonClass}
-                      ${cardClass}
-                    `}
-                  >
-                    <span className={buttonTextClass}>
-                      {kb.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </Accordion>
-
-          <Accordion
-            title="3. Select LLM Provider"
-            isOpen={openSection === 3}
-            onToggle={() => {
-              if (selectedChains.length === 0) {
-                setShowWarningModal(true);
-              } else {
-                setOpenSection(openSection === 3 ? null : 3);
-              }
-            }}
-            isValid={isStepValid(3)}
-          >
-            <div>
-              <h2 className="text-xl font-bold mb-4 text-white text-left">Select LLM Provider</h2>
-              <div className={cardContainerClass}>
-                {llmProviders.map((provider) => {
-                  const isDisabled = (provider.id === "llama_onchain" && selectedChains.some(chain => chain.id === "solana")) ||
-                                     (provider.id === "claude" && (selectedChains.some(chain => chain.id === "base") || selectedChains.some(chain => chain.id === "ethereum"))) ||
-                                     (selectedChains.length === 0); // Disable if no chains are selected
-
-                  return (
+            <Accordion
+              title="4. Select Agent Type"
+              isOpen={openSection === 4}
+              onToggle={() => setOpenSection(openSection === 4 ? null : 4)}
+              isValid={isStepValid(4)}
+            >
+              <div>
+                <h2 className="text-xl font-bold mb-4 text-white text-left">Select Agent Type</h2>
+                <div className={cardContainerClass}>
+                  {agentTypes.map((type) => (
                     <button
-                      key={provider.id}
-                      onClick={() => handleLLMSelection(provider.id)}
+                      key={type.id}
+                      onClick={() => handleAgentTypeSelection(type.id)}
                       className={`
-                        ${isDisabled ? "opacity-50 cursor-not-allowed" : selectedLLM === provider.id ? selectedButtonClass : buttonClass}
+                        ${type.disabled
+                          ? "bg-gray-400 opacity-50 cursor-not-allowed"
+                          : selectedAgentType === type.id
+                            ? selectedButtonClass
+                            : buttonClass
+                        }
                         ${cardClass}
                       `}
-                      disabled={isDisabled}
+                      disabled={type.disabled}
                     >
                       <div className={buttonContentClass}>
-                        <span className={buttonTextClass}>{provider.name}</span>
+                        <span className={buttonTextClass}>{type.name}</span>
                       </div>
-                      {provider.disabled && (
+                      {type.disabled && (
                         <span className="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full text-white">
                           Coming Soon
                         </span>
                       )}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
-          </Accordion>
+            </Accordion>
 
-          <Accordion
-            title="4. Select Agent Type"
-            isOpen={openSection === 4}
-            onToggle={() => setOpenSection(openSection === 4 ? null : 4)}
-            isValid={isStepValid(4)}
-          >
-            <div>
-              <h2 className="text-xl font-bold mb-4 text-white text-left">Select Agent Type</h2>
-              <div className={cardContainerClass}>
-                {agentTypes.map((type) => (
+            <Accordion
+              title="5. Choose Your Character"
+              isOpen={openSection === 5}
+              onToggle={() => setOpenSection(openSection === 5 ? null : 5)}
+              isValid={true}
+            >
+              <div>
+                <h2 className="text-xl font-bold mb-4 text-white text-left">Choose Your Character</h2>
+                <p className="text-gray-300 mb-4">
+                  Select a character for your agent. The agent will talk to you like these characters:
+                </p>
+                <div className={cardContainerClass}>
                   <button
-                    key={type.id}
-                    onClick={() => handleAgentTypeSelection(type.id)}
-                    className={`
-                      ${type.disabled
-                        ? "bg-gray-400 opacity-50 cursor-not-allowed"
-                        : selectedAgentType === type.id
-                          ? selectedButtonClass
-                          : buttonClass
-                      }
-                      ${cardClass}
-                    `}
-                    disabled={type.disabled}
+                    onClick={() => { }}
+                    className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
+                    disabled
                   >
-                    <div className={buttonContentClass}>
-                      <span className={buttonTextClass}>{type.name}</span>
-                    </div>
-                    {type.disabled && (
-                      <span className="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full text-white">
-                        Coming Soon
-                      </span>
-                    )}
+                    <span className={buttonTextClass}>Elon Musk</span>
                   </button>
-                ))}
+                  <button
+                    onClick={() => { }}
+                    className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
+                    disabled
+                  >
+                    <span className={buttonTextClass}>Donald Trump</span>
+                  </button>
+                  <button
+                    onClick={() => { }}
+                    className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
+                    disabled
+                  >
+                    <span className={buttonTextClass}>Andrew Tate</span>
+                  </button>
+                </div>
+                <p className="text-gray-300 mt-4">
+                  Choose wisely! Your agent will embody the personality of the selected character.
+                </p>
               </div>
-            </div>
-          </Accordion>
-
-          <Accordion
-            title="5. Choose Your Character"
-            isOpen={openSection === 5}
-            onToggle={() => setOpenSection(openSection === 5 ? null : 5)}
-            isValid={true}
-          >
-            <div>
-              <h2 className="text-xl font-bold mb-4 text-white text-left">Choose Your Character</h2>
-              <p className="text-gray-300 mb-4">
-                Select a character for your agent. The agent will talk to you like these characters:
-              </p>
-              <div className={cardContainerClass}>
-                <button
-                  onClick={() => {}}
-                  className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
-                  disabled
-                >
-                  <span className={buttonTextClass}>Elon Musk</span>
-                </button>
-                <button
-                  onClick={() => {}}
-                  className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
-                  disabled
-                >
-                  <span className={buttonTextClass}>Donald Trump</span>
-                </button>
-                <button
-                  onClick={() => {}}
-                  className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
-                  disabled
-                >
-                  <span className={buttonTextClass}>Andrew Tate</span>
-                </button>
-              </div>
-              <p className="text-gray-300 mt-4">
-                Choose wisely! Your agent will embody the personality of the selected character.
-              </p>
-            </div>
-          </Accordion>
+            </Accordion>
+          </div>
         </div>
-      </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-black py-4 px-4 border-t border-gray-800">
-        <div className="flex justify-center">
-          <button
-            onClick={handleStart}
-            className={`${primaryButtonClass} w-full max-w-xs ${
-              !isStepValid(1) || !isStepValid(3) || !isStepValid(4)
+        <div className="fixed bottom-0 left-0 right-0 bg-black py-4 px-4 border-t border-gray-800">
+          <div className="flex justify-center">
+            <button
+              onClick={handleStart}
+              className={`${primaryButtonClass} w-full max-w-xs ${!isStepValid(1) || !isStepValid(3) || !isStepValid(4)
                 ? "opacity-50 cursor-not-allowed"
                 : ""
-            }`}
-            disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
-          >
-            Create and Start
-          </button>
+                }`}
+              disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
+            >
+              Create and Start
+            </button>
+          </div>
         </div>
+
+        <TelegramNoticeModal
+          isOpen={showTelegramNotice}
+          onClose={() => setShowTelegramNotice(false)}
+          onConfirm={() => {
+            setShowTelegramNotice(false);
+            window.open("https://t.me/Nexarb_Test_Solana_Bot", "_blank");
+          }}
+        />
+
+        <RoadmapModal
+          isOpen={showRoadmap}
+          onClose={() => setShowRoadmap(false)}
+        />
+
+        {showLoginModal && (
+          <TwitterLoginModal onClose={() => setShowLoginModal(false)} />
+        )}
+
+        {showLogoutModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-white mb-4">Logout Confirmation</h3>
+              <p className="text-gray-300 mb-6">Are you sure you want to log out?</p>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleLogoutClick}
+                  className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-300"
+                >
+                  Logout
+                </button>
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="ml-2 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      <TelegramNoticeModal
-        isOpen={showTelegramNotice}
-        onClose={() => setShowTelegramNotice(false)}
-        onConfirm={() => {
-          setShowTelegramNotice(false);
-          window.open("https://t.me/Nexarb_Test_Solana_Bot", "_blank");
-        }}
-      />
-
-      <RoadmapModal
-        isOpen={showRoadmap}
-        onClose={() => setShowRoadmap(false)}
-      />
-
-      {showLoginModal && (
-        <TwitterLoginModal onClose={() => setShowLoginModal(false)} />
-      )}
-    </div>
+    </AuthProvider>
   );
 }

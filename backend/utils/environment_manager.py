@@ -16,7 +16,7 @@ class EnvironmentManager:
             for key in EnvironmentKeys:
                 self.environment_values[key.value] = os.getenv(key.value)
         else:
-            self.environment_values = dotenv_values("././.env")
+            self.environment_values = dotenv_values("/Users/dogukangundogan/Desktop/Dev/NexWallet/backend/.env")
 
     def get_key(self, key) -> str:
         return self.environment_values[key]
@@ -26,6 +26,6 @@ def get_environment_manager() -> Generator[EnvironmentManager, Any, None]:
     ev_manager = EnvironmentManager()
     try:
         yield ev_manager
-        logger.logger.info("Environment manager init is done")
+        logger.info("Environment manager init is done")
     except Exception as e:
-        logger.logger.error(e)
+        logger.error(e)
