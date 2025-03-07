@@ -7,6 +7,7 @@ from llm.decision_maker.tools.utils import process_agent_stream
 
 router = APIRouter(tags=["Agent"], prefix="/agent")
 
+#TODO if the user doesn't pay or authenticate endpoint must return error
 @router.post("/chat",response_model=AgentResponse)
 async def ask_agent(agent_request: AgentRequest):
     try:

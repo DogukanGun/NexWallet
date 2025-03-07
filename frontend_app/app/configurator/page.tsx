@@ -342,99 +342,87 @@ export default function Configurator() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gradient-to-b bg-black text-white page-with-navbar pb-20 overflow-x-hidden">
-        <section className="mb-12 flex justify-center items-center">
-          <h1 className="text-4xl font-bold text-white">
-            Configurator
+      <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white page-with-navbar pb-20 overflow-x-hidden">
+        {/* Welcome Section */}
+        <section className="pt-12 pb-8 px-4 text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-4">
+            Welcome to NexAI Configurator
           </h1>
-          {/* Display welcome message if authenticated */}
-        </section>
-        {showAuthModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4">
-              <h3 className="text-xl font-bold text-white mb-4">Authentication Required</h3>
-              <p className="text-gray-300 mb-6">
-                You need to authenticate with X to access the configurator. Please log in to continue.
-              </p>
-              <div className="flex justify-end">
-                <button
-                  onClick={handleLogin}
-                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
-                >
-                  Login with X
-                </button>
-                <button
-                  onClick={closeAuthModal}
-                  className="ml-2 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition duration-300"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {showPaymentModal && (
-          <PaymentRequiredModal
-            provider={selectedProvider}
-            onClose={() => setShowPaymentModal(false)}
-          />
-        )}
-        {showWalletModal && (
-          <WalletRequiredModal
-            onClose={() => setShowWalletModal(false)}
-          />
-        )}
-        {showWarningModal && (
-          <WarningModal onClose={() => setShowWarningModal(false)} />
-        )}
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Create your personalized AI assistant in just a few steps. Configure the chains, 
+            knowledge base, and interaction type to get started.
+          </p>
 
-        <div className="w-full min-h-screen bg-black rounded-none p-4 overflow-y-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-transparent bg-clip-text mb-2">
-              NexAI Wallet Configurator
-            </h1>
-
-            {/* X Login Button */}
+          {/* Auth Section */}
+          <div className="mt-6">
             {isAuthenticated && userData ? (
-              <div className="flex items-center justify-center">
-                {userData && (
-                  <span className="text-gray-300 mr-3">
-                    @{userData.username}
-                  </span>
-                )}
+              <div className="inline-flex items-center gap-3 bg-gray-800/50 px-4 py-2 rounded-full">
+                <span className="text-gray-300">@{userData.username}</span>
                 <button
                   onClick={handleLogoutClick}
-                  className="px-3 py-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 flex items-center"
+                  className="text-sm px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-full transition-colors flex items-center gap-2"
                 >
-                  <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 mr-2">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4">
                     <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
                   </svg>
                   Sign Out
                 </button>
               </div>
             ) : (
-              <div className="flex justify-center mt-4">
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-gray-900 text-white font-medium rounded-full transition-all duration-300 shadow-lg hover:shadow-gray-700/20 border border-gray-700"
-                >
-                  <span>Login with</span>
-                  <Image
-                    src="/icons/x.png"
-                    alt="X"
-                    width={20}
-                    height={20}
-                    className="w-5 h-5"
-                  />
-                </button>
-              </div>
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+              >
+                <span>Get Started with</span>
+                <Image
+                  src="/icons/x.png"
+                  alt="X"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-0 group-hover:opacity-30 transition duration-300"></div>
+              </button>
             )}
-
           </div>
+        </section>
 
-          <div className="space-y-4 max-w-3xl mx-auto">
+        {/* Progress Indicator */}
+        <div className="max-w-3xl mx-auto px-4 mb-8">
+          <div className="flex items-center justify-between relative">
+            {[1, 2, 3, 4].map((step) => (
+              <div key={step} className="flex flex-col items-center z-10">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center 
+                  ${openSection === step 
+                    ? 'bg-blue-500 text-white' 
+                    : isStepValid(step) 
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-700 text-gray-300'}`}>
+                  {isStepValid(step) ? '✓' : step}
+                </div>
+                <span className="text-xs mt-2 text-gray-400">
+                  {step === 1 ? 'Chains' 
+                    : step === 2 ? 'Knowledge' 
+                    : step === 3 ? 'LLM' 
+                    : 'Agent Type'}
+                </span>
+              </div>
+            ))}
+            <div className="absolute h-0.5 bg-gray-700 left-0 right-0 top-4 -z-0"></div>
+          </div>
+        </div>
+
+        {/* Main Configuration Area */}
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="space-y-4 bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm">
             <Accordion
-              title="1. Select Chains"
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">1</div>
+                  <span>Select Chains</span>
+                  {isStepValid(1) && <span className="text-green-500 ml-auto">✓</span>}
+                </div>
+              }
               isOpen={openSection === 1}
               onToggle={() => setOpenSection(openSection === 1 ? null : 1)}
               isValid={isStepValid(1)}
@@ -513,7 +501,13 @@ export default function Configurator() {
             </Accordion>
 
             <Accordion
-              title="2. Knowledge Bases"
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">2</div>
+                  <span>Knowledge Bases</span>
+                  {isStepValid(2) && <span className="text-green-500 ml-auto">✓</span>}
+                </div>
+              }
               isOpen={openSection === 2}
               onToggle={() => setOpenSection(openSection === 2 ? null : 2)}
               isValid={isStepValid(2)}
@@ -547,7 +541,13 @@ export default function Configurator() {
             </Accordion>
 
             <Accordion
-              title="3. Select LLM Provider"
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">3</div>
+                  <span>Select LLM Provider</span>
+                  {isStepValid(3) && <span className="text-green-500 ml-auto">✓</span>}
+                </div>
+              }
               isOpen={openSection === 3}
               onToggle={() => {
                 if (selectedChains.length === 0) {
@@ -592,7 +592,13 @@ export default function Configurator() {
             </Accordion>
 
             <Accordion
-              title="4. Select Agent Type"
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">4</div>
+                  <span>Select Agent Type</span>
+                  {isStepValid(4) && <span className="text-green-500 ml-auto">✓</span>}
+                </div>
+              }
               isOpen={openSection === 4}
               onToggle={() => setOpenSection(openSection === 4 ? null : 4)}
               isValid={isStepValid(4)}
@@ -630,61 +636,124 @@ export default function Configurator() {
             </Accordion>
 
             <Accordion
-              title="5. Choose Your Character"
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">5</div>
+                  <span>Voice & Character Settings</span>
+                  <span className="ml-auto text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Coming Soon</span>
+                </div>
+              }
               isOpen={openSection === 5}
               onToggle={() => setOpenSection(openSection === 5 ? null : 5)}
               isValid={true}
             >
-              <div>
-                <h2 className="text-xl font-bold mb-4 text-white text-left">Choose Your Character</h2>
-                <p className="text-gray-300 mb-4">
-                  Select a character for your agent. The agent will talk to you like these characters:
-                </p>
-                <div className={cardContainerClass}>
-                  <button
-                    onClick={() => { }}
-                    className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
-                    disabled
-                  >
-                    <span className={buttonTextClass}>Elon Musk</span>
-                  </button>
-                  <button
-                    onClick={() => { }}
-                    className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
-                    disabled
-                  >
-                    <span className={buttonTextClass}>Donald Trump</span>
-                  </button>
-                  <button
-                    onClick={() => { }}
-                    className={`${buttonClass} opacity-50 cursor-not-allowed ${cardClass}`}
-                    disabled
-                  >
-                    <span className={buttonTextClass}>Andrew Tate</span>
-                  </button>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-white">Voice Customization</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
+                      <h4 className="font-medium mb-2">Voice Type</h4>
+                      <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
+                        <option>Natural</option>
+                        <option>Robotic</option>
+                        <option>Human-like</option>
+                      </select>
+                    </div>
+                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
+                      <h4 className="font-medium mb-2">Accent</h4>
+                      <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
+                        <option>American</option>
+                        <option>British</option>
+                        <option>Australian</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-gray-300 mt-4">
-                  Choose wisely! Your agent will embody the personality of the selected character.
-                </p>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-white">Character Personality</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
+                      <h4 className="font-medium mb-2">Personality Type</h4>
+                      <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
+                        <option>Professional</option>
+                        <option>Friendly</option>
+                        <option>Technical</option>
+                      </select>
+                    </div>
+                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
+                      <h4 className="font-medium mb-2">Communication Style</h4>
+                      <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
+                        <option>Formal</option>
+                        <option>Casual</option>
+                        <option>Technical</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Accordion>
           </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-black py-4 px-4 border-t border-gray-800">
-          <div className="flex justify-center">
+        {/* Footer Action Button */}
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-md py-4 px-4 border-t border-gray-800">
+          <div className="max-w-3xl mx-auto">
             <button
               onClick={handleStart}
-              className={`${primaryButtonClass} w-full max-w-xs ${!isStepValid(1) || !isStepValid(3) || !isStepValid(4)
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-                }`}
               disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full py-3 font-medium
+                disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-300
+                flex items-center justify-center gap-2"
             >
-              Create and Start
+              <span>Create Your AI Assistant</span>
+              {isStepValid(1) && isStepValid(3) && isStepValid(4) && (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
+
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-white mb-4">Authentication Required</h3>
+              <p className="text-gray-300 mb-6">
+                You need to authenticate with X to access the configurator. Please log in to continue.
+              </p>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleLogin}
+                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Login with X
+                </button>
+                <button
+                  onClick={closeAuthModal}
+                  className="ml-2 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition duration-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showPaymentModal && (
+          <PaymentRequiredModal
+            provider={selectedProvider}
+            onClose={() => setShowPaymentModal(false)}
+          />
+        )}
+        {showWalletModal && (
+          <WalletRequiredModal
+            onClose={() => setShowWalletModal(false)}
+          />
+        )}
+        {showWarningModal && (
+          <WarningModal onClose={() => setShowWarningModal(false)} />
+        )}
 
         <TelegramNoticeModal
           isOpen={showTelegramNotice}
