@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FaDollarSign } from "react-icons/fa";
 
 interface PopupComponentProps {
   handleCheckCode: (code: string) => void;
@@ -16,9 +17,14 @@ const PopupComponent: React.FC<PopupComponentProps> = ({
   const [accessCode, setAccessCode] = useState("");
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4">
-        <h2 className="text-xl font-bold text-white mb-4">Subscribe to Access</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+      <div className="bg-gray-900 p-8 rounded-xl max-w-md w-full mx-4 shadow-lg">
+        <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+          <FaDollarSign className="mr-2 text-yellow-400" /> Subscribe to Access
+        </h2>
+        <p className="text-gray-300 mb-4">
+          To ensure the best experience and cover operational costs, we ask for a subscription fee of 10 USDC. Your support helps us maintain and improve the app!
+        </p>
         <div className="space-y-4">
           <div className="subscription-options space-y-4">
             <button
@@ -36,7 +42,7 @@ const PopupComponent: React.FC<PopupComponentProps> = ({
               type="text"
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg mb-2 text-white"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg mb-2 text-white"
               placeholder="Enter access code"
             />
             <button

@@ -3,9 +3,12 @@ from sqlalchemy.orm import Session
 import jwt
 import os
 from datetime import datetime
-
-from controllers.request_models.auth_models import AdminRequest
-from models.user import RegisteredUser, SpecialUserCode, ArbitrumWallet, Admin
+import random
+import string
+from controllers.request_models.auth_models import AdminRequest, RegisterUserRequest, GenerateTokenRequest, \
+    CheckTokenRequest, CreateWalletRequest, CheckSpecialCodeRequest, \
+    DeleteSpecialCodeByAdminRequest, UseSpecialCodeByAdminRequest, VerifySpecialCodeByAdminRequest
+from models.user import RegisteredUser, SpecialUserCode, Admin, UserWallet
 from models.chain import Transaction
 from pydantic import BaseModel
 from utils.database import get_db
@@ -13,18 +16,18 @@ from middleware.withAdmin import verify_admin
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-class WalletAddressRequest(BaseModel):
-    walletAddress: str
+class UserIdRequest(BaseModel):
+    user_id: str
 
 @router.post("/admin")
 async def admin_login(adminRequest: AdminRequest, db: Session = Depends(get_db)):
-    # Verify admin exists in database
-    admin = db.query(Admin).filter(Admin.wallet_address == adminRequest.walletAddress).first()
+    # Verify admin exists in database using user_id
+    admin = db.query(Admin).filter(Admin.user_id == adminRequest.user_id).first()
     if not admin:
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     # Generate JWT token
-    token = jwt.encode({"walletAddress": admin.wallet_address}, os.getenv("SECRET_KEY"), algorithm="HS256")
+    token = jwt.encode({"user_id": admin.user_id}, os.getenv("SECRET_KEY"), algorithm="HS256")
     return {"message": "Authorized", "token": token, "isAdmin": True}
 
 @router.get("/codes")
@@ -36,54 +39,42 @@ async def get_codes(db: Session = Depends(get_db), admin_payload: dict = Depends
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/register")
-async def register_user(request: Request, db: Session = Depends(get_db)):
-    data = await request.json()
-    transaction_hash = data.get("signature")
-    user_wallet = data.get("user_wallet")
-
-    if not transaction_hash or not user_wallet:
+async def register_user(request: RegisterUserRequest, db: Session = Depends(get_db)):
+    if not request.tx_hash or not request.user_id:
         raise HTTPException(status_code=400, detail="Missing parameters")
 
     # Create and save transaction record
-    transaction = Transaction(transaction_hash=transaction_hash, user_wallet=user_wallet)
+    transaction = Transaction(transaction_hash=request.tx_hash, user_wallet=request.wallet_address)  # Adjusted
     db.add(transaction)
     
     # Create and save registered user
-    registered_user = RegisteredUser(user_wallet=user_wallet)
+    registered_user = RegisteredUser(user_id=request.user_id)  # Adjusted
     db.add(registered_user)
     db.commit()
 
-    return {"message": "Subscription registered successfully", "user": {"user_wallet": registered_user.user_wallet}}
+    return {"message": "Subscription registered successfully", "user": {"user_id": registered_user.user_id}}  # Adjusted
 
 @router.post("/token")
-async def generate_token(request: Request):
-    data = await request.json()
-    wallet_address = data.get("walletAddress")
+async def generate_token(request: GenerateTokenRequest):
+    if not request.user_id:
+        raise HTTPException(status_code=400, detail="User ID is required")
 
-    if not wallet_address:
-        raise HTTPException(status_code=400, detail="Wallet address is required")
-
-    token = jwt.encode({"walletAddress": wallet_address}, os.getenv("SECRET_KEY"), algorithm="HS256")
+    token = jwt.encode({"user_id": request.user_id}, os.getenv("SECRET_KEY"), algorithm="HS256")
     return {"token": token}
 
 @router.post("/check")
-async def check_user(request: Request, db: Session = Depends(get_db)):
-    data = await request.json()
-    user_wallet = data.get("userWallet")
-    did = data.get("did")
+async def check_user(request: CheckTokenRequest, db: Session = Depends(get_db)):
+    if not request.user_id:
+        raise HTTPException(status_code=400, detail="user_id cannot be null")
 
-    if not user_wallet and not did:
-        raise HTTPException(status_code=400, detail="Both userWallet and did cannot be null")
-
-    user = db.query(RegisteredUser).filter((RegisteredUser.user_wallet == user_wallet) | (RegisteredUser.user_wallet == did)).first()
+    user = db.query(RegisteredUser).filter(RegisteredUser.user_id == request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User check successful", "isAllowed": True}
 
 @router.post("/wallet")
-async def create_wallet(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
-    data = await request.json()
+async def create_wallet(request: CreateWalletRequest, db: Session = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
     
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -97,18 +88,18 @@ async def create_wallet(request: Request, db: Session = Depends(get_db), admin_p
     try:
         # Verify token
         payload = jwt.decode(access_token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
-        wallet_address = payload.get("walletAddress")
+        user_id = payload.get("user_id")
         
         # Check if user exists
-        user = db.query(RegisteredUser).filter(RegisteredUser.user_wallet == wallet_address).first()
+        user = db.query(RegisteredUser).filter(RegisteredUser.user_id == user_id).first()  # Adjusted
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
             
         # Create wallet
-        wallet = ArbitrumWallet(
-            wallet_address="some_address",  # This should be generated properly
-            private_key="some_key",         # This should be generated properly
-            mnemonic="some_mnemonic"        # This should be generated properly
+        wallet = UserWallet(
+            wallet_address=request.wallet_address,
+            is_verified=True,
+            user_id=user_id
         )
         db.add(wallet)
         db.commit()
@@ -119,18 +110,14 @@ async def create_wallet(request: Request, db: Session = Depends(get_db), admin_p
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.post("/code/check")
-async def check_code(request: Request, db: Session = Depends(get_db)):
-    data = await request.json()
-    code = data.get("code")
-    wallet_address = data.get("walletAddress")
-    
-    if not code:
+async def check_code(request: CheckSpecialCodeRequest, db: Session = Depends(get_db)):
+    if not request.code:
         raise HTTPException(status_code=400, detail="Code is required")
     
     try:
         # Find the code
         user_code = db.query(SpecialUserCode).filter(
-            SpecialUserCode.code == code,
+            SpecialUserCode.code == request.code,
             SpecialUserCode.is_used == False
         ).first()
         
@@ -139,10 +126,10 @@ async def check_code(request: Request, db: Session = Depends(get_db)):
         
         # Mark code as used
         user_code.is_used = True
-        user_code.used_by = wallet_address
+        user_code.used_by = request.user_id
         
         # Register the user
-        registered_user = RegisteredUser(user_wallet=wallet_address)
+        registered_user = RegisteredUser(user_id=request.user_id)  # Adjusted
         db.add(registered_user)
         db.commit()
         
@@ -152,9 +139,6 @@ async def check_code(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/code/generate")
 async def generate_code(db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
-    import random
-    import string
-    
     # Generate a random code
     random_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
     
@@ -166,15 +150,13 @@ async def generate_code(db: Session = Depends(get_db), admin_payload: dict = Dep
     return {"code": code.code}
 
 @router.delete("/code")
-async def delete_code(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
-    data = await request.json()
-    code_id = data.get("id")
-    
-    if not code_id:
+async def delete_code(request: DeleteSpecialCodeByAdminRequest, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
+
+    if not request.code_id:
         raise HTTPException(status_code=400, detail="ID is required")
     
     try:
-        code = db.query(SpecialUserCode).filter(SpecialUserCode.id == code_id).first()
+        code = db.query(SpecialUserCode).filter(SpecialUserCode.id == request.code_id).first()
         if not code:
             raise HTTPException(status_code=404, detail="Code not found")
         
@@ -186,15 +168,12 @@ async def delete_code(request: Request, db: Session = Depends(get_db), admin_pay
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/code/use")
-async def use_code(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
-    data = await request.json()
-    code_id = data.get("id")
-    
-    if not code_id:
+async def use_code(request: UseSpecialCodeByAdminRequest, db: Session = Depends(get_db)):
+    if not request.code_id:
         raise HTTPException(status_code=400, detail="ID is required")
     
     try:
-        code = db.query(SpecialUserCode).filter(SpecialUserCode.id == code_id).first()
+        code = db.query(SpecialUserCode).filter(SpecialUserCode.id == request.code_id).first()
         if not code:
             raise HTTPException(status_code=404, detail="Code not found")
         
@@ -206,16 +185,13 @@ async def use_code(request: Request, db: Session = Depends(get_db), admin_payloa
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/code/verify")
-async def verify_code(request: Request, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
-    data = await request.json()
-    code_value = data.get("code")
-    
-    if not code_value:
+async def verify_code(request: VerifySpecialCodeByAdminRequest, db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):
+    if not request.code:
         raise HTTPException(status_code=400, detail="Code is required")
     
     try:
         code = db.query(SpecialUserCode).filter(
-            SpecialUserCode.code == code_value,
+            SpecialUserCode.code == request.code,
             SpecialUserCode.is_used == False
         ).first()
         

@@ -43,10 +43,10 @@ const Navbar = () => {
 
   return (
     <div className="drawer">
-      <input id="my-drawer-3" type="checkbox" className="drawer-toggle hidden z-[100]" />
-      <div className="drawer-content flex flex-col pt-16">
+      <input id="my-drawer-3" type="checkbox" className="drawer-toggle hidden z-[200]" />
+      <div className="drawer-content flex flex-col">
         {/* Navbar */}
-        <div className="navbar backdrop-blur-md bg-black/30 border-b border-gray-700/50 text-white shadow-lg w-full fixed top-0">
+        <div className="navbar h-20 backdrop-blur-md bg-black/30 text-white shadow-lg w-full fixed top-0 z-50">
           <div className="flex-none lg:hidden">
             <label
               htmlFor="my-drawer-3"
@@ -79,44 +79,44 @@ const Navbar = () => {
           </div>
 
           <div className="hidden flex-none lg:block">
-            <ul className="menu menu-horizontal flex items-center px-4 py-2 gap-4">
+            <ul className="menu menu-horizontal flex items-center px-4 gap-3">
               {path === "/" && (
-                <li className="flex items-center">
+                <li>
                   <Link
                     href="/app"
-                    className="px-6 py-2 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(251,146,60,0.5)] hover:shadow-[0_0_20px_rgba(251,146,60,0.7)] transition-all duration-300"
+                    className="nav-button bg-gradient-to-r from-orange-400 to-pink-500"
                   >
                     Launch NexWallet
                   </Link>
                 </li>
               )}
-              <li className="flex items-center">
+              <li>
                 <button
                   onClick={handleTelegramClick}
-                  className="px-6 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] transition-all duration-300 relative"
+                  className="nav-button bg-gradient-to-r from-blue-400 to-blue-500 relative"
                 >
                   Chat in Telegram
                   <span className="absolute -top-2 -right-2 bg-pink-500 text-xs px-1.5 py-0.5 rounded-full font-semibold">BETA</span>
                 </button>
               </li>
-              <li className="flex items-center">
+              <li>
                 <button
                   onClick={() => setShowRoadmap(true)}
-                  className="px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-500 text-white font-semibold rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-[0_0_20px_rgba(168,85,247,0.7)] transition-all duration-300"
+                  className="nav-button bg-gradient-to-r from-purple-400 to-pink-500"
                 >
                   Roadmap
                 </button>
               </li>
               {path !== "/" && (
-                <li className="flex items-center">
+                <li>
                   <WalletButton />
                 </li>
               )}
               {path !== '/' && path !== '/app' && (
-                <li className="flex items-center">
+                <li>
                   <button
                     onClick={() => router.push('/app')}
-                    className="px-6 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold rounded-full border border-gray-700 hover:border-orange-500/50 transition-all duration-300"
+                    className="nav-button bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50"
                   >
                     Go Back to App
                   </button>
@@ -125,9 +125,11 @@ const Navbar = () => {
             </ul>
           </div>
         </div>
+        {/* Add a spacer to prevent content from hiding under navbar */}
+        <div className="h-20"></div>
       </div>
       
-      {/* Sidebar */}
+      {/* Sidebar - update mobile buttons to match desktop */}
       <div className="drawer-side lg:hidden z-[100]">
         <label
           htmlFor="my-drawer-3"
@@ -156,28 +158,26 @@ const Navbar = () => {
             </label>
           </div>
           
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {path === "/" && (
-              <>
-                <Link
-                  href="/app"
-                  onClick={() => closeDrawer()}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/20 transition duration-300 text-center"
-                >
-                  Launch NexWallet
-                </Link>
-              </>
+              <Link
+                href="/app"
+                onClick={() => closeDrawer()}
+                className="mobile-nav-button bg-gradient-to-r from-orange-400 to-pink-500"
+              >
+                Launch NexWallet
+              </Link>
             )}
             <button
               onClick={handleTelegramClick}
-              className="px-6 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-semibold rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] transition-all duration-300 text-center relative"
+              className="mobile-nav-button bg-gradient-to-r from-blue-400 to-blue-500 relative"
             >
               Chat in Telegram
               <span className="absolute -top-2 -right-2 bg-pink-500 text-xs px-1.5 py-0.5 rounded-full font-semibold">BETA</span>
             </button>
             <button
               onClick={handleRoadmapClick}
-              className="px-6 py-3 bg-gradient-to-r from-purple-400 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/20 transition duration-300 text-center"
+              className="mobile-nav-button bg-gradient-to-r from-purple-400 to-pink-500"
             >
               Roadmap
             </button>
@@ -189,7 +189,7 @@ const Navbar = () => {
             {path !== '/' && path !== '/app' && (
               <button
                 onClick={() => handleNavigation('/app')}
-                className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold rounded-xl border border-gray-700 hover:border-orange-500/50 transition duration-300 text-center"
+                className="mobile-nav-button bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 hover:border-orange-500/50"
               >
                 Go Back to App
               </button>

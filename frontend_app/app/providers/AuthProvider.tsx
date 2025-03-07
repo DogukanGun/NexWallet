@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useConfigStore } from '../store/configStore';
 import Auth from '../components/Auth';
 import { usePathname } from 'next/navigation';
@@ -16,10 +16,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     handleLogout,
   } = useAuth();
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     // Skip authentication check for the root path
     if (pathname === '/') {
-      return; // Exit early if on the root path
+      setLoading(false);
+      return;
     }
 
     // Retrieve authentication state from session storage
@@ -32,6 +35,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         setShowAuthModal(true);
         sessionStorage.removeItem('isAuthenticated');
         sessionStorage.removeItem('userData');
+        setLoading(false);
         return;
       }
       const userData = storedUserData ? JSON.parse(storedUserData) : null;
@@ -39,13 +43,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       
       // If authenticated, no need to check the API
       if (isAuthenticated) {
-        return; // Exit early if already authenticated
+        setLoading(false);
+        return;
       }
     }
 
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch('/api/twitter/user', {
+        const response = await fetch('http://localhost:8000/api/twitter/user', {
           credentials: 'include',
         });
         const data = await response.json();
@@ -59,6 +64,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       } catch (error) {
         console.error('Error checking auth status:', error);
         setShowAuthModal(true);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -94,6 +101,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         console.error('Error fetching user data:', error);
       });
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>

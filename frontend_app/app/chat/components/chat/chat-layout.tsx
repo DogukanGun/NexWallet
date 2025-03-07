@@ -14,6 +14,8 @@ interface ChatLayoutProps {
   navCollapsedSize: number;
   chatId: string;
   setMessages: (messages: Message[]) => void;
+  securityLevel: 'basic' | 'advanced';
+  sidebarClassName?: string;
 }
 
 type MergedProps = ChatLayoutProps & ChatProps;
@@ -34,6 +36,8 @@ export function ChatLayout({
   formRef,
   setInput,
   setMessages,
+  securityLevel,
+  sidebarClassName,
 }: MergedProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [isMobile, setIsMobile] = useState(false);
@@ -71,7 +75,7 @@ export function ChatLayout({
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout=${JSON.stringify(sizes)}`;
       }}
-      className="h-screen items-stretch"
+      className="h-[calc(100vh-64px)] items-stretch"
     >
       <ResizablePanel
         defaultSize={defaultLayout[0]}
@@ -91,6 +95,7 @@ export function ChatLayout({
           isCollapsed
             ? "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out"
             : "hidden md:block",
+          securityLevel === 'advanced' ? 'bg-emerald-950/50' : 'bg-indigo-950/50',
         )}
       >
         <Sidebar
@@ -101,7 +106,13 @@ export function ChatLayout({
         />
       </ResizablePanel>
       <ResizableHandle className={cn("hidden md:flex")} withHandle />
-      <ResizablePanel className="h-full w-full flex justify-center" defaultSize={defaultLayout[1]}>
+      <ResizablePanel 
+        className={cn(
+          "h-full w-full flex justify-center",
+          securityLevel === 'advanced' ? 'bg-emerald-950/30' : 'bg-indigo-950/30'
+        )} 
+        defaultSize={defaultLayout[1]}
+      >
         <Chat
           chatId={chatId}
           messages={messages}

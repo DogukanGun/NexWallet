@@ -8,11 +8,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { userWallet, did } = req.body;
+        const { userId } = req.body;
 
         // Check if both userWallet and did are null
-        if (!userWallet && !did) {
-            return res.status(400).json({ error: 'Both userWallet and did cannot be null' });
+        if (!userId) {
+            return res.status(400).json({ error: 'userId cannot be null' });
         }
 
         const response = await fetch(`${process.env.BACKEND_API_URL}/auth/check`, {
@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userWallet, did }),
+            body: JSON.stringify({ user_id: userId }),
         });
 
         const data = await response.json();

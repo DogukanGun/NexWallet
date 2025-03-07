@@ -21,6 +21,8 @@ export default function Home() {
     { name: "Ethereum", icon: "/icons/ethereum.svg", active: true },
     { name: "Arbitrum", icon: "/icons/arbitrum.svg", active: true },
     { name: "Optimism", icon: "/icons/optimism.svg", active: true },
+    { name: "BNB Chain", icon: "/icons/bnbchain.svg", comingSoon: true },
+    { name: "Sonic EVM", icon: "/icons/sonic_svm.jpg", comingSoon: true },
     { name: "StarkNet", icon: "/icons/starknet.svg", comingSoon: true },
   ];
 

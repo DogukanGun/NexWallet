@@ -6,7 +6,11 @@ import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
 import { apiService } from "../services/ApiService";
 
-const WalletButton = () => {
+interface WalletButtonProps {
+  className?: string;
+}
+
+const WalletButton = ({ className }: WalletButtonProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { open } = useAppKit();
@@ -38,7 +42,7 @@ const WalletButton = () => {
   };
 
   return !isConnected ? (
-    <button className={`${buttonClass} flex items-center gap-2`} onClick={() => open()}>
+    <button className={`${buttonClass} flex items-center gap-2 ${className}`} onClick={() => open()}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -52,7 +56,7 @@ const WalletButton = () => {
     </button>
   ) : (
     <div className="dropdown dropdown-end">
-      <button tabIndex={0} className={`${buttonClass} flex items-center gap-2`}>
+      <button tabIndex={0} className={`${buttonClass} flex items-center gap-2 ${className}`}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="20"

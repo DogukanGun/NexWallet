@@ -5,18 +5,19 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 interface ToolsProps {
   onToolSelect: (tool: ToolConfig | null) => void;
   selectedTool: ToolConfig | null;
+  securityLevel: 'basic' | 'advanced';
 }
 
-export const Tools: React.FC<ToolsProps> = ({ onToolSelect, selectedTool }) => {
+export const Tools: React.FC<ToolsProps> = ({ onToolSelect, selectedTool, securityLevel }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className={`fixed right-0 top-[64px] h-[calc(100vh-64px)] transition-all duration-300 ease-in-out 
+    <div className={`fixed right-0 top-[64px] h-[calc(100vh-64px)] z-50 transition-all duration-300 ease-in-out 
       ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="absolute left-0 top-1/2 -translate-x-full transform bg-[#1E1E1E] p-2 
-          shadow-lg rounded-l-lg border-0 text-white flex items-center gap-2"
+        className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 transform bg-[#1E1E1E] p-2 
+          shadow-lg rounded-l-lg border-0 text-white flex items-center gap-2 hover:bg-[#2A2A2A] transition-colors"
       >
         {isOpen ? (
           <>
@@ -31,40 +32,42 @@ export const Tools: React.FC<ToolsProps> = ({ onToolSelect, selectedTool }) => {
         )}
       </button>
 
-      <div className="h-full w-96 bg-[#1E1E1E] shadow-lg text-white">
-        {selectedTool ? (
-          <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-[#2D2D2D]">
+      <div className="h-full w-96 bg-[#2A2A2A] shadow-lg text-white">
+        {!selectedTool ? (
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4">Tools</h2>
+            <div className="space-y-2">
+              {tools.map((tool) => (
+                <button
+                  key={tool.id}
+                  onClick={() => {
+                    onToolSelect(tool);
+                    setIsOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[#3D3D3D] transition-colors"
+                >
+                  {tool.icon}
+                  <div className="text-left">
+                    <div className="font-medium">{tool.name}</div>
+                    <div className="text-sm text-gray-400">{tool.description}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex flex-col relative">
+            <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-[#3D3D3D] z-10 relative">
               <h2 className="text-lg font-semibold">{selectedTool.name}</h2>
               <button
                 onClick={() => onToolSelect(null)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-[#4D4D4D]"
               >
                 ✕
               </button>
             </div>
-            <div className="flex-1 p-4 overflow-auto">
+            <div className="flex-1 relative">
               <selectedTool.component />
-            </div>
-          </div>
-        ) : (
-          <div className="p-4">
-            <h2 className="text-xl font-bold mb-6">Tools</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {tools.map((tool) => (
-                <button
-                  key={tool.id}
-                  onClick={() => onToolSelect(tool)}
-                  className="group bg-[#2D2D2D] rounded-lg p-4 text-left hover:bg-[#3D3D3D] 
-                    transition-all duration-200 border border-gray-700 hover:border-gray-600"
-                >
-                  <div className="mb-3 w-12 h-12 bg-[#4D4D4D] rounded-lg flex items-center justify-center group-hover:bg-[#5D5D5D]">
-                    {tool.icon}
-                  </div>
-                  <h3 className="font-medium text-white mb-1">{tool.name}</h3>
-                  <p className="text-sm text-gray-400">{tool.description}</p>
-                </button>
-              ))}
             </div>
           </div>
         )}

@@ -14,9 +14,8 @@ import { useAppKitConnection } from "@reown/appkit-adapter-solana/react";
 import { useSnackbar } from "notistack";
 import { apiService } from "../services/ApiService";
 import PopupComponent from "../components/PopupComponent";
-import { useConfigStore } from "../store/configStore";
-import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import useCurrentUserId from "../hooks/useCurrentUserId";
 
 type SubscriptionWrapperProps = {
   children: ReactNode;
@@ -32,6 +31,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const { walletProvider } = useAppKitProvider<Provider>("solana");
   const { connection } = useAppKitConnection();
   const { enqueueSnackbar } = useSnackbar();
+  const { userId } = useCurrentUserId();
   const router = useRouter();
 
   const handleCheckCode = async (accessCode: string) => {
@@ -116,15 +116,16 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
       enqueueSnackbar("Failed to register subscription", { variant: "error" });
     }
   };
+
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
       try {
         setIsLoading(true);
-        if(!address){
+        if(!userId){
           return;
         }
 
-        const response = await apiService.checkUser(address);
+        const response = await apiService.checkUser(userId);
         if (response.isAllowed) {
           setIsAllowed(true);
         } else {

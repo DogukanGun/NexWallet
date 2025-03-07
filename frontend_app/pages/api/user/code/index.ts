@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withAdmin } from '@/middleware/withAdmin';
 
 const handler = async(req: NextApiRequest, res: NextApiResponse) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -67,4 +66,4 @@ const handler = async(req: NextApiRequest, res: NextApiResponse) => {
     }
 }
 
-export default withAdmin(handler);
+export default handler;

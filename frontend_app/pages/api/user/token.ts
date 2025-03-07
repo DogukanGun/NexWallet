@@ -2,10 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
-        const { walletAddress } = req.body;
+        const { userId } = req.body;
 
-        if (!walletAddress) {
-            return res.status(400).json({ error: 'Wallet address is required' });
+        if (!userId) {
+            return res.status(400).json({ error: 'userId is required' });
         }
 
         try {
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ walletAddress }),
+                body: JSON.stringify({ user_id: userId }),
             });
 
             const data = await response.json();

@@ -40,7 +40,7 @@ export default function ChatList({ messages, isLoading, loadingSubmit }: ChatPro
               height={200}
               className="object-contain"
             />
-            <p className="text-center text-black text-lg text-muted-foreground">How can I help you today?</p>
+            <p className="text-center text-white text-lg text-muted-foreground">How can I help you today?</p>
           </div>
         </div>
       </div>

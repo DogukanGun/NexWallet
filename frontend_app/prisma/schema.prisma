@@ -23,7 +23,7 @@ model Transaction {
 
 model RegisteredUsers { 
   id              Int      @id @default(autoincrement())
-  user_wallet String 
+  user_id         String?   @unique
 }
 
 model SpecialUserCodes {
@@ -39,6 +39,7 @@ model ArbitrumWallets {
   private_key     String
   is_verified     Boolean @default(false)
   mnemonic        String?
+  user_id         String
 }
 
 model BaseWallets {
@@ -50,20 +51,20 @@ model BaseWallets {
 }
 
 model Admins {
-  wallet_address String @id
+  user_id         String   @id @default("")
 }
 
 model Interations {
-  id Int @id
-  user String 
-  page String
+  id              Int      @id @default(autoincrement())
+  user            String 
+  page            String
 }
 
 model WalletInteraction {
-  id Int @id 
-  user String
-  operation String
-  success Boolean @default(false)
+  id              Int      @id @default(autoincrement())
+  user            String
+  operation       String
+  success         Boolean @default(false)
 }
 
 model Chains {

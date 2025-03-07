@@ -7,7 +7,7 @@ Base = declarative_base()
 class RegisteredUser(Base):
     __tablename__ = 'RegisteredUsers'
     id = Column(Integer, primary_key=True, index=True)
-    user_wallet = Column(String, index=True)
+    user_id = Column(String, index=True)
 
 class SpecialUserCode(Base):
     __tablename__ = 'SpecialUserCodes'
@@ -16,25 +16,16 @@ class SpecialUserCode(Base):
     is_used = Column(Boolean, default=False)
     used_by = Column(String, index=True)
 
-class ArbitrumWallet(Base):
-    __tablename__ = 'ArbitrumWallets'
+class UserWallet(Base):
+    __tablename__ = 'UserWallet'
     id = Column(Integer, primary_key=True, index=True)
     wallet_address = Column(String, unique=True, index=True)
-    private_key = Column(String)
     is_verified = Column(Boolean, default=False)
-    mnemonic = Column(String, nullable=True)
-
-class BaseWallet(Base):
-    __tablename__ = 'BaseWallets'
-    id = Column(Integer, primary_key=True, index=True)
-    wallet_address = Column(String, unique=True, index=True)
-    private_key = Column(String)
-    is_verified = Column(Boolean, default=False)
-    mnemonic = Column(String, nullable=True)
+    user_id = Column(String, index=True)
 
 class Admin(Base):
     __tablename__ = 'Admins'
-    wallet_address = Column(String, primary_key=True, index=True)
+    user_id = Column(String, primary_key=True, index=True)
 
 class Interaction(Base):
     __tablename__ = 'Interations'  # Note: keeping the typo from Prisma schema

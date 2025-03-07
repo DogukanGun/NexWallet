@@ -4,7 +4,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #2d2d2d;
+  --foreground: #000000;
   --background-gradient: linear-gradient(to bottom right, #ffffff, #f5f7fa);
 }
 
@@ -25,4 +25,17 @@ body {
 /* Add this new utility class */
 .page-with-navbar {
   padding-top: 5rem; /* 80px */
+}
+
+/* Navbar button styles */
+.nav-button {
+  @apply px-4 py-2 text-white font-semibold rounded-full shadow-lg 
+         hover:shadow-[0_0_20px_rgba(251,146,60,0.3)] transition-all duration-300
+         text-sm whitespace-nowrap h-10 flex items-center justify-center;
+}
+
+.mobile-nav-button {
+  @apply px-4 py-3 text-white font-semibold rounded-xl shadow-lg 
+         hover:shadow-[0_0_20px_rgba(251,146,60,0.3)] transition-all duration-300
+         text-sm whitespace-nowrap text-center;
 }

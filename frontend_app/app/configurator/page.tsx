@@ -16,6 +16,7 @@ import RoadmapModal from '../components/RoadmapModal';
 import { AppChain, ChainId, KnowledgeBase } from "./data";
 import AuthProvider from '../providers/AuthProvider';
 import useAuthModal from '../hooks/useAuthModal';
+import useCurrentUserId from "../hooks/useCurrentUserId";
 
 interface UserData {
   id: string;
@@ -132,6 +133,7 @@ export default function Configurator() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { isAuthenticated, userData } = useConfigStore();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { userId } = useCurrentUserId();
   const { handleLogout } = useAuthModal();
 
   const handleChainSelection = (chainId: string) => {
@@ -188,10 +190,6 @@ export default function Configurator() {
     setSelectedAgentType((prev) => (prev === typeId ? "" : typeId));
   };
 
-  const handleConnectionSelection = (connectionType: string) => {
-    setSelectedConnectionType(connectionType);
-  };
-
   const handleStart = async () => {
     // Save selections into the store
     const config = {
@@ -210,7 +208,7 @@ export default function Configurator() {
       return;
     }
 
-    const res = await apiService.updateToken(hasUserWallet ? address! : "");
+    const res = await apiService.updateToken(userId!);
     updateLocalToken(res.token);
 
     if (selectedAgentType === "voice") {
