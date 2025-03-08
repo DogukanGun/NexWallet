@@ -126,32 +126,25 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     setMessages([...messages]);
   };
 
-  const handleSolAi = async (text: string) => {
-    const res = await apiService.postBotSolana(text, address!);
-    if (res.text) {
-      addMessage({ role: "assistant", content: res.text, id: chatId });
+  const handleSolAi = async (transaction: string) => {
+    const serializedTransaction = Buffer.from(transaction, "base64");
+    const tx = VersionedTransaction.deserialize(serializedTransaction);
+    try {
+      await walletProvider.signAndSendTransaction(tx);
+    } catch (e) {
+      console.log(e);
+      addMessage({
+        role: "assistant",
+        content: "Transaction failed, please try again",
+        id: chatId,
+      });
       setMessages([...messages]);
       setLoadingSubmit(false);
-    } else {
-      const serializedTransaction = Buffer.from(res.transaction!, "base64");
-      const tx = VersionedTransaction.deserialize(serializedTransaction);
-      try {
-        await walletProvider.signAndSendTransaction(tx);
-      } catch (e) {
-        console.log(e);
-        addMessage({
-          role: "assistant",
-          content: "Transaction failed, please try again",
-          id: chatId,
-        });
-        setMessages([...messages]);
-        setLoadingSubmit(false);
-      }
     }
   };
 
   const handleBaseAi = async (text: string) => {
-    const res = await apiService.postBotEvm(text, user?.id ?? "",stores.chains[0].id);
+    const res = await apiService.postBotEvm(text, user?.id ?? "", stores.chains[0].id);
     if (res.text) {
       addMessage({ role: "assistant", content: res.text, id: chatId });
       setMessages([...messages]);
@@ -169,9 +162,12 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     setInput("");
 
     try {
-      const { text, op } = await apiService.postChat(input, messages, stores.chains, stores.knowledgeBase);
-      if (op === ChainId.SOLANA) {
-        handleSolAi(text);
+      const { text, op, transaction } = await apiService.postChat(input, address ?? "", messages, stores.chains, stores.knowledgeBase);
+      console.log("text", text);
+      console.log("op", op);
+      console.log("transaction", transaction);
+      if (op === ChainId.SOLANA && transaction) {
+        handleSolAi(transaction);
       } else if (op === ChainId.BASE) {
         handleBaseAi(text);
       } else {
@@ -218,17 +214,17 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
                  opacity-80 blur-sm" />
               <div className="absolute -bottom-6 -left-6 w-12 h-12 rounded-full bg-gradient-to-r 
                  opacity-80 blur-sm" />
-                
+
               <div className="text-center space-y-3">
                 <div className="flex justify-center mb-4">
                   <div className={`w-16 h-16 rounded-full flex items-center justify-center 
                     bg-gradient-to-r ${securityColors[securityLevel].primary} p-1 
                     shadow-lg ${securityColors[securityLevel].glow}`}>
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                        d={securityLevel === 'advanced' 
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d={securityLevel === 'advanced'
                           ? "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                          : "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"} 
+                          : "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"}
                       />
                     </svg>
                   </div>
@@ -237,18 +233,18 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
                   {securityLevel === 'advanced' ? 'Enhanced Security Chat' : 'Secure Chat'}
                 </h2>
                 <p className={`${securityColors[securityLevel].text} text-sm`}>
-                  {securityLevel === 'advanced' 
+                  {securityLevel === 'advanced'
                     ? 'Connect your wallet for maximum security and transaction verification'
                     : 'Connect your wallet to access AI-powered crypto assistance'}
                 </p>
               </div>
-              
+
               <div className="flex flex-col gap-4">
-                <WalletButton 
+                <WalletButton
                   className={`w-full bg-gradient-to-r ${securityColors[securityLevel].primary} 
                     ${securityColors[securityLevel].hover} text-white rounded-lg py-3.5 font-medium 
                     transition-all duration-300 transform hover:scale-102 shadow-lg ${securityColors[securityLevel].glow}
-                    flex items-center justify-center gap-2`} 
+                    flex items-center justify-center gap-2`}
                 />
                 <button
                   onClick={() => router.push('/app')}
@@ -290,15 +286,15 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
             ${loadingSubmit ? 'animate-pulse' : ''}`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-              d={securityLevel === 'advanced' 
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d={securityLevel === 'advanced'
                 ? "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                : "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"} 
+                : "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"}
             />
           </svg>
           <span className="font-medium">
-            {loadingSubmit 
-              ? (securityLevel === 'advanced' ? 'Verifying Securely...' : 'Processing...') 
+            {loadingSubmit
+              ? (securityLevel === 'advanced' ? 'Verifying Securely...' : 'Processing...')
               : (securityLevel === 'advanced' ? 'Enhanced Security' : 'Standard Security')}
           </span>
         </motion.div>
@@ -308,40 +304,38 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
 
   // Enhanced security toggle with better visual differentiation
   const SecurityToggle = () => (
-    <motion.div 
+    <motion.div
       className="absolute top-4 right-4 z-10 flex items-center bg-gray-800/60 p-1 rounded-full backdrop-blur-sm 
         border border-gray-700 shadow-lg"
-      animate={{ 
-        boxShadow: securityTransition 
-          ? `0 0 20px 3px ${securityLevel === 'advanced' ? '#10b981' : '#6366f1'}` 
-          : 'none' 
+      animate={{
+        boxShadow: securityTransition
+          ? `0 0 20px 3px ${securityLevel === 'advanced' ? '#10b981' : '#6366f1'}`
+          : 'none'
       }}
       transition={{ duration: 0.5 }}
     >
       <button
         onClick={() => setSecurityLevel('basic')}
-        className={`px-4 py-1.5 rounded-full transition-all duration-300 flex items-center gap-2 ${
-          securityLevel === 'basic' 
-            ? `bg-gradient-to-r ${securityColors.basic.primary} text-white font-medium` 
+        className={`px-4 py-1.5 rounded-full transition-all duration-300 flex items-center gap-2 ${securityLevel === 'basic'
+            ? `bg-gradient-to-r ${securityColors.basic.primary} text-white font-medium`
             : 'text-gray-400 hover:text-gray-200'
-        }`}
+          }`}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
         <span>Basic</span>
       </button>
       <button
         onClick={() => setSecurityLevel('advanced')}
-        className={`px-4 py-1.5 rounded-full transition-all duration-300 flex items-center gap-2 ${
-          securityLevel === 'advanced' 
-            ? `bg-gradient-to-r ${securityColors.advanced.primary} text-white font-medium` 
+        className={`px-4 py-1.5 rounded-full transition-all duration-300 flex items-center gap-2 ${securityLevel === 'advanced'
+            ? `bg-gradient-to-r ${securityColors.advanced.primary} text-white font-medium`
             : 'text-gray-400 hover:text-gray-200'
-        }`}
+          }`}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
         <span>Advanced</span>
@@ -370,18 +364,18 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
               p-8 rounded-2xl ${securityLevel === 'advanced' ? 'bg-emerald-900/50' : 'bg-indigo-900/50'}`}
           >
             <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                d={securityLevel === 'advanced' 
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d={securityLevel === 'advanced'
                   ? "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  : "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"} 
+                  : "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"}
               />
             </svg>
             <span className="text-center">
               {securityLevel === 'advanced' ? 'Enhanced Security Activated' : 'Standard Security Mode'}
             </span>
             <span className="text-lg font-normal opacity-80">
-              {securityLevel === 'advanced' 
-                ? 'Maximum protection enabled for your transactions' 
+              {securityLevel === 'advanced'
+                ? 'Maximum protection enabled for your transactions'
                 : 'Basic security features activated'}
             </span>
           </motion.div>
@@ -398,13 +392,13 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       variants={pageVariants}
       className={`flex h-[calc(100vh-64px)] flex-col items-center relative 
         transition-all duration-500 bg-black
-        ${securityLevel === 'advanced' 
-          ? 'from-gray-900 to-emerald-950' 
+        ${securityLevel === 'advanced'
+          ? 'from-gray-900 to-emerald-950'
           : 'from-gray-900 to-indigo-950'}`}
     >
       <WalletModal />
       <SecurityTransition />
-      
+
       <RequireConfig>
         <SubscriptionWrapper>
           <div className="w-full h-full mt-5 bg-black relative">
@@ -429,7 +423,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
               securityLevel={securityLevel}
               sidebarClassName="bg-gray-800"
             />
-            
+
             <Tools
               onToolSelect={setSelectedTool}
               selectedTool={selectedTool}

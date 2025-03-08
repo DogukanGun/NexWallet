@@ -33,6 +33,7 @@ type AdminResponse = {
 
 type ChatResponse = {
   text: string;
+  transaction?: string;
   audio?: string;
   op?: string;
 };
@@ -169,6 +170,7 @@ class ApiService {
   // New methods
   async postChat(
     caption: string, 
+    wallet: string,
     messageHistory: ChatCompletionMessageParam[] | Message[],
     chains: AppChain[],
     knowledge: string[]
@@ -176,7 +178,7 @@ class ApiService {
     return this.fetchWithToken("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ caption, messageHistory, chains, knowledge }),
+      body: JSON.stringify({wallet, caption, messageHistory, chains: chains.map((chain)=>chain.name), knowledge }),
     });
   }
 

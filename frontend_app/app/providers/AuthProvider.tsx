@@ -4,6 +4,7 @@ import { useConfigStore } from '../store/configStore';
 import Auth from '../components/Auth';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { setIsAuthenticated } = useConfigStore();
@@ -103,7 +104,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <LoadingSpinner size="large" text="Authenticating..." />
+      </div>
+    );
   }
 
   return (

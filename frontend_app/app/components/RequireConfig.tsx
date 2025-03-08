@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useConfigStore } from '../store/configStore'
+import LoadingSpinner from './LoadingSpinner'
 
 export default function RequireConfig({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -15,7 +16,11 @@ export default function RequireConfig({ children }: { children: React.ReactNode 
   }, [isConfigured, router])
 
   if (!isConfigured) {
-    return null
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <LoadingSpinner size="large" text="Loading Configuration..." />
+      </div>
+    )
   }
 
   return <>{children}</>

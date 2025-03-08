@@ -10,11 +10,13 @@ import { AskCdpAgents } from './tools/cdp/askCdpAgents';
 
 export type agent = 'cookie';
 
-export function createKnowledgeReactAgent(
+export function createKnowledgeReactAgentV2(
     agentName: LLMConfig,
     messageModifier: string,
     agents: agent[],
-    isOnchain: boolean
+    isOnchain: boolean,
+    supportedChains: string[] = ["arbitrum", "optimism", "base", "ethereum"],
+    wallet: string
 ) {
     let tools: StructuredToolInterface[] = [];
     if (agents.includes('cookie')) {
@@ -27,7 +29,7 @@ export function createKnowledgeReactAgent(
             tools.push(tool)
         })
     }
-    tools.push(new AskSolanaSdkAgent())
-    tools.push(new AskCdpAgents())
+    tools.push(new AskSolanaSdkAgent(wallet))
+    tools.push(new AskCdpAgents(supportedChains))
     return createAgent(agentName, tools, messageModifier, isOnchain);
 } 

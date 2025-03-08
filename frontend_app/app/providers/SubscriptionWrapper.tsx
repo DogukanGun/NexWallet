@@ -16,6 +16,7 @@ import { apiService } from "../services/ApiService";
 import PopupComponent from "../components/PopupComponent";
 import { useRouter } from "next/navigation";
 import useCurrentUserId from "../hooks/useCurrentUserId";
+import LoadingSpinner from '../components/LoadingSpinner';
 
 type SubscriptionWrapperProps = {
   children: ReactNode;
@@ -166,7 +167,11 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
 
   return (
     <>
-      {isLoading && <div className="loading-icon">Loading...</div>}
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-50/90 dark:bg-gray-900/90 flex items-center justify-center z-50">
+          <LoadingSpinner size="large" text="Checking subscription..." />
+        </div>
+      )}
       {isAllowed && children}
     </>
   );
