@@ -24,7 +24,7 @@ export const withAuth =
                 const walletAddress = verifyJWT(token) as AdminPayload;
                 console.log(walletAddress);
                 const user = await prisma.registeredUsers.findFirst({
-                    where: { user_wallet: walletAddress.walletAddress },
+                    where: { user_id: walletAddress.user_id },
                 });
                 console.log(user)
                 if (!user) return res.status(401).json({ error: 'Invalid or expired token' });

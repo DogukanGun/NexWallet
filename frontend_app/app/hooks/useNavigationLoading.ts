@@ -23,13 +23,12 @@ export function useNavigationLoading() {
     startLoading();
 
     // Stop loading after a short delay to allow for page content to be rendered
+    // eslint-disable-next-line prefer-const
     timeoutId = setTimeout(stopLoading, 100);
 
     // Clean up on unmount
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      clearTimeout(timeoutId);
     };
   }, [pathname, searchParams]);
 

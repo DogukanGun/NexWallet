@@ -112,6 +112,7 @@ export default function Home() {
               </h2>
               <p className="text-xl mb-8 font-light text-white drop-shadow-md text-center max-w-2xl mx-auto">
                 Interact with your crypto wallets through natural conversation. NexAI simplifies blockchain management with voice commands and AI intelligence.
+                Your AI-Powered Crypto Assistant&apos;s features are designed to enhance your experience.
               </p>
             </motion.div>
 
@@ -280,7 +281,7 @@ export default function Home() {
                   <div>
                     <h4 className="text-xl font-semibold text-white mb-2">Confirm and Execute</h4>
                     <p className="text-gray-300">
-                      Review the AI's actions and confirm transactions with your wallet's security
+                      Review the AI&apos;s actions and confirm transactions with your wallet&apos;s security
                     </p>
                   </div>
                 </div>

@@ -153,7 +153,7 @@ export default function Home() {
     {
       id: 'voice-mod',
       name: 'Voice Modification',
-      description: 'Customize your AI agent\'s voice with different accents and tones',
+      description: 'Customize your AI agent&apos;s voice with different accents and tones',
       icon: '🎙️',
       eta: 'Q2 2025'
     },
@@ -323,7 +323,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-400 mb-2">Voice Customization</h3>
-                <p className="text-gray-500 text-sm">Customize your AI agent's voice and speaking style</p>
+                <p className="text-gray-500 text-sm">Customize your AI agent&apos;s voice and speaking style</p>
               </div>
             </div>
           </section>

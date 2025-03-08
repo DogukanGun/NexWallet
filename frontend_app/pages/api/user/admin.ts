@@ -1,16 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export type AdminPayload = {
-    walletAddress: string;
+    user_id: string;
     iat: number;
     exp: number;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
-        const { walletAddress } = req.body;
+        const { user_id } = req.body;
 
-        if (!walletAddress) {
+        if (!user_id) {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ walletAddress }),
+                body: JSON.stringify({ user_id }),
             });
 
             const data = await response.json();

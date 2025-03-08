@@ -18,7 +18,7 @@ export const withAdmin =
             try {
                 const payload = verifyJWT(token) as AdminPayload;
                 const user = await prisma.admins.findFirst({
-                    where: { wallet_address: payload.walletAddress },
+                    where: { user_id: payload.user_id },
                 });
                 if (!user) return res.status(401).json({ error: 'Invalid or expired token' });
                 return handler(req, res);

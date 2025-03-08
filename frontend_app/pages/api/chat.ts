@@ -34,7 +34,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             try {
                 const agent = createKnowledgeReactAgentV2(
                     { modelName: "gpt-4o-mini", temperature: 0.5 },
-                    "You are a helpful agent that can answer questions about the blockchain.",
+                    `You are a helpful agent that can answer questions about the blockchain.
+                    If an user asks you a questions about outside of these chains ${chains.join(", ")},
+                    you must tell them in configuration the requested chain is not selected, so recommend 
+                    them to select the chain in the configuration.
+                    `,
                     ['cookie'],
                     false,
                     chains,

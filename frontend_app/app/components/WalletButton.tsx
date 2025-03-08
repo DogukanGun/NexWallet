@@ -27,7 +27,7 @@ const WalletButton = ({ className }: WalletButtonProps) => {
     const signature = await walletProvider.signMessage(encodedMessage);
 
     try {
-      const pRes = await apiService.postAdmin(address, Array.from(signature));
+      const pRes = await apiService.postAdmin(address);
       if (!pRes.token) {
         throw new Error("Failed to fetch token");
       }

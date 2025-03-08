@@ -94,11 +94,11 @@ class ApiService {
     return this.fetchWithToken("/api/user/codes", { method: "GET" });
   }
 
-  async postAdmin(address: string, signature: number[]): Promise<AdminResponse> {
+  async postAdmin(user_id: string): Promise<AdminResponse> {
     return this.fetchWithToken("/api/user/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ walletAddress: address, signature }),
+      body: JSON.stringify({ user_id }),
     });
   }
 

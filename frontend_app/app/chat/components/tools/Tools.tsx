@@ -1,6 +1,7 @@
 import React from 'react';
 import { tools, ToolConfig } from '../../config/tools';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ConfigurationComponent } from '../../config/tools';
 
 interface ToolsProps {
   onToolSelect: (tool: ToolConfig | null) => void;
@@ -67,7 +68,11 @@ export const Tools: React.FC<ToolsProps> = ({ onToolSelect, selectedTool, securi
               </button>
             </div>
             <div className="flex-1 relative">
-              <selectedTool.component />
+              {selectedTool.id === 'config' ? (
+                <ConfigurationComponent />
+              ) : (
+                <selectedTool.component />
+              )}
             </div>
           </div>
         )}

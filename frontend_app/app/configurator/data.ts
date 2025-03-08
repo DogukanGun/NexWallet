@@ -8,6 +8,8 @@ export enum ChainId {
     AVALANCHE = "avalanche",
     OPTIMISM = "optimism",
     STARKNET = "starknet",
+    BNB = "bnb",
+    SONIC_SVM = "sonic-svm",
 }
 
 export interface AppChain {

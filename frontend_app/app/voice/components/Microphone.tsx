@@ -87,7 +87,7 @@ export default function Microphone() {
 
   const generateAudio = async (caption: string) => {
     try {
-      const { text, audio, op } = await apiService.postChat(caption, messageHistory, stores.chains, stores.knowledgeBase);
+      const { text, audio, op } = await apiService.postChat(caption,address!, messageHistory, stores.chains, stores.knowledgeBase);
 
       if (op === "solana") {
         handleSolAi(text);

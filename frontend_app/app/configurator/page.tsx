@@ -18,12 +18,6 @@ import AuthProvider from '../providers/AuthProvider';
 import useAuthModal from '../hooks/useAuthModal';
 import useCurrentUserId from "../hooks/useCurrentUserId";
 
-interface UserData {
-  id: string;
-  username: string;
-  name: string;
-}
-
 const knowledgeBases: KnowledgeBase[] = [
   {
     id: "cookieDao",
@@ -69,6 +63,13 @@ const chains: AppChain[] = [
     icon: "/icons/optimism.svg",
   },
   {
+    id: ChainId.BNB,
+    name: "BNB",
+    disabled: true,
+    isEmbedded: false,
+    icon: "/icons/bnbchain.svg",
+  },
+  {
     id: ChainId.STARKNET,
     name: "StarkNet",
     disabled: true,
@@ -81,6 +82,13 @@ const chains: AppChain[] = [
     disabled: true,
     isEmbedded: false,
     icon: "/icons/polygon.svg",
+  },
+  {
+    id: ChainId.SONIC_SVM,
+    name: "Sonic SVM",
+    disabled: true,
+    isEmbedded: false,
+    icon: "/icons/sonic_svm.jpg",
   }
 ];
 
@@ -106,11 +114,6 @@ const agentTypes = [
   { id: "text", name: "Text Agent", disabled: false },
 ];
 
-const primaryButtonClass =
-  "px-4 py-2 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300";
-
-const totalSteps = 5; // Update total steps to include the new step
-
 export default function Configurator() {
   const router = useRouter();
   const [selectedChains, setSelectedChains] = useState<typeof chains[number][]>([]);
@@ -119,7 +122,7 @@ export default function Configurator() {
   const [selectedAgentType, setSelectedAgentType] = useState<string>("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState('');
-  const { address, isConnected } = useAppKitAccount();
+  const { allAccounts } = useAppKitAccount();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -135,6 +138,12 @@ export default function Configurator() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { userId } = useCurrentUserId();
   const { handleLogout } = useAuthModal();
+  const cardContainerClass = "grid grid-cols-2 gap-2 min-h-[160px]";
+  const cardClass = "h-[40px] flex items-center justify-center w-full relative";
+  const buttonContentClass =
+    "absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-[120px]";
+  const iconClass = "w-4 h-4 mr-2";
+  const buttonTextClass = "text-xs";
 
   const handleChainSelection = (chainId: string) => {
     const selectedChain = chains.find(chain => chain.id === chainId);
@@ -201,9 +210,24 @@ export default function Configurator() {
 
     useConfigStore.getState().setConfig(config);
 
-    const hasUserWallet = useConfigStore.getState().chains.some(chain => !chain.isEmbedded);
 
-    if (!isConnected && hasUserWallet) {
+    // Check if an EVM wallet is required
+    const requiresEvmWallet = selectedChains.some(chain => 
+      [ChainId.ARBITRUM, ChainId.BASE, ChainId.ETHEREUM].includes(chain.id)
+    );
+    const hasEvmWallet = allAccounts.filter(account => account.namespace === "eip155").length > 0;
+    const hasSolanaWallet = allAccounts.filter(account => account.namespace === "solana").length > 0;
+
+    const requireSolanaWallet = selectedChains.some(chain => 
+      [ChainId.SOLANA].includes(chain.id)
+    );
+
+    if (requiresEvmWallet && !hasEvmWallet) {
+      setShowWalletModal(true);
+      return;
+    }
+
+    if (requireSolanaWallet && !hasSolanaWallet) {
       setShowWalletModal(true);
       return;
     }
@@ -218,13 +242,6 @@ export default function Configurator() {
     }
   };
 
-  const cardContainerClass = "grid grid-cols-2 gap-2 min-h-[160px]";
-  const cardClass = "h-[40px] flex items-center justify-center w-full relative";
-  const buttonContentClass =
-    "absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-[120px]";
-  const iconClass = "w-4 h-4 mr-2";
-  const buttonTextClass = "text-xs";
-
   const isStepValid = (step: number) => {
     switch (step) {
       case 1:
@@ -238,14 +255,6 @@ export default function Configurator() {
       default:
         return false;
     }
-  };
-
-  const isConnectionStepValid = () => {
-    return selectedConnectionType !== "";
-  };
-
-  const getConnectionErrorMessage = () => {
-    return "Please select a connection type";
   };
 
   const WalletRequiredModal = ({ onClose }: { onClose: () => void }) => {
