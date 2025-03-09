@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --background-gradient: linear-gradient(to bottom right, #ffffff, #f5f7fa);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #e9ebf0;
+    --foreground: #ffffff;
+  }
+}
+
+body {
+  background: black;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Add this new utility class */
+.page-with-navbar {
+  padding-top: 5rem; /* 80px */
+}
+
+/* Navbar button styles */
+.nav-button {
+  @apply px-4 py-2 text-white font-semibold rounded-full shadow-lg 
+         hover:shadow-[0_0_20px_rgba(251,146,60,0.3)] transition-all duration-300
+         text-sm whitespace-nowrap h-10 flex items-center justify-center;
+}
+
+.mobile-nav-button {
+  @apply px-4 py-3 text-white font-semibold rounded-xl shadow-lg 
+         hover:shadow-[0_0_20px_rgba(251,146,60,0.3)] transition-all duration-300
+         text-sm whitespace-nowrap text-center;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background: linear-gradient(-45deg, #3b82f6, #2563eb, #1d4ed8, #1e40af);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

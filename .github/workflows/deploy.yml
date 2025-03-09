@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build Backend", "Build Frontend"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Add your SSH private key to GitHub secrets
+          SERVER_IP: ${{ secrets.SERVER_IP }}              # Add your server IP to GitHub secrets
+          USERNAME: ${{ secrets.USERNAME }}                # Add your server username to GitHub secrets
+          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}          # Add your backend .env content to GitHub secrets
+          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}        # Add your frontend .env content to GitHub secrets
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key
+          chmod 600 private_key
+          ssh -i private_key -o StrictHostKeyChecking=no $USERNAME@$SERVER_IP << 'EOF'
+            cd /path/to/your/project  # Change to your project directory
+            
+            # Create .env files
+            echo "$BACKEND_ENV" > backend/.env
+            echo "$FRONTEND_ENV" > frontend_app/.env
+            
+            # Run docker-compose
+            docker-compose up -d
+          EOF

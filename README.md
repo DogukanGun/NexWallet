@@ -1,115 +1,178 @@
-# NexWallet
+# NexWallet Deployment Guide
 
-## Overview
+This guide explains how to set up and deploy the NexWallet application using GitHub Actions and a self-hosted runner.
 
-NexWallet is a cutting-edge platform that combines blockchain technology with artificial intelligence to provide a seamless and intelligent wallet management experience. It supports multiple blockchain networks and offers unique features such as AI-driven transaction signing.
+## Project Structure
 
-## Key Features
+- `backend/`: Backend API service
+- `frontend_app/`: Frontend React application
+- `.github/workflows/`: GitHub Actions workflow definitions
 
-- **Multi-Chain Support**: Solana, Base, Ethereum, Arbitrum, and more.
-- **AI-Driven Interactions**: Text and voice command capabilities.
-- **Unique Transaction Signing**: First platform to offer AI agent transaction signing.
-- **Real-Time Data Integration**: Utilizes Cookie DataSwarm API for up-to-date blockchain data.
-- **Robust Security**: Advanced authentication and security measures.
+## Prerequisites
 
-## Technical Documentation
+- A server with Docker and Docker Compose installed
+- GitHub account with access to this repository
+- Docker Hub account
 
-### Architecture Overview
+## Server Setup
 
-- **Frontend and Backend**: Built using Next.js, providing both frontend and backend functionalities.
+### 1. Install Docker and Docker Compose
 
-### Agent Kits
+If not already installed:
 
-- **SolanaAgentKit**: Facilitates interactions with the Solana blockchain.
-- **CdpAgentkit**: Used for Base network interactions.
+```sh
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
 
-### AI Agent Configuration
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
 
-- **AI Models**: Powered by OpenAI's GPT-4o, configured using the `createAgent` function.
+### 2. Set Up GitHub Self-Hosted Runner
 
-### Database and API Integration
+1. On GitHub, go to your repository → Settings → Actions → Runners
+2. Click "New self-hosted runner"
+3. Choose your operating system and architecture
+4. Follow the instructions to download and configure the runner on your server
 
-- **Prisma ORM**: Used for database interactions.
-- **API Endpoints**: Detailed integration with external APIs for enhanced functionality.
+Example for Linux:
 
-## Codebase Insights
+```sh
+# Create a folder for the runner
+mkdir actions-runner && cd actions-runner
 
-- **Solana Onchain Bot**: The README.md file describes the Solana Onchain Bot, which provides chat and voice interfaces for interacting with the SEND AI framework. It highlights modifications for transaction signing.
-- **Base Network API**: The `pages/api/bot/base.ts` file configures the CDP AgentKit for the Base network, handling wallet data and initializing the agent for on-chain interactions.
-- **Solana Network API**: The `pages/api/bot/solana.ts` file sets up the SolanaAgentKit, enabling transaction signing and interaction with the Solana blockchain.
-- **Chat API**: The `pages/api/chat.ts` file handles chat interactions, determining if a message is about executing a blockchain transaction and processing it accordingly.
-- **Knowledge Agent**: The `knowledge/createReactAgent.ts` file creates a knowledge-based AI agent using tools from the Cookie and Eigenlayer APIs.
+# Download the runner package
+curl -o actions-runner-linux-x64-2.311.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.311.0/actions-runner-linux-x64-2.311.0.tar.gz
 
-# NexWallet Architecture Overview
+# Extract the installer
+tar xzf ./actions-runner-linux-x64-2.311.0.tar.gz
 
-## Current Architecture
+# Configure the runner
+./config.sh --url https://github.com/YOUR_USERNAME/NexWallet --token YOUR_TOKEN
 
-The current architecture of **NexWallet** is structured around a simple interaction model between the user, frontend, and backend services, organized within a cluster.
+# Install and start the runner as a service
+sudo ./svc.sh install
+sudo ./svc.sh start
+```
 
-- **Actor**: The user interacts directly with the **Frontend** through HTTP requests.
-- **Frontend**: Acts as a bridge, sending HTTP requests to various backend components.
-- **Cluster Components**:
-  - **Configurator**: Handles configuration settings and parameters for the application.
-  - **CDP Agent**: Manages the CDP (Collateralized Debt Position) functionalities.
-  - **Solana SENDAI Agent**: Responsible for interfacing with the **Solana** blockchain.
-  - **User Management**: Manages user-related functionalities and data.
+### 3. Prepare the Project Directory
 
-- **Connections**:
-  - **Database (DB)**: All agents and components interact with the database through database connections to store and retrieve data.
-  - **Blockchain Connections**: The **Solana SENDAI Agent** connects to the **Solana** blockchain, while other agents like **CDP Agent** connect to **Base**.
+```sh
+# Create the project directory
+mkdir -p /opt/nexwallet
+cd /opt/nexwallet
 
-![Current Architecture](./public/images/NexWalletArch.png)
+# Make sure the GitHub Actions runner has permissions to this directory
+sudo chown -R RUNNER_USER:RUNNER_USER /opt/nexwallet
+```
 
----
+## GitHub Secrets Setup
 
-## New Architecture
+Add the following secrets to your GitHub repository (Settings → Secrets and variables → Actions):
 
-The new architecture introduces a more modular and scalable system to handle growing demands and future blockchain integrations.
+### Docker Hub Credentials
+- `DOCKER_USERNAME`: Your Docker Hub username
+- `DOCKER_PASSWORD`: Your Docker Hub password
 
-- **Actor**: The interaction flow remains the same, with the user communicating through the **Frontend**.
-- **Frontend Enhancements**:
-  - **Load Balancer**: Introduced to manage incoming traffic, ensuring high availability and reliability.
-  - **Inner Gateway**: A new component to streamline internal communication within the cluster.
+### Common API and Service Keys
+- `OPEN_AI_KEY`: OpenAI API key
+- `OPENAI_API_KEY`: Alternative OpenAI API key
+- `REOWN_KEY`: Reown service key
+- `SECRET_KEY`: Secret key for JWT authentication
+- `GRAPH_API_KEY`: GraphQL API key
+- `COOKIE_API_KEY`: Cookie API key
 
-- **Cluster Components**:
-  - **User Management**: Continues to manage user data and functionalities.
-  - **Admin Console**: A new addition for administrative controls and monitoring.
-  - **Authentication Manager**: Introduced to handle user authentication and security protocols.
-  - **Database Manager**: Manages database interactions more efficiently.
-  - **Agent Manager**: Oversees the agents, ensuring smooth operations and coordination.
-  
-- **Inner Cluster**:
-  - **Agents**: Consolidated under an **Inner Cluster** to streamline interactions with multiple blockchains and the database.
+### Solana-related Variables
+- `RPC_URL`: Solana RPC URL
+- `SOLANA_PRIVATE_KEY`: Solana private key
+- `SOLANA_RPC_URL`: Solana RPC URL (same as RPC_URL)
+- `HELIUS_API_KEY`: Helius API key for Solana
+- `FLEXLEND_API_KEY`: FlexLend API key
+- `PARA_API_KEY`: Para API key
 
-- **Connections**:
-  - **Database (DB)**: All managers and agents interact with the database through structured database connections.
-  - **Blockchain Connections**: Expanded to support multiple chains (**Solana**, **Base**, and future integrations like **Chain A**).
+### Jupiter Protocol Variables
+- `JUPITER_REFERRAL_ACCOUNT`: Jupiter referral account
+- `JUPITER_FEE_BPS`: Jupiter fee basis points
 
-![New Architecture](./public/images/NewWalletNexWallet.png)
+### OpenAI Variables
+- `OPEN_AI_AGENT_KEY`: OpenAI Agent key
 
----
+### Privy Authentication Variables
+- `NEXT_PUBLIC_PRIVY_APP_ID`: Privy app ID
+- `PRIVY_CLIENT_ID`: Privy client ID
+- `PRIVY_CLIENT_SECRET`: Privy client secret
+- `PRIVY_API_URL`: Privy API URL
+- `PRIVY_VERIFICATION_KEY`: Privy verification key (multi-line)
 
-## Key Changes from Current to New Architecture
+### Database Variables
+- `CONNECTION_STRING`: Full database connection string
+- `DB_USER`: Database username
+- `DB_PASS`: Database password
+- `DB_HOST`: Database host
+- `DB_PORT`: Database port
+- `DB_NAME`: Database name
 
-1. **Load Balancer Introduction**: Ensures better traffic management and high availability of services.
-2. **Inner Gateway**: Simplifies and secures internal communication between frontend and backend services.
-3. **Modular Managers**:
-   - **Authentication Manager** enhances security.
-   - **Database Manager** improves data handling efficiency.
-   - **Agent Manager** provides better control and coordination of blockchain interactions.
-4. **Admin Console**: Provides a dedicated interface for system administrators to manage and monitor the platform.
-5. **Inner Cluster for Agents**: Groups agents together for more efficient blockchain interactions and scalability.
-6. **Multi-Chain Support**: Expanded capability to interact with additional blockchains beyond **Solana** and **Base**.
+### Twitter API Variables
+- `TWITTER_API_KEY`: Twitter API key
+- `TWITTER_API_SECRET`: Twitter API secret
+- `TWITTER_ACCESS_TOKEN`: Twitter access token
+- `TWITTER_ACCESS_TOKEN_SECRET`: Twitter access token secret
+- `TWITTER_CLIENT_ID`: Twitter client ID
+- `TWITTER_CLIENT_SECRET`: Twitter client secret
 
----
+### CDP API Variables
+- `CDP_API_KEY_NAME`: CDP API key name
+- `CDP_API_KEY_PRIVATE_KEY`: CDP API private key (multi-line)
+- `NETWORK_ID`: Network ID for CDP
 
-This architectural evolution aims to improve scalability, security, and maintainability while preparing **NexWallet** for future growth and blockchain integrations.
+### Gaianet Variables
+- `GAIANET_API_KEY`: Gaianet API key
 
+### Frontend-specific Variables
+- `BACKEND_API_URL`: URL for the frontend to access the backend API
 
-## Main changes done in SEND AI
+## How It Works
 
-- SolanaAgentKit now includes a callback mechanism.
-    <img width="629" alt="Screenshot 2025-01-23 at 15 21 08" src="https://github.com/user-attachments/assets/ed8d88d2-4525-4e8f-afe5-b8e5b30fd2b3" />
+1. When you push to the main branch, GitHub Actions will:
+   - Check out the code on your self-hosted runner
+   - Create .env files with secrets from GitHub
+   - Build and push Docker images to Docker Hub
+   - Deploy the application using docker-compose
 
-- Private keys are no longer mandatory; public keys can also be used. When using a public key, the UI mode variable must be set to true.
-    <img width="480" alt="Screenshot 2025-01-23 at 15 21 14" src="https://github.com/user-attachments/assets/dba0a627-f5dd-4da8-a161-929b26764a96" />
+2. The deployment uses environment variables loaded from .env files for each service.
+
+## Manual Deployment (if needed)
+
+If you need to manually deploy:
+
+```sh
+cd /opt/nexwallet
+
+# Create .env files (with all variables as shown in the GitHub Secrets section)
+# For brevity, this example shows just a few key variables
+cat > ./backend/.env << EOF
+OPEN_AI_KEY=your_openai_key_here
+SECRET_KEY=your_secret_key_here
+CONNECTION_STRING=your_db_connection_string_here
+# ... add all other variables
+EOF
+
+cat > ./frontend_app/.env << EOF
+OPEN_AI_KEY=your_openai_key_here
+BACKEND_API_URL=your_backend_url_here
+# ... add all other variables
+EOF
+
+# Deploy with docker-compose
+docker-compose pull
+docker-compose up -d
+```
+
+## Troubleshooting
+
+- Check GitHub Actions logs for errors
+- Verify the runner is online and working
+- Check Docker logs: `docker-compose logs`
+- Ensure all secrets are properly set in GitHub repository settings 

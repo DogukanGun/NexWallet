@@ -1,0 +1,40 @@
+name: Build Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Set environment variables
+        env:
+          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
+        run: |
+          echo "Frontend environment variables are set."
+
+      - name: Install dependencies
+        run: |
+          cd frontend_app
+          npm install --force
+
+      - name: Build application
+        run: |
+          cd frontend_app
+          npm run build
