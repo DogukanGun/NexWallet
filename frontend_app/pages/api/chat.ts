@@ -63,7 +63,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                             if (tempResponse.includes('transaction')) {
                                 // Try to extract JSON from the response content
                                 console.log("onchain transaction");
-                                const jsonMatches = tempResponse.match(/({[\s\S]*?})/);
+                                const jsonMatches = tempResponse.match(/({[^{}]*})/);
                                 if (jsonMatches && jsonMatches[1]) {
                                     const jsonStr = jsonMatches[1];
                                     const parsedResponse = JSON.parse(jsonStr);

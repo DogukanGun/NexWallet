@@ -15,13 +15,13 @@ ENV PATH="/root/.local/bin:$PATH"
 RUN poetry config virtualenvs.create false
 
 # Copy the necessary files for installing dependencies.
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml ./
+COPY poetry.lock ./
 
 # Install dependencies (excluding development dependencies)
 RUN poetry install
 
 # Copy the rest of the application code.
-COPY . .
 
 # Expose the port the app runs on.
 EXPOSE 8080
