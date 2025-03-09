@@ -16,7 +16,7 @@ class EnvironmentManager:
             for key in EnvironmentKeys:
                 self.environment_values[key.value] = os.getenv(key.value)
         else:
-            self.environment_values = dotenv_values("/Users/dogukangundogan/Desktop/Dev/NexWallet/backend/.env")
+            self.environment_values = dotenv_values(".env")
 
     def get_key(self, key) -> str:
         return self.environment_values[key]
