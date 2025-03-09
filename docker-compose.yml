@@ -16,7 +16,7 @@ services:
       context: ./frontend_app
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "9123:9123"
     env_file:
       - ./frontend_app/.env
     restart: always 
