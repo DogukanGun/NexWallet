@@ -23,9 +23,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Print environment variables
-        run: env
-
       - name: Set environment variables
         env:
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}

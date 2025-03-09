@@ -6,7 +6,6 @@ import ContextProvider from "./context";
 import "@reown/appkit-wallet-button/react";
 import { ModalProvider } from "./providers/ModalWrapper";
 import InnerLayout from "./components/InnerLayout";
-import PrivyProviders from "./components/PrivyProvider";
 import React from 'react';
 import { LoadingProvider } from './context/LoadingContext';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -41,13 +40,11 @@ export default function RootLayout({
         <ContextProvider>
           <WalletProvider>
             <ModalProvider>
-              <PrivyProviders>
                 <AuthProvider>
                 <LoadingProvider>
                   <InnerLayout>{children}</InnerLayout>
                 </LoadingProvider>
                 </AuthProvider>
-              </PrivyProviders>
             </ModalProvider>
           </WalletProvider>
         </ContextProvider>

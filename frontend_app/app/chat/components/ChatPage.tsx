@@ -15,7 +15,6 @@ import { apiService } from "@/app/services/ApiService";
 import WalletButton from "../../components/WalletButton";
 import { useRouter } from "next/navigation";
 import { useConfigStore } from "../../store/configStore";
-import { usePrivy } from "@privy-io/react-auth";
 import { ChainId } from "@/app/configurator/data";
 import { TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
 import { Tools } from './tools/Tools';
@@ -68,7 +67,6 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const [chatId, setChatId] = React.useState<string>("");
   const [loadingSubmit, setLoadingSubmit] = React.useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const { user } = usePrivy();
   const { address, isConnected } = useAppKitAccount();
   const { walletProvider } = useAppKitProvider<Provider>("solana");
   const router = useRouter();
@@ -144,19 +142,6 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     }
   };
 
-  const handleBaseAi = async (text: string) => {
-    const res = await apiService.postBotEvm(text, user?.id ?? "", stores.chains[0].id);
-    if (res.text) {
-      addMessage({ role: "assistant", content: res.text, id: chatId });
-      setMessages([...messages]);
-      setLoadingSubmit(false);
-    } else {
-      addMessage({ role: "assistant", content: "Transaction failed, please try again", id: chatId });
-      setMessages([...messages]);
-      setLoadingSubmit(false);
-    }
-  };
-
   const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     addMessage({ role: "user", content: input, id: chatId });
@@ -169,8 +154,6 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       console.log("transaction", transaction);
       if (op === ChainId.SOLANA && transaction) {
         handleSolAi(transaction);
-      } else if (op === ChainId.BASE) {
-        handleBaseAi(text);
       } else {
         addMessage({ role: "assistant", content: text, id: chatId });
         setMessages([...messages]);
