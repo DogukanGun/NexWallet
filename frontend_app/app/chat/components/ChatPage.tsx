@@ -111,10 +111,11 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       }
     };
 
-    if (messages.length < 1) {
+    // Ensure messages are loaded only if they are empty
+    if (messages.length === 0) {
       loadHistoricalMessages();
     }
-  }, [setMessages, initialChatId]);
+  }, [setMessages, initialChatId, messages.length]);
 
   const addMessage = (innerMessage: Message) => {
     const uiMessage: UIMessage = {

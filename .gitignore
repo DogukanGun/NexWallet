@@ -8,6 +8,7 @@
 */.yarn/*
 !*/.yarn/patches
 !*/.yarn/plugins
+.secrets
 !*/.yarn/releases
 !*/.yarn/versions
 __pycache__

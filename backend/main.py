@@ -24,7 +24,7 @@ for router in routers:  # routers_test
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to FastAPI!"}
+    return {"message": "App is running"}
 
 
 @app.get("/items/{item_id}")

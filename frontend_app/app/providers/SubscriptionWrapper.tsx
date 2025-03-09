@@ -28,7 +28,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const { openModal, closeModal } = useModal();
   const { address, isConnected } = useAppKitAccount();
   const { open } = useAppKit();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { walletProvider } = useAppKitProvider<Provider>("solana");
   const { connection } = useAppKitConnection();
   const { enqueueSnackbar } = useSnackbar();
@@ -121,8 +121,8 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
       try {
-        setIsLoading(true);
-        if(!userId){
+        if (!userId) {
+          setIsLoading(false);
           return;
         }
 
@@ -139,8 +139,9 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         setIsLoading(false);
       }
     };
+
     checkSubscriptionStatus();
-  }, [address]);
+  }, [userId]);
 
   useEffect(() => {
     if (showPopup) {
