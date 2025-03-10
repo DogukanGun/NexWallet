@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const AuthSuccess = () => {
   useEffect(() => {
-    window.opener.postMessage({ type: 'AUTH_SUCCESS' }, process.env.NEXT_PUBLIC_BACKEND_URL);
+    window.opener.postMessage({ type: 'AUTH_SUCCESS' }, "*");
 
     // Event listener for messages from the backend
     const handleMessage = (event: MessageEvent) => {

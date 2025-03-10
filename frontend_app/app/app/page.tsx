@@ -147,6 +147,7 @@ export default function Home() {
 
   const handleLogoutClick = () => {
     handleLogout();
+    router.refresh();
   };
 
   const upcomingFeatures: UpcomingFeature[] = [

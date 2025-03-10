@@ -17,7 +17,7 @@ routers = [
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
                    allow_credentials=True)
-app.add_middleware(SessionMiddleware, secret_key='your_secret_key')
+app.add_middleware(SessionMiddleware, secret_key='your_secret_key',session_cookie="session")
 
 for router in routers:  # routers_test
     app.include_router(router)

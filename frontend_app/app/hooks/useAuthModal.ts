@@ -12,6 +12,8 @@ const useAuthModal = () => {
       await fetch('http://localhost:8000/api/twitter/logout', { credentials: 'include' });
       setIsAuthenticated(false);
       setShowLogoutModal(false); // Close the logout modal after logout
+      sessionStorage.removeItem('isAuthenticated');
+      sessionStorage.removeItem('userData');
     } catch (error) {
       console.error('Error during logout:', error);
     }

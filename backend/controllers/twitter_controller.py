@@ -6,14 +6,21 @@ from utils.environment_manager import get_environment_manager, EnvironmentManage
 import secrets
 import urllib.parse
 import base64
-
+import hashlib
 
 router = APIRouter(prefix="/api/twitter", tags=["twitter"])
 
 # Matching exactly the X API documentation format
-REDIRECT_URI = "http://localhost:8000/api/twitter/callback"
 AUTHORIZATION_URL = 'https://x.com/i/oauth2/authorize'
 TOKEN_URL = 'https://api.x.com/2/oauth2/token'
+def generate_code_verifier():
+    return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("utf-8").rstrip("=")
+
+def generate_code_challenge(code_verifier):
+    digest = hashlib.sha256(code_verifier.encode()).digest()
+    return base64.urlsafe_b64encode(digest).decode("utf-8").rstrip("=")
+
+verifiers = {}
 
 # Using plain code challenge as shown in the documentation
 @router.get("/login")
@@ -21,20 +28,20 @@ async def login(
     request: Request,
     environment_manager: EnvironmentManager = Depends(get_environment_manager)
 ):
-    # Generate a random code verifier
-    code_verifier = secrets.token_urlsafe(32)
+    # Dynamically construct the REDIRECT_URI
+    REDIRECT_URI = f"{request.base_url}api/twitter/callback"
     
-    # Store the code verifier in session
-    request.session['code_verifier'] = code_verifier
-    
-    # For 'plain' method, code_challenge is the same as code_verifier
-    code_challenge = code_verifier
-    
+    code_verifier = generate_code_verifier()
+    code_challenge = generate_code_challenge(code_verifier)
+
+    request.session["code_verifier"] = code_verifier
+
     # Use the exact format from X documentation
     scope = "tweet.read users.read"
     state = secrets.token_urlsafe(16)
     encoded_scope = urllib.parse.quote(scope, safe='')
     redirect_uri = urllib.parse.quote(REDIRECT_URI, safe='')
+    verifiers[state] = code_verifier
 
     # Format the authorization URL exactly as shown in the documentation
     auth_url = (f"{AUTHORIZATION_URL}?"
@@ -43,21 +50,24 @@ async def login(
                 f"redirect_uri={redirect_uri}&"
                 f"scope={encoded_scope}&"
                 f"state={state}&"
-                f"code_challenge={code_challenge}&"
+                f"code_challenge={code_verifier}&"
                 f"code_challenge_method=plain")
-                
+
+    print(auth_url)
+
     return RedirectResponse(auth_url)
 
 @router.get("/callback")
 async def callback(
-    code: str,
     request: Request,
-    response: Response,
+    code: str,
     environment_manager: EnvironmentManager = Depends(get_environment_manager)
 ):
+    REDIRECT_URI = f"{request.base_url}api/twitter/callback"
     print(f"Received code: {code}")  # Log the received code
-    code_verifier = request.session.get('code_verifier')
-
+    code_verifier = request.session.get("code_verifier")
+    if code_verifier is None:
+        code_verifier = verifiers[request.query_params.get("state")]
     # Get client ID and client secret
     client_id = environment_manager.get_key(EnvironmentKeys.TWITTER_CLIENT_ID.name)
     client_secret = environment_manager.get_key(EnvironmentKeys.TWITTER_CLIENT_SECRET.name)
@@ -121,7 +131,7 @@ async def callback(
         pass
 
     # Redirect to frontend with a success message
-    frontend_redirect_url = "http://localhost:3000/auth-success"  # Adjust this URL to your frontend's success page
+    frontend_redirect_url = f"{environment_manager.get_key(EnvironmentKeys.FRONTEND_URL.name)}auth-success"
     return RedirectResponse(frontend_redirect_url)
 
 @router.get("/user")
