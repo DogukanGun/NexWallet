@@ -1,8 +1,14 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
+class TwitterUser(Base):
+    __tablename__ = 'TwitterUsers'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    username = Column(String)
+    name = Column(String)
 
 class RegisteredUser(Base):
     __tablename__ = 'RegisteredUsers'

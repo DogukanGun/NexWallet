@@ -15,7 +15,8 @@ routers = [
     twitter_controller.router
 ]
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000","https://ai.nexarb.com"]
+, allow_methods=["*"], allow_headers=["*"],
                    allow_credentials=True)
 app.add_middleware(SessionMiddleware, secret_key='your_secret_key',session_cookie="session")
 
