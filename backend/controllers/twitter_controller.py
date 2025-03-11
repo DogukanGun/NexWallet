@@ -7,6 +7,7 @@ import secrets
 import urllib.parse
 import base64
 import hashlib
+import json
 
 router = APIRouter(prefix="/api/twitter", tags=["twitter"])
 
@@ -115,23 +116,34 @@ async def callback(
         request.session['token_expiry'] = time.time() + token_data.get('expires_in')
 
     # Step 5: Get user profile information
+    user_data = None
     try:
         user_response = requests.get('https://api.x.com/2/users/me', headers={
             'Authorization': f'Bearer {token_data.get("access_token")}'
         })
         user_response.raise_for_status()
         user_data = user_response.json()
-        request.session['user'] = {
+        user = {
             'id': user_data.get('data', {}).get('id'),
             'username': user_data.get('data', {}).get('username'),
             'name': user_data.get('data', {}).get('name')
         }
-    except:
-        # Continue even if we can't get the user profile
-        pass
-
-    # Redirect to frontend with a success message
-    frontend_redirect_url = f"{environment_manager.get_key(EnvironmentKeys.FRONTEND_URL.name)}auth-success"
+        request.session['user'] = user
+        print(f"User data: {user_data}")
+    except Exception as e: 
+        print(e)
+        user = None
+    
+    # Create redirect URL with user data as query parameters
+    frontend_base_url = f"{environment_manager.get_key(EnvironmentKeys.FRONTEND_URL.name)}auth-success"
+    
+    # Only add query parameters if we have user data
+    if user:
+        encoded_user = urllib.parse.quote(json.dumps(user))
+        frontend_redirect_url = f"{frontend_base_url}?user={encoded_user}"
+    else:
+        frontend_redirect_url = frontend_base_url
+        
     return RedirectResponse(frontend_redirect_url)
 
 @router.get("/user")

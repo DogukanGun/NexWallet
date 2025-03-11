@@ -8,26 +8,17 @@ const useCurrentUserId = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/twitter/user', { credentials: 'include' });
-        const data = await response.json();
-        
-        if (data.authenticated && data.user) {
-          setUserId(data.user.id); // Assuming the user object has an 'id' property
-          setIsAuthenticated(true, data.user);
-        } else {
-          setUserId(null);
-        }
-      } catch (error) {
-        console.error('Error fetching user ID:', error);
-        setUserId(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const storedUserData = sessionStorage.getItem('userData');
 
-    fetchUserId();
+    if (storedUserData && storedUserData !== "undefined") {
+      const userData = JSON.parse(storedUserData);
+      setUserId(userData.id); // Assuming the user object has an 'id' property
+      setIsAuthenticated(true, userData);
+    } else {
+      setUserId(null);
+    }
+
+    setLoading(false);
   }, [setIsAuthenticated]);
 
   return { userId, loading };

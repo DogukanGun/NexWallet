@@ -26,81 +26,106 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       return;
     }
 
-    // Retrieve authentication state from session storage
-    const storedAuth = sessionStorage.getItem('isAuthenticated');
-    const storedUserData = sessionStorage.getItem('userData');
-
-    if (storedAuth) {
-      const isAuthenticated = JSON.parse(storedAuth);
-      if (!storedUserData || storedUserData == "undefined"){
-        setShowAuthModal(true);
-        sessionStorage.removeItem('isAuthenticated');
-        sessionStorage.removeItem('userData');
-        setLoading(false);
-        return;
-      }
-      const userData = storedUserData ? JSON.parse(storedUserData) : null;
-      setIsAuthenticated(isAuthenticated, userData);
-      
-      // If authenticated, no need to check the API
-      if (isAuthenticated) {
-        setLoading(false);
-        return;
-      }
-    }
+    let authCheckInterval: NodeJS.Timeout;
 
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/twitter/user', {
-          credentials: 'include',
-        });
-        const data = await response.json();
-        console.log('Auth Status:', data);
+        // First check localStorage for fresh auth data
+        const authDataString = localStorage.getItem('authData');
+        if (authDataString) {
+          try {
+            const authData = JSON.parse(authDataString);
+            const timestamp = authData.timestamp;
+            const now = new Date().getTime();
+            
+            // If auth data is fresh (less than 10 seconds old)
+            if (now - timestamp < 10000 && authData.authenticated && authData.user) {
+              console.log('Found fresh auth data in localStorage:', authData);
+              setIsAuthenticated(true, authData.user);
+              localStorage.removeItem('authData'); // Clear it after using
+              setLoading(false);
+              setShowAuthModal(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Error parsing auth data from localStorage:', e);
+          }
+        }
 
-        setIsAuthenticated(data.authenticated);
+        // Then check sessionStorage
+        const userDataString = sessionStorage.getItem('userData');
+        const isAuthenticatedString = sessionStorage.getItem('isAuthenticated');
         
-        if (!data.authenticated) {
+        if (userDataString && userDataString !== "undefined" && isAuthenticatedString === 'true') {
+          const userData = JSON.parse(userDataString);
+          console.log('User already authenticated from session storage:', userData);
+          setIsAuthenticated(true, userData);
+          setLoading(false);
+        } else {
+          setIsAuthenticated(false);
           setShowAuthModal(true);
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error checking auth status:', error);
+        setIsAuthenticated(false);
         setShowAuthModal(true);
-      } finally {
         setLoading(false);
       }
     };
 
     checkAuthStatus();
+    
+    // Set up polling to check for auth data every second
+    authCheckInterval = setInterval(() => {
+      const authDataString = localStorage.getItem('authData');
+      if (authDataString) {
+        try {
+          const authData = JSON.parse(authDataString);
+          const timestamp = authData.timestamp;
+          const now = new Date().getTime();
+          
+          // If auth data is fresh (less than 10 seconds old)
+          if (now - timestamp < 10000 && authData.authenticated && authData.user) {
+            console.log('Found fresh auth data in localStorage during polling:', authData);
+            setIsAuthenticated(true, authData.user);
+            localStorage.removeItem('authData'); // Clear it after using
+            setShowAuthModal(false);
+          }
+        } catch (e) {
+          console.error('Error parsing auth data from localStorage during polling:', e);
+        }
+      }
+    }, 1000);
 
+    // Also keep the message event listener as a backup
     const handleAuthSuccessMessage = (event: MessageEvent) => {
-      if (event.origin === "http://localhost:3000" && event.data.type === 'AUTH_SUCCESS') {
+      console.log('Received message:', event.data, 'from origin:', event.origin);
+      
+      if (event.data && event.data.type === 'AUTH_SUCCESS') {
+        const userData = event.data.user;
+        console.log('Auth success message received with user data:', userData);
+        
+        if (userData) {
+          setIsAuthenticated(true, userData);
+          console.log('Authentication successful, user data saved:', userData);
+        }
         handleAuthSuccess();
       }
     };
 
-    // Add event listener for authentication success messages
     window.addEventListener('message', handleAuthSuccessMessage);
 
     return () => {
-      // Clean up the event listener on unmount
+      clearInterval(authCheckInterval);
       window.removeEventListener('message', handleAuthSuccessMessage);
     };
-  }, [setIsAuthenticated, pathname]);
+  }, [setIsAuthenticated, pathname, setShowAuthModal]);
 
   const handleAuthSuccess = () => {
+    // Close the auth modal after successful authentication
     setShowAuthModal(false);
-    // Refresh user data
-    fetch('http://localhost:8000/api/twitter/user', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        console.log('User Data:', data);
-        if (data.user) {
-          setIsAuthenticated(true, data.user);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching user data:', error);
-      });
+    setLoading(false);
   };
 
   if (loading) {
