@@ -14,7 +14,7 @@ async def verify_admin(request: Request):
     token = auth_header.split(" ")[1]
     
     try:
-        payload = jwt.decode(token, env_manager.get_key(EnvironmentKeys.SECRET_KEY), algorithms=["HS256"])
+        payload = jwt.decode(token, env_manager.get_key(EnvironmentKeys.SECRET_KEY.name), algorithms=["HS256"])
         return payload
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token") 

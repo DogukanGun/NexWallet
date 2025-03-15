@@ -8,9 +8,9 @@ export type AdminPayload = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
-        const { user_id } = req.body;
+        const { wallet_address, signature } = req.body;
 
-        if (!user_id) {
+        if (!wallet_address || !signature) {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ user_id }),
+                body: JSON.stringify({ wallet_address, signature }),
             });
 
             const data = await response.json();

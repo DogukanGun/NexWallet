@@ -35,6 +35,21 @@ export default function TemporaryDrawer() {
             href: "/admin/user-codes",
             icon: <ListIcon />,
           },
+          {
+            name: "Manage Chains",
+            href: "/admin/chains",
+            icon: <ListIcon />,
+          },
+          {
+            name: "Manage Knowledge Bases",
+            href: "/admin/knowledge-bases",
+            icon: <ListIcon />,
+          },
+          {
+            name: "Manage LLM Providers",
+            href: "/admin/llm-providers",
+            icon: <ListIcon />,
+          },
         ].map((link) => (
           <ListItem key={link.name} disablePadding>
             <ListItemButton
