@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controllers import auth,agent_controller, twitter_controller
+from controllers import auth,agent_controller, twitter_controller, page_manager
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(
@@ -12,7 +12,8 @@ app = FastAPI(
 routers = [
     auth.router,
     agent_controller.router,
-    twitter_controller.router
+    twitter_controller.router,
+    page_manager.router
 ]
 
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000","https://ai.nexarb.com"]

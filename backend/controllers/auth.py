@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 import jwt
 import os
@@ -8,7 +8,8 @@ import string
 from controllers.request_models.auth_models import AdminRequest, RegisterUserRequest, GenerateTokenRequest, \
     CheckTokenRequest, CreateWalletRequest, CheckSpecialCodeRequest, \
     DeleteSpecialCodeByAdminRequest, UseSpecialCodeByAdminRequest, VerifySpecialCodeByAdminRequest
-from models.user import RegisteredUser, SpecialUserCode, Admin, UserWallet
+from models.auth import AuthPayload
+from models import RegisteredUser, SpecialUserCode, Admin, UserWallet
 from models.chain import Transaction
 from pydantic import BaseModel
 from utils.database import get_db
@@ -20,15 +21,29 @@ class UserIdRequest(BaseModel):
     user_id: str
 
 @router.post("/admin")
-async def admin_login(adminRequest: AdminRequest, db: Session = Depends(get_db)):
-    # Verify admin exists in database using user_id
-    admin = db.query(Admin).filter(Admin.user_id == adminRequest.user_id).first()
+async def admin_login(admin_request: AdminRequest, db: Session = Depends(get_db)):
+    try:
+        # Verify admin exists in database using user_id
+        admin = db.query(Admin).filter(Admin.user_id == admin_request.wallet_address).first()
+        if not admin:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+
+        # TODO: Implement signature verification here
+        # For now, we'll skip signature verification and just check if admin exists
+
+        # Generate JWT token
+        payload = AuthPayload(user_id=admin.user_id)
+        token = jwt.encode(payload.__dict__, os.getenv("SECRET_KEY"), algorithm="HS256")
+        return {"message": "Authorized", "token": token, "isAdmin": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/admin")
+async def admin_check(admin_payload: dict = Depends(verify_admin), db: Session = Depends(get_db)):
+    admin = db.query(Admin).filter(Admin.user_id == admin_payload["user_id"]).first()
     if not admin:
         raise HTTPException(status_code=403, detail="Unauthorized")
-
-    # Generate JWT token
-    token = jwt.encode({"user_id": admin.user_id}, os.getenv("SECRET_KEY"), algorithm="HS256")
-    return {"message": "Authorized", "token": token, "isAdmin": True}
+    return {"message": "Authorized", "isAdmin": True}
 
 @router.get("/codes")
 async def get_codes(db: Session = Depends(get_db), admin_payload: dict = Depends(verify_admin)):

@@ -6,8 +6,7 @@ from utils.logger import logger
 
 
 class Database:
-    def __init__(self):
-        ev_manager = EnvironmentManager()
+    def __init__(self,ev_manager = EnvironmentManager()):
         connection_string = ev_manager.get_key(EnvironmentKeys.CONNECTION_STRING.value)
 
         self.engine = create_engine(connection_string, pool_pre_ping=True)

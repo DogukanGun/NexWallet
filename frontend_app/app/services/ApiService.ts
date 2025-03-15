@@ -1,6 +1,7 @@
 import { Message } from "ai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { AppChain } from "../configurator/data";
+import { Chain } from "@prisma/client";
 
 type FetchOptions = RequestInit & {
   headers?: Record<string, string>;
@@ -94,11 +95,11 @@ class ApiService {
     return this.fetchWithToken("/api/user/codes", { method: "GET" });
   }
 
-  async postAdmin(user_id: string): Promise<AdminResponse> {
+  async postAdmin(wallet_address: string, signature: string): Promise<AdminResponse> {
     return this.fetchWithToken("/api/user/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id }),
+      body: JSON.stringify({ wallet_address, signature }),
     });
   }
 
@@ -263,6 +264,87 @@ class ApiService {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
+    });
+  }
+
+  async getChains(): Promise<Chain[]> {
+    return this.fetchWithToken("/api/admin/chain", {
+      method: "GET",
+    });
+  }
+
+  async createChain(name: string): Promise<Chain> {
+    return this.fetchWithToken("/api/admin/chain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+  }
+
+  async deleteChain(chainId: string): Promise<{ message: string }> {
+    return this.fetchWithToken(`/api/admin/chain?id=${chainId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async toggleChain(chainId: string, enable: boolean): Promise<{ message: string }> {
+    const action = enable ? 'enable' : 'disable';
+    return this.fetchWithToken(`/api/admin/chain?id=${chainId}&action=${action}`, {
+      method: "PUT",
+    });
+  }
+
+  async getKnowledgeBases(): Promise<any[]> {
+    return this.fetchWithToken("/api/admin/knowledge", {
+      method: "GET",
+    });
+  }
+
+  async createKnowledgeBase(name: string): Promise<any> {
+    return this.fetchWithToken("/api/admin/knowledge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+  }
+
+  async deleteKnowledgeBase(kbId: string): Promise<{ message: string }> {
+    return this.fetchWithToken(`/api/admin/knowledge?id=${kbId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async toggleKnowledgeBase(kbId: string, enable: boolean): Promise<{ message: string }> {
+    const action = enable ? 'enable' : 'disable';
+    return this.fetchWithToken(`/api/admin/knowledge?id=${kbId}&action=${action}`, {
+      method: "PUT",
+    });
+  }
+
+  async getLLMProviders(): Promise<any[]> {
+    return this.fetchWithToken("/api/admin/llm", {
+      method: "GET",
+    });
+  }
+
+  async createLLMProvider(name: string): Promise<any> {
+    return this.fetchWithToken("/api/admin/llm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+  }
+
+  async deleteLLMProvider(providerId: string): Promise<{ message: string }> {
+    return this.fetchWithToken(`/api/admin/llm?id=${providerId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async toggleLLMProvider(providerId: string, enable: boolean): Promise<{ message: string }> {
+    const action = enable ? 'enable' : 'disable';
+    return this.fetchWithToken(`/api/admin/llm?id=${providerId}&action=${action}`, {
+      method: "PUT",
     });
   }
 }

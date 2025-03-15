@@ -11,54 +11,76 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_PROD")
 }
-
 
 model Transaction {
   id              Int      @id @default(autoincrement())
   transaction_hash String   @unique
   user_wallet      String
   createdAt       DateTime @default(now())
+
+  @@map("Transactions")
 }
 
-model RegisteredUsers { 
+model RegisteredUser { 
   id              Int      @id @default(autoincrement())
   user_id         String?   @unique
+
+  @@map("RegisteredUsers")
 }
 
-model SpecialUserCodes {
+model SpecialUserCode {
   id              Int      @id @default(autoincrement())
   code            String 
   is_used         Boolean @default(false)
   used_by         String
+
+  @@map("SpecialUserCodes")
 }
 
-model ArbitrumWallets {
+model ArbitrumWallet {
   id              Int      @id @default(autoincrement())
   wallet_address  String   @unique
   private_key     String
   is_verified     Boolean @default(false)
   mnemonic        String?
   user_id         String
+
+  @@map("ArbitrumWallets")
 }
 
-model BaseWallets {
+model BaseWallet {
   id              Int      @id @default(autoincrement())
   wallet_address  String   @unique
   private_key     String
   is_verified     Boolean @default(false)
   mnemonic        String?
+
+  @@map("BaseWallets")
 }
 
-model Admins {
+model UserWallet {
+  id              Int      @id @default(autoincrement())
+  wallet_address  String   @unique
+  is_verified     Boolean @default(false)
+  user_id         String
+
+  @@map("UserWallet")
+}
+
+model Admin {
   user_id         String   @id @default("")
+
+  @@map("Admins")
 }
 
-model Interations {
+model Interaction {
   id              Int      @id @default(autoincrement())
   user            String 
   page            String
+
+  @@map("Interations") // Note: keeping the typo as it exists in both files
 }
 
 model WalletInteraction {
@@ -66,44 +88,83 @@ model WalletInteraction {
   user            String
   operation       String
   success         Boolean @default(false)
+
+  @@map("WalletInteraction")
 }
 
-model Chains {
+model Chain {
   id          String   @id
   name        String
   isEmbedded  Boolean  @default(false)
   disabled    Boolean  @default(false)
   icon        String
-  Agents      Agents[]
+  agents      Agent[]  @relation("ChainAgents")
+  agentChains AgentChain[] @relation("ChainAgents")
+
+  @@map("Chains")
 }
 
-model LlmProviders {
+model LlmProvider {
   id          String   @id
   name        String
   disabled    Boolean  @default(false)
-  Agents      Agents[]
+  agents      Agent[]  @relation("AgentLlmProviders")
+
+  @@map("LlmProviders")
 }
 
-model KnowledgeBases {
+model KnowledgeBase {
   id          String   @id
   name        String
   disabled    Boolean  @default(false)
-  Agents      Agents[]
+  agents      Agent[]  @relation("KnowledgeBaseAgents")
+
+  @@map("KnowledgeBases")
 }
 
-model Agents {
+model Agent {
   id              String           @id
   name            String
-  chains          Chains[]
-  llmProviders    LlmProviders[]
-  knowledgeBases  KnowledgeBases[]
+  description     String
   isOnPointSystem Boolean          @default(false)
-  points          AgentPoints[]
+  chains          Chain[]          @relation("ChainAgents")
+  llmProviders    LlmProvider[]    @relation("AgentLlmProviders")
+  knowledgeBases  KnowledgeBase[]  @relation("KnowledgeBaseAgents")
+  user_id         Int
+  user            TwitterUser      @relation(fields: [user_id], references: [id])
+  points          AgentPoint[]     
+  agentChains     AgentChain[]     @relation("AgentChains")
+
+  @@map("Agents")
 }
 
-model AgentPoints {
+model AgentPoint {
   id        String  @id
   agentId   String
   points    Int
-  agent     Agents  @relation(fields: [agentId], references: [id])
+  agent     Agent   @relation(fields: [agentId], references: [id])
+
+  @@map("AgentPoints")
+}
+
+model TwitterUser {
+  id        Int      @id @default(autoincrement())
+  user_id   String   @unique
+  username  String
+  name      String
+  agents    Agent[]
+
+  @@map("TwitterUsers")
+}
+
+// Add this new model for the join table
+model AgentChain {
+  agentId String @map("agent_id")
+  chainId String @map("chain_id")
+
+  agent Agent @relation(fields: [agentId], references: [id], name: "AgentChains")
+  chain Chain @relation(fields: [chainId], references: [id], name: "ChainAgents")
+
+  @@id([agentId, chainId]) // Composite primary key
+  @@map("agent_chain")
 }
