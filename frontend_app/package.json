@@ -86,6 +86,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@uniswap/widgets": "^2.59.0",
     "@voltr/vault-sdk": "^0.1.1",
+    "agent-twitter-client": "^0.0.18",
     "ai": "^4.0.22",
     "axios": "^1.7.9",
     "bs58": "^6.0.0",
