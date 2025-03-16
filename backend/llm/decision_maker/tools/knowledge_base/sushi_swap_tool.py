@@ -5,7 +5,6 @@ from pydantic import BaseModel
 import requests
 
 from llm.decision_maker.tools.model import SwapToolParams
-from llm.decision_maker.tools.utils import process_agent_stream
 
 
 class CdpSushiSwapTool(BaseTool):
