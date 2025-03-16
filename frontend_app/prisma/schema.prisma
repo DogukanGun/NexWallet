@@ -109,6 +109,7 @@ model LlmProvider {
   name        String
   disabled    Boolean  @default(false)
   agents      Agent[]  @relation("AgentLlmProviders")
+  agentLlmProviders AgentLlmProvider[] @relation("AgentLlmProviders")
 
   @@map("LlmProviders")
 }
@@ -118,6 +119,7 @@ model KnowledgeBase {
   name        String
   disabled    Boolean  @default(false)
   agents      Agent[]  @relation("KnowledgeBaseAgents")
+  agentKnowledgeBases AgentKnowledgeBase[] @relation("KnowledgeBaseAgents")
 
   @@map("KnowledgeBases")
 }
@@ -129,7 +131,9 @@ model Agent {
   isOnPointSystem Boolean          @default(false)
   chains          Chain[]          @relation("ChainAgents")
   llmProviders    LlmProvider[]    @relation("AgentLlmProviders")
+  agentLlmProviders AgentLlmProvider[] @relation("AgentLlmProviders")
   knowledgeBases  KnowledgeBase[]  @relation("KnowledgeBaseAgents")
+  agentKnowledgeBases AgentKnowledgeBase[] @relation("AgentKnowledgeBases")
   user_id         Int
   user            TwitterUser      @relation(fields: [user_id], references: [id])
   points          AgentPoint[]     
@@ -167,4 +171,28 @@ model AgentChain {
 
   @@id([agentId, chainId]) // Composite primary key
   @@map("agent_chain")
+}
+
+// Add this new model for the LlmProvider join table
+model AgentLlmProvider {
+  agentId String @map("agent_id")
+  llmProviderId String @map("llm_provider_id")
+
+  agent LlmProvider @relation(fields: [llmProviderId], references: [id], name: "AgentLlmProviders")
+  provider Agent @relation(fields: [agentId], references: [id], name: "AgentLlmProviders")
+
+  @@id([agentId, llmProviderId]) // Composite primary key
+  @@map("agent_llm_provider")
+}
+
+// Add this new model for the Agent-KnowledgeBase join table
+model AgentKnowledgeBase {
+  agentId String @map("agent_id")
+  knowledgeBaseId String @map("knowledge_base_id")
+
+  agent Agent @relation(fields: [agentId], references: [id], name: "AgentKnowledgeBases")
+  knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], name: "KnowledgeBaseAgents")
+
+  @@id([agentId, knowledgeBaseId]) // Composite primary key
+  @@map("agent_knowledge_base")
 }

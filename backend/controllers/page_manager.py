@@ -82,7 +82,7 @@ async def add_knowledge_base(
     request: CreateKnowledgeBaseRequest,
     db: Session = Depends(get_db)
 ):
-    kb = KnowledgeBase(name=request.name,disabled=request.disabled)
+    kb = KnowledgeBase(id=str(uuid.uuid4()),name=request.name,disabled=request.disabled)
     db.add(kb)
     db.commit()
     db.refresh(kb)

@@ -88,7 +88,10 @@ class LlmProvider(Base):
     id = Column(String, primary_key=True, index=True)
     name = Column(String)
     disabled = Column(Boolean, default=False)
-    agents = relationship('Agents', secondary=agent_llm_provider, back_populates='_llm_providers')
+    agents = relationship('Agents', 
+                         secondary=agent_llm_provider, 
+                         back_populates='llm_providers',
+                         cascade="all, delete")
 
 class KnowledgeBase(Base):
     __tablename__ = 'KnowledgeBases'
@@ -104,14 +107,13 @@ class Agents(Base):
     description = Column(String)
     is_on_point_system = Column(Boolean, default=False, name="isOnPointSystem")
     chains = relationship('Chain', secondary=agent_chain, back_populates='agents')
-    _llm_providers = relationship('LlmProvider', secondary=agent_llm_provider, back_populates='agents')
+    llm_providers = relationship('LlmProvider', 
+                                secondary=agent_llm_provider, 
+                                back_populates='agents',
+                                cascade="all, delete")
     _knowledge_bases = relationship('KnowledgeBase', secondary=agent_knowledge_base, back_populates='agents')
     user_id = Column(String, ForeignKey('TwitterUsers.id'))
     user = relationship('TwitterUsers', back_populates='agents')
-
-    @property
-    def llmProviders(self):
-        return self._llm_providers
 
     @property
     def knowledgeBases(self):
