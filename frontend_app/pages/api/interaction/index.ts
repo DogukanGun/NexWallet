@@ -7,7 +7,7 @@ const handler = async(req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         try {
             const {data} = req.body;
-            const savedData = await prisma.interations.create({
+            const savedData = await prisma.interaction.create({
                 data: data,
             });
             res.status(200).json(savedData);

@@ -30,16 +30,15 @@ async def save_agent(
         db: Session = Depends(get_db)
 ):
     # Fetch knowledge bases
-    knowledge_bases = [db.query(KnowledgeBase).filter(KnowledgeBase.id == knowledge_base).first() for knowledge_base in save_agent_request.knowledge_bases]
+    knowledge_bases = [db.query(KnowledgeBase).filter(KnowledgeBase.name == knowledge_base).first() for knowledge_base in save_agent_request.knowledge_bases]
     # Fetch LLM provider
-    llm_provider = db.query(LlmProvider).filter(LlmProvider.id == save_agent_request.llm_provider).first()
+    llm_provider = db.query(LlmProvider).filter(LlmProvider.name == save_agent_request.llm_provider).first()
     # Fetch chains
-    chains = [db.query(Chain).filter(Chain.id == chain).first() for chain in save_agent_request.chains]
+    chains = [db.query(Chain).filter(Chain.name == chain).first() for chain in save_agent_request.chains]
     # Fetch user
     payload = AuthPayload(**admin_payload)
-    user = db.query(TwitterUsers).filter(TwitterUsers.id == payload.user_id).first()
-
-    if any(kb is None for kb in knowledge_bases):
+    user = db.query(TwitterUsers).filter(TwitterUsers.user_id == payload.user_id).first()
+    if any(kb is None for kb in knowledge_bases) and len(save_agent_request.knowledge_bases) > 0:
         raise HTTPException(status_code=400, detail="Invalid knowledge base ID")
     if llm_provider is None:
         raise HTTPException(status_code=400, detail="Invalid LLM provider ID")

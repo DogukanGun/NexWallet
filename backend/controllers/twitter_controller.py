@@ -1,7 +1,11 @@
 import requests
 from fastapi import APIRouter, HTTPException, Depends, Request, Response
 from fastapi.responses import RedirectResponse
+from sqlalchemy.orm import Session
+
+from models import TwitterUsers
 from utils.constants.environment_keys import EnvironmentKeys
+from utils.database import get_db
 from utils.environment_manager import get_environment_manager, EnvironmentManager
 import secrets
 import urllib.parse
@@ -62,6 +66,7 @@ async def login(
 async def callback(
     request: Request,
     code: str,
+    db: Session = Depends(get_db),
     environment_manager: EnvironmentManager = Depends(get_environment_manager)
 ):
     REDIRECT_URI = f"{request.base_url}api/twitter/callback"
@@ -128,6 +133,12 @@ async def callback(
             'username': user_data.get('data', {}).get('username'),
             'name': user_data.get('data', {}).get('name')
         }
+        user_from_db = db.query(TwitterUsers).filter(TwitterUsers.user_id == user["id"]).first()
+        if user_from_db is None:
+            db_user = TwitterUsers(user_id=user["id"], username=user["username"], name=user["name"])
+            db.add(db_user)
+            db.commit()
+            db.refresh(db_user)
         request.session['user'] = user
         print(f"User data: {user_data}")
     except Exception as e: 

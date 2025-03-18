@@ -17,6 +17,7 @@ import { AppChain, ChainId, KnowledgeBase } from "./data";
 import AuthProvider from '../providers/AuthProvider';
 import useAuthModal from '../hooks/useAuthModal';
 import useCurrentUserId from "../hooks/useCurrentUserId";
+import { SaveAgentModal } from './components/SaveAgentModal';
 
 const knowledgeBases: KnowledgeBase[] = [
   {
@@ -114,6 +115,15 @@ const agentTypes = [
   { id: "text", name: "Text Agent", disabled: false },
 ];
 
+type SavedAgent = {
+  id: string;
+  name: string;
+  chains: AppChain[];
+  llmProvider: string;
+  agentType: string;
+  createdAt: string;
+};
+
 export default function Configurator() {
   const router = useRouter();
   const [selectedChains, setSelectedChains] = useState<typeof chains[number][]>([]);
@@ -144,6 +154,11 @@ export default function Configurator() {
     "absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-[120px]";
   const iconClass = "w-4 h-4 mr-2";
   const buttonTextClass = "text-xs";
+  const [agentName, setAgentName] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [savedAgents, setSavedAgents] = useState<SavedAgent[]>([]);
+  const [showSavedAgentsModal, setShowSavedAgentsModal] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChainSelection = (chainId: string) => {
     const selectedChain = chains.find(chain => chain.id === chainId);
@@ -346,6 +361,76 @@ export default function Configurator() {
     // Redirect to the login endpoint
     window.location.href = '/login';
   };
+
+  const SavedAgentsModal = ({ onClose }: { onClose: () => void }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="bg-gray-800 p-6 rounded-xl max-w-2xl w-full mx-4 border border-gray-700">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-white">Your Saved Agents</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          {savedAgents.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <p>You haven't saved any agents yet.</p>
+              <p className="text-sm mt-2">Save your first agent configuration to see it here!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {savedAgents.map((agent) => (
+                <div
+                  key={agent.id}
+                  className="bg-gray-700/50 p-4 rounded-lg hover:bg-gray-700 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-white">{agent.name}</h4>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Created {new Date(agent.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <button className="text-blue-400 hover:text-blue-300 text-sm">
+                      Load
+                    </button>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {agent.chains.map((chain) => (
+                      <span
+                        key={chain.id}
+                        className="text-xs px-2 py-1 bg-gray-600 rounded-full text-gray-300"
+                      >
+                        {chain.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    const loadSavedAgents = async () => {
+      try {
+        const agents = await apiService.getMyAgents();
+        setSavedAgents(agents);
+      } catch (error) {
+        console.error('Error loading saved agents:', error);
+      }
+    };
+
+    if (isAuthenticated) {
+      loadSavedAgents();
+    }
+  }, [isAuthenticated]);
 
   return (
     <AuthProvider>
@@ -705,20 +790,41 @@ export default function Configurator() {
 
         {/* Footer Action Button */}
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-md py-4 px-4 border-t border-gray-800">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto flex gap-4">
+            <div className="flex-1 flex gap-3">
+              <button
+                onClick={() => setShowSavedAgentsModal(true)}
+                className="px-6 py-3 bg-gray-700 text-white rounded-full font-medium hover:bg-gray-600 transition-all duration-300
+                  flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span>Saved Agents</span>
+              </button>
+              <button
+                onClick={() => setShowSaveModal(true)}
+                disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
+                className="px-6 py-3 bg-purple-600 text-white rounded-full font-medium hover:bg-purple-700 transition-all duration-300
+                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                <span>Save Agent</span>
+              </button>
+            </div>
             <button
               onClick={handleStart}
               disabled={!isStepValid(1) || !isStepValid(3) || !isStepValid(4)}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full py-3 font-medium
+              className="px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-medium
                 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-300
-                flex items-center justify-center gap-2"
+                flex items-center gap-2"
             >
-              <span>Create Your AI Assistant</span>
-              {isStepValid(1) && isStepValid(3) && isStepValid(4) && (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              )}
+              <span>Start Agent</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </button>
           </div>
         </div>
@@ -802,6 +908,19 @@ export default function Configurator() {
             </div>
           </div>
         )}
+
+        {showSaveModal && (
+          <SaveAgentModal 
+            onClose={() => setShowSaveModal(false)}
+            agentName={agentName}
+            setAgentName={setAgentName}
+            selectedChains={selectedChains}
+            selectedLLM={selectedLLM}
+            selectedAgentType={selectedAgentType}
+            setSavedAgents={setSavedAgents}
+          />
+        )}
+        {showSavedAgentsModal && <SavedAgentsModal onClose={() => setShowSavedAgentsModal(false)} />}
       </div>
     </AuthProvider>
   );

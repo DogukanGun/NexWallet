@@ -65,6 +65,34 @@ type ChatHistory = {
   updatedAt: string;
 };
 
+// Add these types at the top with other types
+type SaveAgentRequest = {
+  name: string;
+  chains: string[];
+  llmProvider: string;
+  agentType: string;
+  description?: string;
+};
+
+type SaveAgentResponse = {
+  id: string;
+  name: string;
+  chains: AppChain[];
+  llmProvider: string;
+  agentType: string;
+  createdAt: string;
+};
+
+// Add this with other types at the top
+type SavedAgent = {
+  id: string;
+  name: string;
+  chains: AppChain[];
+  llmProvider: string;
+  agentType: string;
+  createdAt: string;
+};
+
 class ApiService {
   private async fetchWithToken<T>(url: string, options: FetchOptions = {}): Promise<T> {
     const token = localStorage.getItem("token");
@@ -345,6 +373,30 @@ class ApiService {
     const action = enable ? 'enable' : 'disable';
     return this.fetchWithToken(`/api/admin/llm?id=${providerId}&action=${action}`, {
       method: "PUT",
+    });
+  }
+
+  async saveAgent(agentData: SaveAgentRequest): Promise<SaveAgentResponse> {
+    return this.fetchWithToken("/api/agent/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        llm_provider: agentData.llmProvider,
+        knowledge_bases: [],
+        ...agentData
+      }),
+    });
+  }
+
+  async getMyAgents(): Promise<SavedAgent[]> {
+    return this.fetchWithToken("/api/agent/my", {
+      method: "GET",
+    });
+  }
+
+  async loadAgent(agentId: string): Promise<SavedAgent> {
+    return this.fetchWithToken(`/api/agent/my/${agentId}`, {
+      method: "GET",
     });
   }
 }

@@ -5,11 +5,6 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 
-type SolOP = {
-    text: string,
-    op: string
-}
-
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { method } = req;
 
