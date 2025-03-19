@@ -1,5 +1,7 @@
+import uuid
+
 from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from controllers.request_models.agent_models import AgentRequest, AgentResponse, SaveAgentRequest
 from llm.decision_maker import LangChainAgent
@@ -49,6 +51,7 @@ async def save_agent(
 
     # Create the agent instance
     agent = Agents(
+        id=str(uuid.uuid4()),
         name=save_agent_request.name,
         description=save_agent_request.description,
         is_on_point_system=False,
@@ -71,12 +74,12 @@ async def get_my_agents(
         admin_payload: dict = Depends(verify_admin)
 ):
     payload = AuthPayload(**admin_payload)
-    users = db.query(Agents).filter(Agents.user_id == payload.user_id).all()
-    if len(users) == 0:
+    user = db.query(TwitterUsers).filter(TwitterUsers.user_id == str(payload.user_id)).first()
+    if user is None:
         raise HTTPException(status_code=404, detail="Users not found")
-    if len(users) > 1:
-        raise HTTPException(status_code=500, detail="More than 1 user found")
-    agents = db.query(Agents).filter(Agents.user_id == payload.user_id).all()
+    
+    # Update the query to include related llm_providers and chains
+    agents = db.query(Agents).options(joinedload(Agents.llm_providers), joinedload(Agents.chains)).filter(Agents.user_id == user.id).all()
     return agents
 
 @router.get("/my/{agent_id}")

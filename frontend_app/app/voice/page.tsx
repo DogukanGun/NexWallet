@@ -1,5 +1,5 @@
 "use client";
-import Microphone from "./components/Microphone";
+import VoiceUI from "./components/VoiceUI";
 import Starter from "./components/Starter";
 import { useAppKitAccount } from "../config";
 import RequireConfig from "../components/RequireConfig";
@@ -34,7 +34,7 @@ export default function Home() {
               Connect Your Wallet
             </h2>
             <p className="text-gray-600 mb-6 text-center">
-              Please connect your wallet to continue using the chat.
+              Please connect your wallet to continue using the voice chat.
             </p>
             <div className="flex flex-col gap-4">
               <div className="flex justify-center">
@@ -52,8 +52,8 @@ export default function Home() {
       )}
       <RequireConfig>
         <SubscriptionWrapper>
-          <div className="mb-32 flex justify-center items-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4">
-            {isConnected ? <Microphone /> : <Starter />}
+          <div className="w-full">
+            {isConnected ? <VoiceUI /> : <Starter />}
           </div>
         </SubscriptionWrapper>
       </RequireConfig>

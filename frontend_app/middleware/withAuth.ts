@@ -1,12 +1,11 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { verifyJWT } from '@/lib/jwt';
-import { RegisteredUsers } from '@prisma/client';
 import { prisma } from '@/app/helper/PrismaHelper';
 import { AdminPayload } from '@/pages/api/user/admin';
-
+import { RegisteredUser } from '@prisma/client';
 // Define a custom request type to include the authenticated user
 export interface AuthenticatedRequest extends NextApiRequest {
-    user?: RegisteredUsers;
+    user?: RegisteredUser;
 }
 
 export const withAuth =
@@ -23,7 +22,7 @@ export const withAuth =
             try {
                 const walletAddress = verifyJWT(token) as AdminPayload;
                 console.log(walletAddress);
-                const user = await prisma.registeredUsers.findFirst({
+                const user = await prisma.registeredUser.findFirst({
                     where: { user_id: walletAddress.user_id },
                 });
                 console.log(user)

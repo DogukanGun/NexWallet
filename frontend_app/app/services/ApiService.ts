@@ -74,17 +74,34 @@ type SaveAgentRequest = {
   description?: string;
 };
 
+type LLMProvider = {
+  id: string;
+  name: string;
+  disabled: boolean;
+};
+
 type SaveAgentResponse = {
   id: string;
   name: string;
   chains: AppChain[];
-  llmProvider: string;
+  llm_providers: LLMProvider[];
   agentType: string;
+  description: string;
+  createdAt: string;
+};
+
+export type SaveAgentApiServiceResponse = {
+  id: string;
+  name: string;
+  chains: AppChain[];
+  llmProvider: LLMProvider[];
+  agentType: string;
+  description: string;
   createdAt: string;
 };
 
 // Add this with other types at the top
-type SavedAgent = {
+export type SavedAgent = {
   id: string;
   name: string;
   chains: AppChain[];
@@ -388,10 +405,19 @@ class ApiService {
     });
   }
 
-  async getMyAgents(): Promise<SavedAgent[]> {
-    return this.fetchWithToken("/api/agent/my", {
+  async getMyAgents(): Promise<SaveAgentApiServiceResponse[]> {
+    const response = await this.fetchWithToken<SaveAgentResponse[]>("/api/agent/my", {
       method: "GET",
     });
+
+    return response.map(agent => ({
+      ...agent,
+      llmProvider: agent.llm_providers.map(provider => ({
+        id: provider.id,
+        name: provider.name,
+        disabled: provider.disabled,
+      })),
+    } as SaveAgentApiServiceResponse));
   }
 
   async loadAgent(agentId: string): Promise<SavedAgent> {
