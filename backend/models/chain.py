@@ -34,7 +34,7 @@ class TwitterUsers(Base):
 class RegisteredUser(Base):
     __tablename__ = 'RegisteredUsers'
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, index=True,name="userId")
+    user_id = Column(String, index=True)
 
 class SpecialUserCode(Base):
     __tablename__ = 'SpecialUserCodes'
@@ -112,7 +112,7 @@ class Agents(Base):
                                 back_populates='agents',
                                 cascade="all, delete")
     _knowledge_bases = relationship('KnowledgeBase', secondary=agent_knowledge_base, back_populates='agents')
-    user_id = Column(String, ForeignKey('TwitterUsers.id'))
+    user_id = Column(String, ForeignKey('TwitterUsers.user_id'))
     user = relationship('TwitterUsers', back_populates='agents')
 
     @property

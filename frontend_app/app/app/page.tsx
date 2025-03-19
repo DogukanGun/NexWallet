@@ -8,6 +8,7 @@ import { ChainId } from '../configurator/data'
 import AuthProvider from '../providers/AuthProvider'
 import useAuthModal from '../hooks/useAuthModal'
 import { AuthProvider as AuthContextProvider } from '../context/AuthContext'
+import { apiService, SaveAgentApiServiceResponse, SavedAgent } from '../services/ApiService'
 
 interface Agent {
   id: string
@@ -129,6 +130,20 @@ export default function Home() {
   const { setConfig, setIsAuthenticated, isAuthenticated, userData } = useConfigStore();
   const { handleLogout } = useAuthModal();
   
+  const [savedAgents, setSavedAgents] = useState<SaveAgentApiServiceResponse[]>([]);
+
+  useEffect(() => {
+    const fetchSavedAgents = async () => {
+      try {
+        const agents = await apiService.getMyAgents();
+        setSavedAgents(agents);
+      } catch (error) {
+        console.error('Error fetching saved agents:', error);
+      }
+    };
+
+    fetchSavedAgents();
+  }, []);
 
   const handleAgentSelect = (agent: Agent) => {
     const config = {
@@ -378,6 +393,42 @@ export default function Home() {
               </div>
             </section>
 
+            {/* Saved Agents Section */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6 text-white flex items-center">
+                <span className="mr-2">📁</span> Your Saved Agents
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {savedAgents.length > 0 ? (
+                  savedAgents.map(agent => (
+                    <div key={agent.id} className="relative overflow-hidden p-6 bg-gray-800 rounded-lg border border-gray-700 transition-all duration-300 
+                                        hover:shadow-lg hover:shadow-purple-500/30">
+                      <h3 className="text-xl font-semibold text-purple-300 mb-2">{agent.name}</h3>
+                      <p className="text-gray-400 text-sm mb-4">{agent.agentType || 'No description available.'}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-300 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                          </svg>
+                          Powered by: {agent.chains?.map(chain => chain.name).join(', ')}
+                        </span>
+                        {agent.llmProvider && (
+                          <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full flex items-center">
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            {agent.llmProvider[0].name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm text-center">No saved agents found.</p>
+                )}
+              </div>
+            </section>
+
             {/* Upcoming Features Section */}
             <section className="mb-12">
               <h2 className="text-2xl font-bold mb-6 text-white flex items-center">
@@ -403,20 +454,7 @@ export default function Home() {
               </div>
             </section>
 
-            {/* Saved Agents Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 text-white flex items-center">
-                <span className="mr-2">📁</span> Your Saved Agents
-              </h2>
-              <div className="h-[200px] p-6 bg-gradient-to-br from-gray-800/30 to-gray-700/30 backdrop-blur-sm rounded-lg border border-gray-700 flex flex-col items-center justify-center">
-                <svg className="w-12 h-12 text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
-                <p className="text-gray-400 text-sm text-center">
-                  Your custom and imported agents will appear here
-                </p>
-              </div>
-            </section>
+            
           </div>
         </main>
       </AuthProvider>
