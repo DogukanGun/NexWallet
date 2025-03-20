@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { apiService,SavedAgent } from '../../services/ApiService'; // Ensure the correct import path
+import { apiService,SaveAgentApiServiceResponse,SavedAgent } from '../../services/ApiService'; // Ensure the correct import path
 
 const SavedAgentsModal = ({ onClose }: { onClose: () => void }) => {
-  const [savedAgents, setSavedAgents] = useState<SavedAgent[]>([]);
+  const [savedAgents, setSavedAgents] = useState<SaveAgentApiServiceResponse[]>([]);
 
   useEffect(() => {
     const loadSavedAgents = async () => {

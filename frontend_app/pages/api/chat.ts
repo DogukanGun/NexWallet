@@ -1,3 +1,4 @@
+import { componentFactory, ComponentType } from "@/component_factory/factory";
 import { createKnowledgeReactAgentV2 } from "@/frontend_agent/agent";
 import { agent, createKnowledgeReactAgent } from "@/knowledge/createReactAgent";
 import { withAuth } from "@/middleware/withAuth";
@@ -75,6 +76,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                                         });
                                     }
                                 }
+                            } else if (tempResponse.includes("component")) {
+                                console.log("component", tempResponse);
+                                const component = tempResponse.split("component:")[1].trim();
+                                const params = JSON.parse(tempResponse.split("params:")[1].trim());
+                                return res.status(200).json({ component: component, params: params });
                             }
 
                         } catch (e) {
@@ -86,10 +92,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     console.log("-------------------");
                 }
                 console.log("response", response);
-
             } catch (e) {
                 console.log("Error: ", e)
                 console.log("Not a transaction")
+            }
+
+            if (response.includes("component")) {
+                console.log("response", response);
+                const component = response.split("component:")[1].trim();
+                const params = JSON.parse(response.split("params:")[1].trim());
+                return res.status(200).json({ component: component, params: params });
             }
 
             // Convert the message to speech

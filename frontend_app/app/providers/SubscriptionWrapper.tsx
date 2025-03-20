@@ -7,8 +7,8 @@ import {
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { useAppKit, useAppKitAccount } from "../config";
-import { useAppKitProvider } from "@reown/appkit/react";
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+import { useAppKit } from "./AppKitProvider";
 import type { Provider } from "@reown/appkit-adapter-solana";
 import { useAppKitConnection } from "@reown/appkit-adapter-solana/react";
 import { useSnackbar } from "notistack";

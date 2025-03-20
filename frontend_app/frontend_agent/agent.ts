@@ -7,6 +7,7 @@ import { SearchTweetsTool } from '../frontend_agent/tools/cookie/searchTweetsToo
 import { StructuredToolInterface } from '@langchain/core/tools';
 import { AskSolanaSdkAgent } from './tools/solona/askSolanaAgent';
 import { AskCdpAgents } from './tools/cdp/askCdpAgents';
+import { GetUniswapTool } from './tools/components/uniswapTool';
 
 export type agent = 'cookie';
 
@@ -30,6 +31,7 @@ export function createKnowledgeReactAgentV2(
         })
     }
     tools.push(new AskSolanaSdkAgent(wallet))
+    tools.push(new GetUniswapTool())
     tools.push(new AskCdpAgents(supportedChains))
     return createAgent(agentName, tools, messageModifier, isOnchain);
 } 

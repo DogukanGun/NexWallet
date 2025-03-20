@@ -5,6 +5,7 @@ import type { Provider } from "@reown/appkit-adapter-solana";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
 import { apiService } from "../services/ApiService";
+import { useEffect } from "react";
 
 interface WalletButtonProps {
   className?: string;
@@ -41,8 +42,36 @@ const WalletButton = ({ className }: WalletButtonProps) => {
     }
   };
 
+  const handleOpenWallet = () => {
+    console.log("Attempting to open wallet modal");
+    try {
+      open();
+      console.log("Wallet modal open function called successfully");
+    } catch (error) {
+      console.error("Error opening wallet modal:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Check if modal container exists
+    const modalContainer = document.getElementById('appkit-modal-container');
+    if (!modalContainer) {
+      console.log("Creating modal container");
+      const container = document.createElement('div');
+      container.id = 'appkit-modal-container';
+      container.style.position = 'fixed';
+      container.style.zIndex = '9999';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.pointerEvents = 'none';
+      document.body.appendChild(container);
+    }
+  }, []);
+
   return !isConnected ? (
-    <button className={`${buttonClass} flex items-center gap-2 ${className}`} onClick={() => open()}>
+    <button className={`${buttonClass} flex items-center gap-2 ${className}`} onClick={handleOpenWallet}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import type { Provider } from "@reown/appkit-adapter-solana";
 import { ChatLayout } from "./chat/chat-layout";
-import { useAppKitAccount } from "../../config";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { VersionedTransaction } from "@solana/web3.js";
 import { useAppKitProvider } from "@reown/appkit/react";
 import SubscriptionWrapper from "../../providers/SubscriptionWrapper";
