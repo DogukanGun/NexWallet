@@ -7,7 +7,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.12"
 python-dotenv = "^1.0.1"
 langchain-openai = "^0.2.14"
 langgraph = "^0.2.76"
@@ -22,6 +22,11 @@ pydantic = "^2.0"
 web3 = "^7.6.0"
 requests = "^2.31.0"
 itsdangerous = "^2.2.0"
+tts = "^0.22.0"
+torch = "^2.6.0"
+notebook = "^7.3.3"
+jupyter = "^1.1.1"
+ipywidgets = "^8.1.5"
 
 
 [tool.poetry.group.dev.dependencies]

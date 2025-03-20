@@ -10,6 +10,7 @@ import React from 'react';
 import { LoadingProvider } from './context/LoadingContext';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import AuthProvider from "./providers/AuthProvider";
+import AppKitProvider from "./providers/AppKitProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,17 +38,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ContextProvider>
-          <WalletProvider>
-            <ModalProvider>
+        <AppKitProvider>
+          <ContextProvider>
+            <WalletProvider>
+              <ModalProvider>
                 <AuthProvider>
-                <LoadingProvider>
-                  <InnerLayout>{children}</InnerLayout>
-                </LoadingProvider>
+                  <LoadingProvider>
+                    <InnerLayout>{children}</InnerLayout>
+                  </LoadingProvider>
                 </AuthProvider>
-            </ModalProvider>
-          </WalletProvider>
-        </ContextProvider>
+              </ModalProvider>
+            </WalletProvider>
+          </ContextProvider>
+        </AppKitProvider>
       </body>
     </html>
   );

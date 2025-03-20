@@ -26,7 +26,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       return;
     }
 
-    let authCheckInterval: NodeJS.Timeout;
 
     const checkAuthStatus = async () => {
       try {
@@ -77,7 +76,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     checkAuthStatus();
     
     // Set up polling to check for auth data every second
-    authCheckInterval = setInterval(() => {
+    const authCheckInterval = setInterval(() => {
       const authDataString = localStorage.getItem('authData');
       if (authDataString) {
         try {
@@ -100,7 +99,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
     // Also keep the message event listener as a backup
     const handleAuthSuccessMessage = (event: MessageEvent) => {
-      console.log('Received message:', event.data, 'from origin:', event.origin);
       
       if (event.data && event.data.type === 'AUTH_SUCCESS') {
         const userData = event.data.user;

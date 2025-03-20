@@ -1,52 +1,40 @@
-import {
-  createAppKit,
-  useAppKit,
-  useAppKitState,
-  useAppKitAccount,
-  useAppKitTheme,
-  useAppKitEvents,
-  useWalletInfo,
-  useAppKitNetwork,
-  useDisconnect,
-} from "@reown/appkit/react";
-import { SolanaAdapter } from "@reown/appkit-adapter-solana";
-import { solana, solanaDevnet, solanaTestnet, type AppKitNetwork } from "@reown/appkit/networks";
+import { createAppKit } from "@reown/appkit/react";
+import { SolanaAdapter } from '@reown/appkit-adapter-solana/react'
+import { AppKitNetwork, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks'
+import { PhantomWalletAdapter, SolflareWalletAdapter, TrustWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { HuobiWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 export const projectId = process.env.REOWN_KEY || "b56e18d47c72ab683b10814fe9495694"; // this is a public projectId only to use on localhost
 
-export const networks = [solana, solanaDevnet, solanaTestnet] as [
-  AppKitNetwork,
-  ...AppKitNetwork[],
-];
+export const networks = [solana, solanaTestnet, solanaDevnet]
 
-// Setup wagmi adapter
-export const solanaAdapter = new SolanaAdapter({});
+// Setup solana adapter
+const solanaAdapter = new SolanaAdapter({
+  wallets: [
+    new HuobiWalletAdapter(),
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter(),
+    new TrustWalletAdapter()
+  ] as any // Type assertion to bypass type checking
+})
+
 
 // Create modal
 const modal = createAppKit({
   adapters: [solanaAdapter],
-  networks,
+  networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
   metadata: {
-    name: "AppKit Next.js Example",
-    description: "AppKit Next.js App Router Example",
-    url: "https://reown.com/appkit",
-    icons: ["https://avatars.githubusercontent.com/u/179229932?s=200&v=4"],
+    name: 'Nexarb App',
+    description: 'NexAI Agents Wallet Connection',
+    url: "https://ai.nexarb.com",
+    icons: ['https://avatars.githubusercontent.com/u/179229932?s=200&v=4']
   },
   projectId,
-  themeMode: "light",
+  themeMode: 'light',
   features: {
-    analytics: true,
-  },
+    analytics: true
+  }
 });
 
-export {
-  modal,
-  useAppKit,
-  useAppKitState,
-  useAppKitTheme,
-  useAppKitEvents,
-  useAppKitAccount,
-  useWalletInfo,
-  useAppKitNetwork,
-  useDisconnect,
-};
+// Export the modal instance
+export { modal };

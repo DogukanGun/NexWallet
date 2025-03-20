@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useConfigStore } from '../store/configStore';
 import PaymentRequiredModal from "../components/PaymentRequiredModal";
-import { apiService } from "../services/ApiService";
-import { useAppKitAccount } from "@reown/appkit/react";
+import { apiService, SaveAgentApiServiceResponse } from "../services/ApiService";
+import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { updateLocalToken } from "@/lib/jwt";
 import Accordion from "../components/Accordion";
 import { WarningModal } from "./components/WarningMode";
@@ -141,6 +141,7 @@ export default function Configurator() {
   const [openSection, setOpenSection] = useState<number | null>(1);
   const [selectedConnectionType, setSelectedConnectionType] = useState<string>("apiKeys");
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const { open } = useAppKit();
   const [showTelegramNotice, setShowTelegramNotice] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -157,7 +158,7 @@ export default function Configurator() {
   const buttonTextClass = "text-xs";
   const [agentName, setAgentName] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [savedAgents, setSavedAgents] = useState<SavedAgent[]>([]);
+  const [savedAgents, setSavedAgents] = useState<SaveAgentApiServiceResponse[]>([]);
   const [showSavedAgentsModal, setShowSavedAgentsModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -225,7 +226,6 @@ export default function Configurator() {
     };
 
     useConfigStore.getState().setConfig(config);
-
 
     // Check if an EVM wallet is required
     const requiresEvmWallet = selectedChains.some(chain => 
@@ -807,7 +807,10 @@ export default function Configurator() {
         )}
         {showWalletModal && (
           <WalletRequiredModal
-            onClose={() => setShowWalletModal(false)}
+            onClose={() => {
+              setShowWalletModal(false)
+              open()
+            }}
           />
         )}
         {showWarningModal && (

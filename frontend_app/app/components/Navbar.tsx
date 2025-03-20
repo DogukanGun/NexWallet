@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { buttonClass } from "./ButtonClass";
-import { useAppKitAccount } from "../config";
+import { useAppKitAccount } from "@reown/appkit/react";
 import WalletButton from "./WalletButton";
 import TelegramNoticeModal from './TelegramNoticeModal';
 import RoadmapModal from './RoadmapModal';

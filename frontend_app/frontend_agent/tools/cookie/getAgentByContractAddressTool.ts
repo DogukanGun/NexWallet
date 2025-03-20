@@ -1,5 +1,4 @@
 import { Tool } from "langchain/tools";
-import { z } from "zod";
 
 export class GetAgentByContractAddressTool extends Tool {
     name = "get_agent_by_contract_address";
