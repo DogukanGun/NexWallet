@@ -110,6 +110,19 @@ export type SavedAgent = {
   createdAt: string;
 };
 
+// Add this type with other types
+export type SavedVoice = {
+  voice_id: string;
+  share_for_training: boolean;
+  voice_bytes: string; // base64 encoded audio bytes
+};
+
+// Add this type
+type VoiceProcessResponse = {
+  audioData: string; // base64 encoded audio
+  status: string;
+};
+
 class ApiService {
   private async fetchWithToken<T>(url: string, options: FetchOptions = {}): Promise<T> {
     const token = localStorage.getItem("token");
@@ -423,6 +436,38 @@ class ApiService {
   async loadAgent(agentId: string): Promise<SavedAgent> {
     return this.fetchWithToken(`/api/agent/my/${agentId}`, {
       method: "GET",
+    });
+  }
+
+  async cloneVoice(voiceFile: File, shareForTraining: boolean = false): Promise<{ message: string }> {
+    // Create proper FormData with the file
+    const formData = new FormData();
+    formData.append('voice', voiceFile);
+    formData.append('shareForTraining', String(shareForTraining));
+    
+    // Use formData as the body - don't set content-type header as it will be set automatically
+    // with the correct boundary parameter
+    return this.fetchWithToken("/api/voice/clone", {
+      method: "POST",
+      headers: {
+        'x-file-name': voiceFile.name,
+        'x-share-for-training': String(shareForTraining),
+      },
+      body: formData, // Send FormData instead of raw file
+    });
+  }
+
+  async getMyVoices(): Promise<SavedVoice[]> {
+    return this.fetchWithToken("/api/voice/my", {
+      method: "GET",
+    });
+  }
+
+  async processVoiceResponse(text: string, voiceId: string): Promise<VoiceProcessResponse> {
+    return this.fetchWithToken("/api/voice/process", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voiceId }),
     });
   }
 }

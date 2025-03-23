@@ -157,11 +157,40 @@ model TwitterUser {
   username  String
   name      String
   agents    Agent[]
+  
+  voices    Voice[]
+  userVoices UserVoice[]
 
   @@map("TwitterUsers")
 }
 
-// Add this new model for the join table
+model Voice {
+  id                Int      @id @default(autoincrement())
+  voice_id          String   @unique
+  voice_bytes       Bytes
+  user_id           String
+  ipfs_hash         String   @default("")
+  share_for_training Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  user              TwitterUser @relation(fields: [user_id], references: [user_id])
+  userVoices        UserVoice[]
+
+  @@map("Voices")
+}
+
+model UserVoice {
+  user_id String
+  voice_id Int  // Changed from String to Int to match Voice.id
+
+  user   TwitterUser @relation(fields: [user_id], references: [user_id])
+  voice  Voice       @relation(fields: [voice_id], references: [id])
+
+  @@id([user_id, voice_id])
+  @@map("user_voice")
+}
+
 model AgentChain {
   agentId String @map("agent_id")
   chainId String @map("chain_id")
@@ -169,11 +198,10 @@ model AgentChain {
   agent Agent @relation(fields: [agentId], references: [id], name: "AgentChains")
   chain Chain @relation(fields: [chainId], references: [id], name: "ChainAgents")
 
-  @@id([agentId, chainId]) // Composite primary key
+  @@id([agentId, chainId])
   @@map("agent_chain")
 }
 
-// Add this new model for the LlmProvider join table
 model AgentLlmProvider {
   agentId String @map("agent_id")
   llmProviderId String @map("llm_provider_id")
@@ -181,11 +209,10 @@ model AgentLlmProvider {
   agent LlmProvider @relation(fields: [llmProviderId], references: [id], name: "AgentLlmProviders")
   provider Agent @relation(fields: [agentId], references: [id], name: "AgentLlmProviders")
 
-  @@id([agentId, llmProviderId]) // Composite primary key
+  @@id([agentId, llmProviderId])
   @@map("agent_llm_provider")
 }
 
-// Add this new model for the Agent-KnowledgeBase join table
 model AgentKnowledgeBase {
   agentId String @map("agent_id")
   knowledgeBaseId String @map("knowledge_base_id")
@@ -193,6 +220,6 @@ model AgentKnowledgeBase {
   agent Agent @relation(fields: [agentId], references: [id], name: "AgentKnowledgeBases")
   knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], name: "KnowledgeBaseAgents")
 
-  @@id([agentId, knowledgeBaseId]) // Composite primary key
+  @@id([agentId, knowledgeBaseId])
   @@map("agent_knowledge_base")
 }

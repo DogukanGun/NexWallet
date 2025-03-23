@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useConfigStore } from '../store/configStore';
 import PaymentRequiredModal from "../components/PaymentRequiredModal";
-import { apiService, SaveAgentApiServiceResponse } from "../services/ApiService";
+import { apiService, SaveAgentApiServiceResponse, SavedVoice } from "../services/ApiService";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { updateLocalToken } from "@/lib/jwt";
 import Accordion from "../components/Accordion";
@@ -125,6 +125,76 @@ type SavedAgent = {
   createdAt: string;
 };
 
+type AudioPlayerProps = {
+  voiceData: string;
+  voiceName: string;
+};
+
+type Voice = {
+  id: string;
+  name: string;
+  previewUrl: string;
+};
+
+const defaultVoices: Voice[] = [
+  { id: 'voice1', name: 'Professional Male', previewUrl: '/voices/male1.wav' },
+  { id: 'voice2', name: 'Professional Female', previewUrl: '/voices/female1.wav' },
+  { id: 'voice3', name: 'Casual Male', previewUrl: '/voices/male2.wav' },
+  { id: 'voice4', name: 'Casual Female', previewUrl: '/voices/female2.wav' },
+];
+
+const AudioPlayer = ({ voiceData, voiceName }: { voiceData: string; voiceName: string }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.addEventListener('ended', () => setIsPlaying(false));
+      return () => {
+        audio.removeEventListener('ended', () => setIsPlaying(false));
+      };
+    }
+  }, []);
+
+  return (
+    <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+      <button
+        onClick={togglePlay}
+        className="w-10 h-10 flex items-center justify-center bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+      >
+        {isPlaying ? (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
+      <div className="flex-1">
+        <p className="text-sm text-gray-300">{voiceName}</p>
+        <div className="mt-1 h-1 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-full bg-blue-600 w-0"></div>
+        </div>
+      </div>
+      <audio ref={audioRef} src={`data:audio/wav;base64,${voiceData}`} className="hidden" />
+    </div>
+  );
+};
+
 export default function Configurator() {
   const router = useRouter();
   const [selectedChains, setSelectedChains] = useState<typeof chains[number][]>([]);
@@ -161,6 +231,11 @@ export default function Configurator() {
   const [savedAgents, setSavedAgents] = useState<SaveAgentApiServiceResponse[]>([]);
   const [showSavedAgentsModal, setShowSavedAgentsModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [savedVoices, setSavedVoices] = useState<SavedVoice[]>([]);
+  const [isLoadingVoices, setIsLoadingVoices] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<string>('');
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement>(null);
 
   const handleChainSelection = (chainId: string) => {
     const selectedChain = chains.find(chain => chain.id === chainId);
@@ -223,6 +298,7 @@ export default function Configurator() {
       llmProvider: selectedLLM,
       agentType: selectedAgentType,
       isPointSystemJoined: selectedConnectionType === "join",
+      selectedVoice: selectedVoice || 'voice1',
     };
 
     useConfigStore.getState().setConfig(config);
@@ -377,6 +453,35 @@ export default function Configurator() {
       loadSavedAgents();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const loadVoices = async () => {
+      if (selectedAgentType === 'voice') {
+        setIsLoadingVoices(true);
+        try {
+          const voices = await apiService.getMyVoices();
+          setSavedVoices(voices);
+        } catch (error) {
+          console.error('Error loading voices:', error);
+        } finally {
+          setIsLoadingVoices(false);
+        }
+      }
+    };
+
+    loadVoices();
+  }, [selectedAgentType]);
+
+  const handlePreviewToggle = () => {
+    if (previewAudioRef.current) {
+      if (isPreviewPlaying) {
+        previewAudioRef.current.pause();
+      } else {
+        previewAudioRef.current.play();
+      }
+      setIsPreviewPlaying(!isPreviewPlaying);
+    }
+  };
 
   return (
     <AuthProvider>
@@ -678,7 +783,9 @@ export default function Configurator() {
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">5</div>
                   <span>Voice & Character Settings</span>
-                  <span className="ml-auto text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Coming Soon</span>
+                  {selectedAgentType !== 'voice' && (
+                    <span className="ml-auto text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Coming Soon</span>
+                  )}
                 </div>
               }
               isOpen={openSection === 5}
@@ -686,32 +793,78 @@ export default function Configurator() {
               isValid={true}
             >
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-white">Voice Customization</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
-                      <h4 className="font-medium mb-2">Voice Type</h4>
-                      <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
-                        <option>Natural</option>
-                        <option>Robotic</option>
-                        <option>Human-like</option>
-                      </select>
-                    </div>
-                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
-                      <h4 className="font-medium mb-2">Accent</h4>
-                      <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
-                        <option>American</option>
-                        <option>British</option>
-                        <option>Australian</option>
-                      </select>
+                {selectedAgentType === 'voice' && (
+                  <div className="space-y-6">
+                    <div className="p-6 bg-gray-800/50 rounded-lg border border-gray-700">
+                      <h3 className="text-lg font-semibold mb-4 text-white">Voice Selection</h3>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <select
+                              value={selectedVoice}
+                              onChange={(e) => setSelectedVoice(e.target.value)}
+                              className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">Select a voice</option>
+                              {savedVoices.map((voice, index) => (
+                                <option key={index} value={voice.voice_id}>
+                                  {voice.voice_id}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          <button
+                            onClick={() => router.push('/app/voice-customization')}
+                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Create Voice
+                          </button>
+                          
+                          {selectedVoice !== '' && (
+                            <button
+                              onClick={handlePreviewToggle}
+                              className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d={isPreviewPlaying ? "M6 4h4v16H6V4zm8 0h4v16h-4V4z" : "M8 5v14l11-7z"} />
+                              </svg>
+                              Preview
+                            </button>
+                          )}
+                        </div>
+
+                        {selectedVoice !== '' && (
+                          <div className="mt-4">
+                            <AudioPlayer
+                              voiceData={savedVoices.find(voice => voice.voice_id === selectedVoice)?.voice_bytes ?? ""}
+                              voiceName={savedVoices.find(voice => voice.voice_id === selectedVoice)?.voice_id ?? ""}
+                            />
+                          </div>
+                        )}
+
+                        {isLoadingVoices && (
+                          <div className="text-center py-4">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                            <p className="mt-2 text-gray-400">Loading voices...</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-white">Character Personality</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
+                  <h3 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+                    Character Personality
+                    <span className="text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Coming Soon</span>
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 opacity-50">
+                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 cursor-not-allowed">
                       <h4 className="font-medium mb-2">Personality Type</h4>
                       <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
                         <option>Professional</option>
@@ -719,7 +872,7 @@ export default function Configurator() {
                         <option>Technical</option>
                       </select>
                     </div>
-                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 opacity-50 cursor-not-allowed">
+                    <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700 cursor-not-allowed">
                       <h4 className="font-medium mb-2">Communication Style</h4>
                       <select disabled className="w-full bg-gray-700 text-gray-400 rounded p-2">
                         <option>Formal</option>
