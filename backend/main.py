@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controllers import auth,agent_controller, twitter_controller, page_manager
+from controllers import auth_controller,agent_controller, twitter_controller, page_manager_controller, clone_voice_controller
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(
@@ -10,10 +10,11 @@ app = FastAPI(
     swagger_ui_parameters={"docExpansion": "none"},
 )
 routers = [
-    auth.router,
+    auth_controller.router,
     agent_controller.router,
+    clone_voice_controller.router,
     twitter_controller.router,
-    page_manager.router
+    page_manager_controller.router
 ]
 
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000","https://ai.nexarb.com"]

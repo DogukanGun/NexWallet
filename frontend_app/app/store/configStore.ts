@@ -8,6 +8,14 @@ interface UserData {
   name: string;
 }
 
+export type Config = {
+  chains: AppChain[];
+  llmProvider: string;
+  agentType: string;
+  isPointSystemJoined: boolean;
+  selectedVoice?: string;
+};
+
 interface ConfigState {
   chains: AppChain[]
   llmProvider: string
@@ -19,11 +27,13 @@ interface ConfigState {
   isPointSystemJoined: boolean
   isAuthenticated: boolean
   userData: UserData | null;
-  setConfig: (config: { chains: AppChain[]; llmProvider: string; agentType: string; isPointSystemJoined: boolean }) => void
+  selectedVoice: string;
+  setConfig: (config: Config) => void
   clearConfig: () => void
   setPremiumVerified: (verified: boolean) => void
   getFeatures: () => { value: string; label: string; }[]
   setIsAuthenticated: (auth: boolean, userData?: UserData | null) => void
+  setUserData: (data: any) => void
 }
 
 export const useConfigStore = create<ConfigState>()(
@@ -39,8 +49,13 @@ export const useConfigStore = create<ConfigState>()(
       isPointSystemJoined: false,
       isAuthenticated: false,
       userData: null,
+      selectedVoice: 'voice1',
       setConfig: (config) => 
-        set({ ...config, isConfigured: true }),
+        set((state) => ({ 
+          ...state,
+          ...config,
+          selectedVoice: config.selectedVoice || state.selectedVoice
+        })),
       clearConfig: () => 
         set({ 
           chains: [], 
@@ -53,6 +68,7 @@ export const useConfigStore = create<ConfigState>()(
           isPointSystemJoined: false,
           isAuthenticated: false,
           userData: null,
+          selectedVoice: 'voice1',
         }),
       setPremiumVerified: (verified) =>
         set({ isPremiumVerified: verified }),
@@ -77,6 +93,7 @@ export const useConfigStore = create<ConfigState>()(
         sessionStorage.setItem('isAuthenticated', JSON.stringify(auth));
         sessionStorage.setItem('userData', JSON.stringify(userData));
       },
+      setUserData: (data) => set({ userData: data }),
     }),
     {
       name: 'app-config',

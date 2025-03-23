@@ -86,6 +86,7 @@ export default function Auth({ isOpen, onClose, onAuthSuccess }: AuthProps) {
         const top = window.screenY + (window.outerHeight - height) / 2;
         
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+        console.log("backendUrl", backendUrl);
         const popup = window.open(
             `${backendUrl}/api/twitter/login`,
             'X Authentication',

@@ -31,43 +31,11 @@ interface UpcomingFeature {
   description: string;
   icon: string;
   eta: string; // Estimated time of arrival
-}
-
-const TwitterLoginModal = ({ onClose }: { onClose: () => void }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full mx-4 border border-gray-700">
-        <h3 className="text-xl font-bold text-white mb-4">Connect with X</h3>
-        
-        {/* Added social media call-to-action */}
-        <div className="mb-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-4 border border-purple-500/20">
-          <div className="flex items-start space-x-3">
-            <span className="text-xl">🚀</span>
-            <div>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                Join our growing community on X for exclusive updates, early access to new features, and be the first to know about upcoming AI innovations!
-              </p>
-              <div className="flex items-center mt-2 text-xs text-purple-400">
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                <span>Stay ahead of the curve</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          {/* ... existing button code ... */}
-        </div>
-      </div>
-    </div>
-  )
+  isBeta: boolean;
 }
 
 export default function Home() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [predefinedAgents, setPredefinedAgents] = useState<Agent[]>([
     {
       id: '1',
@@ -126,10 +94,9 @@ export default function Home() {
       isWalletRequired: true
     },
   ])
-
-  const { setConfig, setIsAuthenticated, isAuthenticated, userData } = useConfigStore();
+  const { setConfig, isAuthenticated, userData } = useConfigStore();
   const { handleLogout } = useAuthModal();
-  
+
   const [savedAgents, setSavedAgents] = useState<SaveAgentApiServiceResponse[]>([]);
 
   useEffect(() => {
@@ -147,12 +114,12 @@ export default function Home() {
 
   const handleAgentSelect = (agent: Agent) => {
     const config = {
-      chains: agent.id === '1' ? [{ id: ChainId.SOLANA, name: 'Solana', isEmbedded: false, disabled: false, icon: '' }] : 
-              agent.id === '2' ? [{ id: ChainId.BASE, name: 'Base', isEmbedded: false, disabled: false, icon: '' }] : 
-              agent.id === '3' ? [{ id: ChainId.ETHEREUM, name: 'Ethereum', isEmbedded: false, disabled: false, icon: '' }] : 
-              agent.id === '4' ? [{ id: ChainId.BASE, name: 'Base with Llama 3.1', isEmbedded: false, disabled: false, icon: '' }] : 
-              agent.id === '5' ? [{ id: ChainId.ARBITRUM, name: 'Arbitrum', isEmbedded: false, disabled: false, icon: '' }] : 
-              agent.id === '6' ? [{ id: ChainId.OPTIMISM, name: 'Optimism', isEmbedded: false, disabled: false, icon: '' }] : [],
+      chains: agent.id === '1' ? [{ id: ChainId.SOLANA, name: 'Solana', isEmbedded: false, disabled: false, icon: '' }] :
+        agent.id === '2' ? [{ id: ChainId.BASE, name: 'Base', isEmbedded: false, disabled: false, icon: '' }] :
+          agent.id === '3' ? [{ id: ChainId.ETHEREUM, name: 'Ethereum', isEmbedded: false, disabled: false, icon: '' }] :
+            agent.id === '4' ? [{ id: ChainId.BASE, name: 'Base with Llama 3.1', isEmbedded: false, disabled: false, icon: '' }] :
+              agent.id === '5' ? [{ id: ChainId.ARBITRUM, name: 'Arbitrum', isEmbedded: false, disabled: false, icon: '' }] :
+                agent.id === '6' ? [{ id: ChainId.OPTIMISM, name: 'Optimism', isEmbedded: false, disabled: false, icon: '' }] : [],
       llmProvider: agent.id === '1' || agent.id === '2' || agent.id === '3' ? 'OpenAI' : '',
       agentType: agent.name,
       isPointSystemJoined: false
@@ -172,6 +139,7 @@ export default function Home() {
       name: 'Voice Modification',
       description: 'Customize your AI agent&apos;s voice with different accents and tones',
       icon: '🎙️',
+      isBeta: true,
       eta: 'Q2 2025'
     },
     {
@@ -179,6 +147,7 @@ export default function Home() {
       name: 'Character Analysis',
       description: 'AI-powered personality analysis and behavior prediction',
       icon: '🧠',
+      isBeta: false,
       eta: 'Q2 2025'
     },
     {
@@ -186,6 +155,7 @@ export default function Home() {
       name: 'Specialized Agents',
       description: 'Topic-specific AI agents for finance, legal, tech, and more',
       icon: '🤖',
+      isBeta: false,
       eta: 'Q3 2025'
     }
   ];
@@ -205,10 +175,10 @@ export default function Home() {
                   Your gateway to blockchain interaction through AI. Choose from our pre-built agents or create your own custom solution.
                 </p>
               </div>
-              
+
               {/* User Profile Section */}
               <div>
-                {isAuthenticated && 
+                {isAuthenticated &&
                   <div className="flex items-center bg-gray-800/50 rounded-lg p-2">
                     {userData && (
                       <div className="flex items-center mr-4">
@@ -221,7 +191,7 @@ export default function Home() {
                         </div>
                       </div>
                     )}
-                    <button 
+                    <button
                       onClick={handleLogoutClick}
                       className="px-3 py-1.5 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center"
                     >
@@ -241,7 +211,7 @@ export default function Home() {
                             rounded-2xl border border-purple-500/20 p-6">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
-                
+
                 <div className="relative flex items-center justify-between">
                   <div className="max-w-2xl">
                     <div className="flex items-center gap-3 mb-4">
@@ -250,21 +220,21 @@ export default function Home() {
                       </svg>
                       <h2 className="text-xl font-bold text-white">Join Our Community</h2>
                     </div>
-                    
+
                     <p className="text-gray-300 mb-4 leading-relaxed">
-                      Stay at the forefront of AI innovation! Follow us on X for exclusive updates, 
+                      Stay at the forefront of AI innovation! Follow us on X for exclusive updates,
                       early access to new features, and be part of our growing community of AI enthusiasts.
                     </p>
-                    
+
                     <div className="flex items-center gap-4">
-                      <a href="https://x.com/NexArb_" 
-                         target="_blank"
-                         rel="noopener noreferrer" 
-                         className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 
+                      <a href="https://x.com/NexArb_"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 
                                   text-white rounded-lg transition-colors duration-200">
                         <span>Follow Us</span>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </a>
                       <span className="text-sm text-purple-400/80">Join 5k+ AI enthusiasts</span>
@@ -289,24 +259,53 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Create Agent Card */}
-                <Link href="/configurator" 
-                      className="group relative overflow-hidden p-6 bg-gradient-to-br from-purple-500/10 to-purple-700/10 
+                <Link href="/configurator"
+                  className="group relative overflow-hidden p-6 bg-gradient-to-br from-purple-500/10 to-purple-700/10 
                                backdrop-blur-sm rounded-xl border border-purple-500/20 hover:border-purple-500 
                                transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl transform translate-x-16 -translate-y-16"></div>
                   <div className="relative">
                     <div className="p-3 bg-purple-500/20 rounded-xl w-fit mb-4">
                       <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
                     </div>
                     <h3 className="text-xl font-semibold text-purple-400 group-hover:text-purple-300 mb-2">Create Agent</h3>
                     <p className="text-gray-400 text-sm mb-4">Build your custom AI agent with specific capabilities</p>
-                    <div className="flex items-center text-purple-400/50 text-sm">
-                      Get Started <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                    <div className="flex items-center text-purple-400/50 text-sm group-hover:translate-x-2 transition-transform">
+                      Get Started 
+                      <svg className="w-4 h-4 ml-1 transition-transform group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                       </svg>
                     </div>
+                  </div>
+                </Link>
+
+                {/* Voice Modification Preview Card */}
+                <Link href="/app/voice-customization"
+                  className="group relative overflow-hidden p-6 bg-gradient-to-br from-blue-500/10 to-blue-700/10 
+                               backdrop-blur-sm rounded-xl border border-blue-500/20 hover:border-blue-500 
+                               transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl transform translate-x-16 -translate-y-16"></div>
+                  <div className="relative">
+                    <div className="p-3 bg-blue-500/20 rounded-xl w-fit mb-4">
+                      <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-blue-400 group-hover:text-blue-300 mb-2">Voice Customization</h3>
+                    <p className="text-gray-400 text-sm mb-4">Customize your AI agent&apos;s voice and speaking style</p>
+                    <div className="flex items-center text-blue-400/50 text-sm group-hover:translate-x-2 transition-transform">
+                      Get Started 
+                      <svg className="w-4 h-4 ml-1 transition-transform group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <span className="bg-red-500 text-white text-xs px-3 py-1 rounded-full">
+                      In Beta
+                    </span>
                   </div>
                 </Link>
 
@@ -320,28 +319,11 @@ export default function Home() {
                   </div>
                   <div className="p-3 bg-gray-700/20 rounded-xl w-fit mb-4">
                     <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-400 mb-2">Import Agent</h3>
                   <p className="text-gray-500 text-sm">Import your existing AI agent configuration</p>
-                </div>
-
-                {/* Voice Modification Preview Card */}
-                <div className="relative overflow-hidden p-6 bg-gradient-to-br from-gray-800/30 to-gray-700/30 
-                              backdrop-blur-sm rounded-xl border border-gray-700 cursor-not-allowed">
-                  <div className="absolute top-3 right-3">
-                    <span className="bg-purple-500 text-white text-xs px-3 py-1 rounded-full">
-                      Coming Soon
-                    </span>
-                  </div>
-                  <div className="p-3 bg-gray-700/20 rounded-xl w-fit mb-4">
-                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-400 mb-2">Voice Customization</h3>
-                  <p className="text-gray-500 text-sm">Customize your AI agent&apos;s voice and speaking style</p>
                 </div>
               </div>
             </section>
@@ -353,36 +335,36 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {predefinedAgents.map((agent) => (
-                  <div key={agent.id} 
-                       onClick={() => !agent.description.includes('Coming Soon') && handleAgentSelect(agent)}
-                       className={`relative group overflow-hidden p-6 bg-gradient-to-br from-gray-800/50 to-gray-700/50 
+                  <div key={agent.id}
+                    onClick={() => !agent.description.includes('Coming Soon') && handleAgentSelect(agent)}
+                    className={`relative group overflow-hidden p-6 bg-gradient-to-br from-gray-800/50 to-gray-700/50 
                                  backdrop-blur-sm rounded-xl border border-gray-700 
                                  ${!agent.description.includes('Coming Soon') ? 'hover:border-purple-500 cursor-pointer' : 'opacity-50 cursor-not-allowed'}
                                  transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20`}>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl transform translate-x-16 -translate-y-16"></div>
-                    
+
                     <div className="relative">
                       <h3 className="text-xl font-semibold text-purple-400 group-hover:text-purple-300 mb-3">{agent.name}</h3>
                       <p className="text-gray-300 text-sm mb-6">{agent.description}</p>
-                      
+
                       <div className="flex items-center justify-between mt-4">
                         <span className="text-xs text-gray-400 flex items-center">
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
                           {agent.poweredBy}
                         </span>
                         {agent.isWalletRequired && (
                           <span className="text-xs bg-gray-700/50 text-gray-300 px-2 py-1 rounded-full flex items-center">
                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             Wallet Required
                           </span>
                         )}
                       </div>
                     </div>
-                    
+
                     {agent.description.includes('Coming Soon') && (
                       <span className="absolute top-3 right-3 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
                         Coming Soon
@@ -408,14 +390,14 @@ export default function Home() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-300 flex items-center">
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
                           Powered by: {agent.chains?.map(chain => chain.name).join(', ')}
                         </span>
                         {agent.llmProvider && (
                           <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded-full flex items-center">
                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             {agent.llmProvider[0].name}
                           </span>
@@ -436,8 +418,8 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {upcomingFeatures.map((feature) => (
-                  <div key={feature.id} 
-                       className="relative overflow-hidden p-6 bg-gradient-to-br from-gray-800/30 to-gray-700/30 
+                  <div key={feature.id}
+                    className="relative overflow-hidden p-6 bg-gradient-to-br from-gray-800/30 to-gray-700/30 
                                  backdrop-blur-sm rounded-xl border border-gray-700">
                     <div className="absolute top-3 right-3">
                       <span className="bg-blue-500/80 text-white text-xs px-3 py-1 rounded-full">
@@ -454,7 +436,7 @@ export default function Home() {
               </div>
             </section>
 
-            
+
           </div>
         </main>
       </AuthProvider>

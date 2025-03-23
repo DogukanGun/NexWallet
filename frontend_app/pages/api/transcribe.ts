@@ -71,6 +71,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             res.status(500).json({ error: "Failed to convert audio file" });
             // Clean up the temporary file
             fs.unlinkSync(filePath);
+            // Ensure the output file is also cleaned up if it exists
+            if (fs.existsSync(outputPath)) {
+                fs.unlinkSync(outputPath);
+            }
         })
         .save(outputPath); // Specify the output file path
     });

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Siriwave from "react-siriwave";
 import "@reown/appkit-wallet-button/react";
-import { useAppKit, useAppKitAccount } from "@/app/config";
 import WalletButton from "@/app/components/WalletButton";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 const Starter = () => {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const { open, close } = useAppKit();
+  const { address, isConnected } = useAppKitAccount();
   useEffect(() => {
     const audio = new Audio();
     audio.src = "/WelcomeMessage.mp3";

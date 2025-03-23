@@ -1,7 +1,7 @@
 "use client";
 import VoiceUI from "./components/VoiceUI";
 import Starter from "./components/Starter";
-import { useAppKitAccount } from "../config";
+import { useAppKitAccount } from "@reown/appkit/react";
 import RequireConfig from "../components/RequireConfig";
 import SubscriptionWrapper from "../providers/SubscriptionWrapper";
 import { useEffect, useState } from "react";

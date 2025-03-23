@@ -1,55 +1,79 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import formidable from 'formidable';
-import fs from 'fs';
-import { withAuth } from '../../../middleware/withAuth';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import OpenAI from 'openai';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Missing or invalid Authorization header' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
   try {
-    const form = formidable();
-    const [fields, files] = await form.parse(req);
-    
-    if (!files.audio || !files.audio[0]) {
-      return res.status(400).json({ error: 'No audio file provided' });
+    const { text, voiceId } = req.body;
+
+    if (!text || !voiceId) {
+      return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    const audioFile = files.audio[0];
-    const tools = fields.tools ? JSON.parse(fields.tools[0]) : [];
+    // If voiceId is 'voice1', use OpenAI's text-to-speech
+    if (voiceId === 'voice1') {
+      const openai = new OpenAI({
+        apiKey: process.env.OPEN_AI_KEY
+      });
 
-    // Read the audio file
-    const audioBuffer = fs.readFileSync(audioFile.filepath);
+      const mp3 = await openai.audio.speech.create({
+        model: "tts-1",
+        voice: "alloy",
+        input: text,
+      });
 
-    // Make request to your backend voice processing endpoint
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/voice/process`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        audio: audioBuffer.toString('base64'),
-        tools: tools,
-      }),
-    });
+      const buffer = Buffer.from(await mp3.arrayBuffer());
+      const base64Audio = buffer.toString("base64");
 
-    const data = await response.json();
+      return res.status(200).json({
+        audioData: base64Audio,
+        status: 'success'
+      });
+    }
+    // For other voice IDs, use the backend service
+    else {
+      const response = await fetch(
+        `${process.env.BACKEND_API_URL}/voice/synthesize`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text, voice_id: voiceId }),
+        }
+      );
 
-    // Clean up the temporary file
-    fs.unlinkSync(audioFile.filepath);
+      if (!response.ok) {
+        throw new Error('Backend voice synthesis failed');
+      }
 
-    return res.status(200).json(data);
+      // The backend returns audio data directly
+      const arrayBuffer = await response.arrayBuffer();
+      const base64Audio = Buffer.from(arrayBuffer).toString('base64');
+
+      return res.status(200).json({
+        audioData: base64Audio,
+        status: 'success'
+      });
+    }
+
   } catch (error) {
-    console.error('Error processing voice message:', error);
-    return res.status(500).json({ error: 'Error processing voice message' });
+    console.error('Voice processing error:', error);
+    return res.status(500).json({ error: 'Voice processing failed' });
   }
-}
-
-export default withAuth(handler); 
+} 

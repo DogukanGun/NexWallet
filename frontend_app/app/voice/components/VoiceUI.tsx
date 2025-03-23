@@ -2,16 +2,27 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaMicrophone, FaStop, FaTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useVoiceStore, Message } from '../store/voiceStore';
-import { Tools } from '@/app/chat/components/tools/Tools';
+import type { Provider } from "@reown/appkit-adapter-solana";
+import { useVoiceStore, ExtendedUIMessage } from '../store/voiceStore';
 import { AudioWaveform } from './AudioWaveform';
-import { BsRobot } from 'react-icons/bs';
+import { BsPerson, BsRobot } from 'react-icons/bs';
+import { apiService } from '@/app/services/ApiService';
+import { useAppKitAccount } from "@reown/appkit/react";
+import { useConfigStore } from "../../store/configStore";
+import { ChainId } from "@/app/configurator/data";
+import { useAppKitProvider } from "@reown/appkit/react";
+import { VersionedTransaction } from "@solana/web3.js";
+import { toast } from "sonner";
 
 interface VoiceUIProps {
   onCancel?: () => void;
 }
 
 export default function VoiceUI({ onCancel }: VoiceUIProps) {
+  const { address } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider<Provider>("solana");
+  const stores = useConfigStore();
+  
   const { 
     voiceHistory, 
     setVoiceHistory,
@@ -26,6 +37,11 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [transcribedText, setTranscribedText] = useState<string>("");
+  const [showVerification, setShowVerification] = useState(false);
+  const [isVoiceProcessing, setIsVoiceProcessing] = useState(false);
+  const { selectedVoice,  } = useConfigStore();
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,13 +63,14 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
 
       mediaRecorder.current.onstop = async () => {
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-        await processAudio(audioBlob);
+        await handleTranscription(audioBlob);
       };
 
       mediaRecorder.current.start();
       setIsListening(true);
     } catch (error) {
       console.error('Error accessing microphone:', error);
+      toast.error("Error accessing microphone. Please check your permissions.");
     }
   };
 
@@ -65,6 +82,131 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
     }
   };
 
+  const handleTranscription = async (audioBlob: Blob) => {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob);
+      
+      const response = await apiService.postTranscribe(formData);
+      setTranscribedText(response.text);
+      setShowVerification(true);
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      toast.error("Error transcribing audio. Please try again.");
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSolAi = async (transaction: string) => {
+    try {
+      const serializedTransaction = Buffer.from(transaction, "base64");
+      const tx = VersionedTransaction.deserialize(serializedTransaction);
+      await walletProvider.signAndSendTransaction(tx);
+      toast.success("Transaction sent successfully!");
+    } catch (e) {
+      console.error(e);
+      addMessage({
+        type: 'assistant',
+        content: "Transaction failed, please try again",
+      });
+      setIsProcessing(false);
+    }
+  };
+
+  const handleVerification = async (approved: boolean) => {
+    setShowVerification(false);
+    setTranscribedText("");
+
+    if (!approved) return;
+
+    try {
+      toast.loading("Converting your voice to text...");
+      
+      setIsProcessing(true);
+      addMessage({
+        type: 'user',
+        content: transcribedText,
+      });
+
+      toast.loading("Processing your request...");
+      const response = await apiService.postChat(
+        transcribedText,
+        address ?? "",
+        voiceHistory,
+        stores.chains,
+        stores.knowledgeBase
+      );
+
+      if (response.op === ChainId.SOLANA && response.transaction) {
+        await handleSolAi(response.transaction);
+      }
+
+      toast.loading("Converting response to voice...");
+      setIsVoiceProcessing(true);
+      const voiceResponse = await apiService.processVoiceResponse(
+        response.text,
+        selectedVoice
+      );
+
+      let currentText = '';
+      const textToType = response.text;
+      setIsAIResponding(true);
+
+      addMessage({
+        type: 'assistant',
+        content: '',
+      });
+
+      const audio = new Audio(`data:audio/wav;base64,${voiceResponse.audioData}`);
+      audio.onended = () => {
+        setIsAIResponding(false);
+        setIsVoiceProcessing(false);
+      };
+      
+      audio.play();
+      
+      for (let i = 0; i < textToType.length; i++) {
+        currentText += textToType[i];
+        setVoiceHistory(prev => {
+          const newHistory = [...prev];
+          newHistory[newHistory.length - 1].content = currentText;
+          return newHistory;
+        });
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+
+      toast.success("Response complete!");
+
+    } catch (error) {
+      console.error('Error processing chat:', error);
+      toast.error("Error processing your message. Please try again.");
+      setIsAIResponding(false);
+      setIsVoiceProcessing(false);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const generateUniqueId = () => {
+    return Math.random().toString(36).substr(2, 9); // Simple unique ID generator
+  };
+
+  const addMessage = (message: { type: 'user' | 'assistant', content: string }) => {
+    const newMessage: ExtendedUIMessage = {
+      ...message,
+      timestamp: new Date().toISOString(),
+      id: generateUniqueId(),
+      role: message.type === 'user' ? 'user' : 'assistant',
+      parts: []
+    };
+
+    setVoiceHistory((prev: ExtendedUIMessage[]): ExtendedUIMessage[] => [
+      ...prev,
+      newMessage
+    ]);
+  };
+
   const handleCancel = () => {
     if (mediaRecorder.current) {
       mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
@@ -72,66 +214,41 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
     setIsListening(false);
     setIsProcessing(false);
     setIsAIResponding(false);
-    setVoiceHistory((prev: Message[]): Message[] => [
+    
+    // Create the user and assistant messages with all required properties
+    const userMessage: ExtendedUIMessage = {
+      type: 'user',
+      content: 'Voice message',
+      timestamp: new Date().toISOString(),
+      id: generateUniqueId(), // Generate a unique ID
+      role: 'user', // Set role
+      parts: [] // Initialize parts as needed
+    };
+
+    const assistantMessage: ExtendedUIMessage = {
+      type: 'assistant',
+      content: 'Voice message cancelled',
+      timestamp: new Date().toISOString(),
+      id: generateUniqueId(), // Generate a unique ID
+      role: 'assistant', // Set role
+      parts: [] // Initialize parts as needed
+    };
+
+    setVoiceHistory((prev: ExtendedUIMessage[]): ExtendedUIMessage[] => [
       ...prev,
-      {
-        type: 'user',
-        content: 'Voice message',
-        timestamp: new Date().toISOString()
-      },
-      {
-        type: 'assistant',
-        content: 'Voice message cancelled',
-        timestamp: new Date().toISOString()
-      }
+      userMessage,
+      assistantMessage
     ]);
+
     if (onCancel) onCancel();
   };
 
-  const processAudio = async (audioBlob: Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob);
-
-      const response = await fetch('/api/voice/process', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-      setVoiceHistory((prev: Message[]): Message[] => [
-        ...prev,
-        {
-          type: 'user',
-          content: 'Voice message',
-          timestamp: new Date().toISOString()
-        },
-        {
-          type: 'assistant',
-          content: data.response,
-          timestamp: new Date().toISOString()
-        }
-      ]);
-      setIsAIResponding(true);
-    } catch (error) {
-      console.error('Error processing audio:', error);
-      setVoiceHistory((prev: Message[]): Message[] => [
-        ...prev,
-        {
-          type: 'user',
-          content: 'Voice message',
-          timestamp: new Date().toISOString()
-        },
-        {
-          type: 'assistant',
-          content: 'Sorry, there was an error processing your voice message.',
-          timestamp: new Date().toISOString()
-        }
-      ]);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const StatusIndicator = ({ message }: { message: string }) => (
+    <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+      <span>{message}</span>
+    </div>
+  );
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
@@ -148,12 +265,18 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
               <div className={`max-w-[80%] rounded-2xl p-4 ${
                 message.type === 'user' 
                   ? 'bg-blue-500 text-white ml-4' 
-                  : 'bg-white shadow-md mr-4'
+                  : 'bg-white shadow-md mr-4 text-gray-800'
               }`}>
                 {message.type === 'assistant' && (
                   <div className="flex items-center mb-2 text-blue-500">
                     <BsRobot className="mr-2" />
                     <span className="text-sm font-medium">AI Assistant</span>
+                  </div>
+                )}
+                {message.type === 'user' && (
+                  <div className="flex items-center mb-2 text-white">
+                    <BsPerson className="mr-2" />
+                    <span className="text-sm font-medium">You</span>
                   </div>
                 )}
                 <p>{message.content}</p>
@@ -166,6 +289,45 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Verification Modal */}
+        <AnimatePresence>
+          {showVerification && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                className="bg-white rounded-lg p-6 max-w-lg w-full mx-4"
+              >
+                <h3 className="text-xl font-semibold mb-4">Verify Transcription</h3>
+                <p className="text-gray-600 mb-4">Is this transcription correct?</p>
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <p className="text-gray-800">{transcribedText}</p>
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    onClick={() => handleVerification(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                  >
+                    Record Again
+                  </button>
+                  <button
+                    onClick={() => handleVerification(true)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Send Message
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Control Area */}
         <div className="p-6 bg-white border-t">
           <div className="flex justify-center items-center space-x-4">
@@ -173,7 +335,7 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
           </div>
           
           <div className="flex justify-center items-center mt-6 space-x-4">
-            {!isListening && !isProcessing && (
+            {!isListening && !isProcessing && !showVerification && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -211,18 +373,16 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
           </div>
 
           {isProcessing && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-4 text-center text-gray-600"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <div className="animate-bounce">Processing</div>
-                <div className="animate-bounce" style={{ animationDelay: "0.2s" }}>.</div>
-                <div className="animate-bounce" style={{ animationDelay: "0.4s" }}>.</div>
-                <div className="animate-bounce" style={{ animationDelay: "0.6s" }}>.</div>
-              </div>
-            </motion.div>
+            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm 
+              px-6 py-3 rounded-full shadow-lg border border-gray-200 z-50">
+              <StatusIndicator 
+                message={
+                  isVoiceProcessing ? "Converting response to voice..." :
+                  isAIResponding ? "AI is responding..." :
+                  "Processing your request..."
+                }
+              />
+            </div>
           )}
         </div>
       </div>

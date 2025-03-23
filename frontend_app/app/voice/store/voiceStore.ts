@@ -1,18 +1,18 @@
+import { UIMessage } from 'ai';
 import { create } from 'zustand';
 
-export interface Message {
+export interface ExtendedUIMessage extends UIMessage {
   type: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  isAudioPlaying?: boolean;
 }
 
 interface VoiceStore {
-  voiceHistory: Message[];
+  voiceHistory: ExtendedUIMessage[];
   isListening: boolean;
   isProcessing: boolean;
   isAIResponding: boolean;
-  setVoiceHistory: (history: Message[] | ((prev: Message[]) => Message[])) => void;
+  setVoiceHistory: (history: ExtendedUIMessage[] | ((prev: ExtendedUIMessage[]) => ExtendedUIMessage[])) => void;
   setIsListening: (isListening: boolean) => void;
   setIsProcessing: (isProcessing: boolean) => void;
   setIsAIResponding: (isAIResponding: boolean) => void;
@@ -24,7 +24,7 @@ export const useVoiceStore = create<VoiceStore>((set) => ({
   isListening: false,
   isProcessing: false,
   isAIResponding: false,
-  setVoiceHistory: (history) => set((state) => ({
+  setVoiceHistory: (history: ExtendedUIMessage[] | ((prev: ExtendedUIMessage[]) => ExtendedUIMessage[])) => set((state) => ({
     voiceHistory: typeof history === 'function' ? history(state.voiceHistory) : history
   })),
   setIsListening: (isListening) => set({ isListening }),
