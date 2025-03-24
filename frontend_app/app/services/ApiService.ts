@@ -352,13 +352,13 @@ class ApiService {
     });
   }
 
-  async getKnowledgeBases(): Promise<any[]> {
+  async getKnowledgeBases(): Promise<{ id: string; name: string; enabled: boolean }[]> {
     return this.fetchWithToken("/api/admin/knowledge", {
       method: "GET",
     });
   }
 
-  async createKnowledgeBase(name: string): Promise<any> {
+  async createKnowledgeBase(name: string): Promise<{ message: string; id: string }> {
     return this.fetchWithToken("/api/admin/knowledge", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -379,13 +379,13 @@ class ApiService {
     });
   }
 
-  async getLLMProviders(): Promise<any[]> {
+  async getLLMProviders(): Promise<{ id: string; name: string; disabled: boolean }[]> {
     return this.fetchWithToken("/api/admin/llm", {
       method: "GET",
     });
   }
 
-  async createLLMProvider(name: string): Promise<any> {
+  async createLLMProvider(name: string): Promise<{ message: string; id: string }> {
     return this.fetchWithToken("/api/admin/llm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

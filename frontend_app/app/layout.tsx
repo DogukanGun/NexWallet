@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import WalletProvider from "./provider";
 import ContextProvider from "./context";
 import "@reown/appkit-wallet-button/react";
 import { ModalProvider } from "./providers/ModalWrapper";
@@ -40,7 +39,6 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppKitProvider>
           <ContextProvider>
-            <WalletProvider>
               <ModalProvider>
                 <AuthProvider>
                   <LoadingProvider>
@@ -48,7 +46,6 @@ export default function RootLayout({
                   </LoadingProvider>
                 </AuthProvider>
               </ModalProvider>
-            </WalletProvider>
           </ContextProvider>
         </AppKitProvider>
       </body>

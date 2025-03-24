@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withAdmin } from '@/middleware/withAdmin';
 
 const handler = async(req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'GET') {
@@ -39,4 +38,4 @@ const handler = async(req: NextApiRequest, res: NextApiResponse) => {
     }
 }
 
-export default withAdmin(handler);
+export default handler;

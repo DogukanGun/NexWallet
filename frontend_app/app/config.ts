@@ -15,7 +15,8 @@ const solanaAdapter = new SolanaAdapter({
     new HuobiWalletAdapter(),
     new PhantomWalletAdapter(),
     new TrustWalletAdapter()
-  ] as any // Type assertion to bypass type checking
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ] as any
 })
 
 const wagmiAdapter = new WagmiAdapter({

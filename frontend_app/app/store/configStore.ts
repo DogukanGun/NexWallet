@@ -33,7 +33,7 @@ interface ConfigState {
   setPremiumVerified: (verified: boolean) => void
   getFeatures: () => { value: string; label: string; }[]
   setIsAuthenticated: (auth: boolean, userData?: UserData | null) => void
-  setUserData: (data: any) => void
+  setUserData: (data: UserData | null) => void
 }
 
 export const useConfigStore = create<ConfigState>()(
@@ -93,7 +93,7 @@ export const useConfigStore = create<ConfigState>()(
         sessionStorage.setItem('isAuthenticated', JSON.stringify(auth));
         sessionStorage.setItem('userData', JSON.stringify(userData));
       },
-      setUserData: (data) => set({ userData: data }),
+      setUserData: (data: UserData | null) => set({ userData: data }),
     }),
     {
       name: 'app-config',
