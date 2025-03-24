@@ -103,25 +103,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 const params = JSON.parse(response.split("params:")[1].trim());
                 return res.status(200).json({ component: component, params: params });
             }
-
-            // Convert the message to speech
-            const mp3 = await openai.audio.speech.create({
-                model: "tts-1",
-                voice: "alloy",
-                input: response,
-            });
-
-            // Convert audio data to buffer and return it
-            const buffer = Buffer.from(await mp3.arrayBuffer());
-            const base64Audio = buffer.toString("base64");
-
-            res.status(200).json({
+            return res.status(200).json({
                 text: response,
-                audio: base64Audio,
+                audio: "",
                 op: ""
             });
-            break;
-
         default:
             // Handle unsupported methods
             res.setHeader('Allow', ['GET', 'POST']);

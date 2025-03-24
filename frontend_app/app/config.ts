@@ -1,27 +1,34 @@
 import { createAppKit } from "@reown/appkit/react";
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react'
 import { AppKitNetwork, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks'
-import { PhantomWalletAdapter, SolflareWalletAdapter, TrustWalletAdapter } from "@solana/wallet-adapter-wallets";
-import { HuobiWalletAdapter } from "@solana/wallet-adapter-wallets";
-
+import { HuobiWalletAdapter, PhantomWalletAdapter, TrustWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { mainnet, arbitrum, optimism, base, polygon, avalanche } from '@reown/appkit/networks'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { cookieStorage, createStorage, http } from '@wagmi/core'
 export const projectId = process.env.REOWN_KEY || "b56e18d47c72ab683b10814fe9495694"; // this is a public projectId only to use on localhost
 
-export const networks = [solana, solanaTestnet, solanaDevnet]
+export const networks = [solana, solanaTestnet, solanaDevnet, mainnet, arbitrum, optimism, base, polygon, avalanche]
 
 // Setup solana adapter
 const solanaAdapter = new SolanaAdapter({
   wallets: [
     new HuobiWalletAdapter(),
     new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
     new TrustWalletAdapter()
   ] as any // Type assertion to bypass type checking
 })
 
-
+const wagmiAdapter = new WagmiAdapter({
+  storage: createStorage({
+    storage: cookieStorage
+  }),
+  ssr: true,
+  projectId,
+  networks
+})
 // Create modal
 const modal = createAppKit({
-  adapters: [solanaAdapter],
+  adapters: [solanaAdapter, wagmiAdapter],
   networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
   metadata: {
     name: 'Nexarb App',
