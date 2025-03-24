@@ -5,6 +5,7 @@
 */.idea
 */.pnp
 */.pnp.*
+*/playground/
 */.yarn/*
 !*/.yarn/patches
 !*/.yarn/plugins
