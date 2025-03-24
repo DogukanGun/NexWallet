@@ -9,7 +9,6 @@ import {
 import { createNodePlugin } from "@elizaos/plugin-node";
 import { solanaPlugin } from "@elizaos/plugin-solana";
 import fs from "fs";
-import net from "net";
 import path from "path";
 import { fileURLToPath } from "url";
 import { getTokenForProvider } from "./config";
