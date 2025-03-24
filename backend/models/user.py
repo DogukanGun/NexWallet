@@ -1,7 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, Boolean, Table, ForeignKey, LargeBinary
-from sqlalchemy.ext.declarative import declarative_base
 from models.chain import Base, TwitterUsers
-from sqlalchemy.sql import expression
 from sqlalchemy import event
 
 class Voices(Base):
