@@ -3,10 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+interface User {
+  name: string;
+  // Add other properties as needed
+}
+
 const AuthSuccess = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -16,7 +21,7 @@ const AuthSuccess = () => {
     if (userParam) {
       try {
         // Parse the JSON user data from the URL parameter
-        const user = JSON.parse(decodeURIComponent(userParam));
+        const user = JSON.parse(decodeURIComponent(userParam)) as User;
         setUserData(user);
 
         if (!user){

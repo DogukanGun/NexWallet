@@ -24,14 +24,14 @@ import { apiService } from "@/app/services/ApiService";
 interface KnowledgeBase {
   id: string;
   name: string;
-  disabled: boolean;
+  enabled: boolean;
 }
 
 const KnowledgeBasesPage: React.FC = () => {
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [newKnowledgeBase, setNewKnowledgeBase] = useState<Omit<KnowledgeBase, 'id'>>({ 
     name: '', 
-    disabled: false 
+    enabled: false 
   });
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -42,7 +42,12 @@ const KnowledgeBasesPage: React.FC = () => {
   const fetchKnowledgeBases = async () => {
     try {
       const data = await apiService.getKnowledgeBases();
-      setKnowledgeBases(data);
+      const mappedData = data.map(kb => ({
+        id: kb.id,
+        name: kb.name,
+        enabled: kb.enabled,
+      }));
+      setKnowledgeBases(mappedData);
     } catch (error) {
       enqueueSnackbar("Failed to fetch knowledge bases", { variant: "error" });
     }
@@ -54,7 +59,7 @@ const KnowledgeBasesPage: React.FC = () => {
       fetchKnowledgeBases();
       enqueueSnackbar("Knowledge Base created successfully!", { variant: "success" });
       setOpenDialog(false);
-      setNewKnowledgeBase({ name: '', disabled: false });
+      setNewKnowledgeBase({ name: '', enabled: false });
     } catch (error) {
       enqueueSnackbar("Failed to create knowledge base", { variant: "error" });
     }
@@ -135,8 +140,8 @@ const KnowledgeBasesPage: React.FC = () => {
               <Grid item key={kb.id} xs={12} sm={6} md={4}>
                 <AdminItemCard
                   name={kb.name}
-                  disabled={kb.disabled}
-                  onToggle={() => toggleKnowledgeBase(kb.id, kb.disabled)}
+                  disabled={kb.enabled}
+                  onToggle={() => toggleKnowledgeBase(kb.id, kb.enabled)}
                   onDelete={() => deleteKnowledgeBase(kb.id)}
                 />
               </Grid>

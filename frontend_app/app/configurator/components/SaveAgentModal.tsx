@@ -10,6 +10,7 @@ interface SaveAgentModalProps {
   selectedChains: AppChain[];
   selectedLLM: string;
   selectedAgentType: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setSavedAgents: React.Dispatch<React.SetStateAction<any[]>>;
 }
 

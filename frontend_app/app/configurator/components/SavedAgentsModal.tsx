@@ -31,8 +31,8 @@ const SavedAgentsModal = ({ onClose }: { onClose: () => void }) => {
         </div>
         {savedAgents.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
-            <p>You haven't saved any agents yet.</p>
-            <p className="text-sm mt-2">Save your first agent configuration to see it here!</p>
+            <p>You haven&apos;t saved any agents yet.</p>
+            <p className="text-sm mt-2">Save your first agent configuration to see it here!&apos;</p>
           </div>
         ) : (
           <div className="space-y-4">
