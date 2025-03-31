@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from controllers import auth_controller,agent_controller, twitter_controller, page_manager_controller, clone_voice_controller
 from starlette.middleware.sessions import SessionMiddleware
 
+from utils.environment_manager import get_environment_manager
+
 app = FastAPI(
     title="API Project",
     description="Work in progress",
@@ -34,6 +36,7 @@ def read_root():
 def read_item(item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
 
+environment_manager = get_environment_manager()
 
 if __name__ == "__main__":
     import uvicorn

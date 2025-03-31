@@ -4,6 +4,14 @@ interface VideoModalProps {
 }
 
 const VideoPlayer: React.FC<VideoModalProps> = ({ onClose, videoUrl }) => {
+  const getYouTubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
+  const videoId = getYouTubeVideoId(videoUrl);
+
   return (
     <div
       style={{
@@ -18,21 +26,22 @@ const VideoPlayer: React.FC<VideoModalProps> = ({ onClose, videoUrl }) => {
         alignItems: "center",
         justifyContent: "center",
       }}
-      onClick={onClose} // Close modal when clicking outside the video
+      onClick={onClose}
     >
       <div
         style={{
           position: "relative",
-          maxWidth: "90%",
-          maxHeight: "90%",
+          width: "90%",
+          maxWidth: "1280px",
+          aspectRatio: "16/9",
         }}
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the video container
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
           style={{
             position: "absolute",
-            top: "-10px",
+            top: "-40px",
             right: "-10px",
             background: "red",
             color: "white",
@@ -47,16 +56,24 @@ const VideoPlayer: React.FC<VideoModalProps> = ({ onClose, videoUrl }) => {
         >
           ✕
         </button>
-        <video
-          src={videoUrl}
-          controls
-          autoPlay
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            borderRadius: "8px",
-          }}
-        />
+        {videoId ? (
+          <iframe
+            width="100%"
+            height="100%"
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{
+              borderRadius: "8px",
+            }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full bg-gray-800 rounded-lg">
+            <p className="text-white">Invalid YouTube URL</p>
+          </div>
+        )}
       </div>
     </div>
   );

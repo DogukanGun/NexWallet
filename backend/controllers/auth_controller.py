@@ -13,7 +13,7 @@ from models import RegisteredUser, SpecialUserCode, Admin, UserWallet
 from models.chain import Transaction
 from pydantic import BaseModel
 from utils.database import get_db
-from middleware.withAdmin import verify_admin
+from middleware.with_admin import verify_admin
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

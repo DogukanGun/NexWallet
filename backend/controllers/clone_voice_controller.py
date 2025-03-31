@@ -12,7 +12,7 @@ from typing import Optional
 
 from controllers.request_models.voice_models import VoiceRequest, VoiceGenerateRequest
 import os
-from middleware.withAdmin import verify_admin
+from middleware.with_admin import verify_admin
 from models.user import Voices
 from utils.database import get_db
 

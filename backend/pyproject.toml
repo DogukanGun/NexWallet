@@ -28,6 +28,7 @@ notebook = "^7.3.3"
 jupyter = "^1.1.1"
 ipywidgets = "^8.1.5"
 python-multipart = "^0.0.20"
+cryptography = "^44.0.2"
 
 
 [tool.poetry.group.dev.dependencies]

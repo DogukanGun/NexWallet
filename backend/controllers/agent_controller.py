@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 from controllers.request_models.agent_models import AgentRequest, AgentResponse, SaveAgentRequest
 from llm.decision_maker import LangChainAgent
 from llm.decision_maker.tools.utils import process_agent_stream
-from middleware.withAdmin import verify_admin
+from middleware.with_admin import verify_admin
 from models import TwitterUsers,KnowledgeBase, LlmProvider, Chain, Agents, AuthPayload
 from utils.database import get_db
 
