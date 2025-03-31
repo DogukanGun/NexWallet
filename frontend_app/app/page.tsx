@@ -586,7 +586,7 @@ export default function Home() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <VideoPlayer videoUrl="/welcome.mp4" onClose={handleCloseModal} />
+          <VideoPlayer videoUrl="https://www.youtube.com/watch?v=fIx24i4zyTw" onClose={handleCloseModal} />
         </motion.div>
       )}
     </div>
