@@ -1,5 +1,9 @@
 import uuid
 from base64 import b64encode
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
 
 from fastapi import APIRouter, File, Depends, HTTPException, UploadFile, Form
 import torch
@@ -8,13 +12,15 @@ from TTS.tts.configs.xtts_config import XttsArgs,XttsConfig,XttsAudioConfig
 from TTS.config.shared_configs import BaseDatasetConfig
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
-from typing import Optional
 
 from controllers.request_models.voice_models import VoiceRequest, VoiceGenerateRequest
 import os
 from middleware.with_admin import verify_admin
 from models.user import Voices
+from utils.constants.environment_keys import EnvironmentKeys
 from utils.database import get_db
+from utils.environment_manager import EnvironmentManager, get_environment_manager
+from utils.voice import get_dummy_voice_bytes
 
 torch.serialization.add_safe_globals([XttsConfig])
 torch.serialization.add_safe_globals([XttsAudioConfig])
@@ -26,7 +32,6 @@ router = APIRouter(prefix="/voice", tags=["Clone Voice"])
 @router.post("/clone")
 async def clone_voice(
     audio_file: UploadFile = File(...),
-    share_for_training: Optional[bool] = Form(False),
     admin_payload: dict = Depends(verify_admin),
     db: Session = Depends(get_db),
 ):
@@ -41,7 +46,7 @@ async def clone_voice(
         user_voice_data = Voices(
             voice_id=str(uuid.uuid4()),
             voice_bytes=content,
-            share_for_training=share_for_training,
+            share_for_training=False,
             user_id=admin_payload['user_id']
         )
         db.add(user_voice_data)
@@ -149,3 +154,69 @@ async def generate_voice(
                     os.remove(file_path)
                 except Exception:
                     pass
+
+@router.post("/share-for-training")
+async def share_voice_for_training(
+    audio_file: UploadFile = File(...),
+    admin_payload: dict = Depends(verify_admin),
+    environment_manager: EnvironmentManager = Depends(get_environment_manager)
+):
+    """
+    Encrypt an uploaded voice file and return the encrypted data.
+    """
+    try:
+        if not audio_file.content_type.startswith('audio/'):
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid file type. Please upload an audio file."
+            )
+            
+        content = await audio_file.read()
+
+        # Get the private key from environment
+        private_key = environment_manager.get_key(EnvironmentKeys.PRIVATE_KEY.name)
+        if not private_key:
+            raise HTTPException(status_code=500, detail="Private key not found in environment")
+        
+        # Convert the private key to a valid Fernet key using PBKDF2
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=b'fixed_salt',  # In a production environment, use a secure random salt
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(private_key.encode()))
+        f = Fernet(key)
+        
+        # Encrypt the voice data
+        encrypted_content = f.encrypt(content)
+        
+        # Return the encrypted data
+        return {
+            "encrypted_voice": b64encode(encrypted_content).decode('utf-8'),
+            "original_filename": audio_file.filename
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/save/ipfs/{cid}")
+async def clone_ipfs_voice(
+        cid: str,
+        admin_payload: dict = Depends(verify_admin),
+        db: Session = Depends(get_db),
+):
+    try:
+        user_voice_data = Voices(
+            voice_id=cid,
+            voice_bytes=get_dummy_voice_bytes(),
+            share_for_training=False,
+            user_id=admin_payload['user_id']
+        )
+        db.add(user_voice_data)
+        db.commit()
+        db.refresh(user_voice_data)
+
+        return {"message": "Voice cloned successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
