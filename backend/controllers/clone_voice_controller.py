@@ -4,6 +4,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
+import os
 
 from fastapi import APIRouter, File, Depends, HTTPException, UploadFile, Form
 import torch
@@ -159,6 +160,7 @@ async def generate_voice(
 async def share_voice_for_training(
     audio_file: UploadFile = File(...),
     admin_payload: dict = Depends(verify_admin),
+    db: Session = Depends(get_db),
     environment_manager: EnvironmentManager = Depends(get_environment_manager)
 ):
     """
@@ -178,11 +180,14 @@ async def share_voice_for_training(
         if not private_key:
             raise HTTPException(status_code=500, detail="Private key not found in environment")
         
+        # Generate a random salt
+        salt = os.urandom(16)  # 16 bytes = 128 bits is a common salt size
+        
         # Convert the private key to a valid Fernet key using PBKDF2
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=b'fixed_salt',  # In a production environment, use a secure random salt
+            salt=salt,  # Use the random salt
             iterations=100000,
         )
         key = base64.urlsafe_b64encode(kdf.derive(private_key.encode()))
@@ -190,9 +195,22 @@ async def share_voice_for_training(
         
         # Encrypt the voice data
         encrypted_content = f.encrypt(content)
-        
-        # Return the encrypted data
+        voice_id = str(uuid.uuid4())
+        user_voice_data = Voices(
+            voice_id=voice_id,
+            voice_bytes=get_dummy_voice_bytes(),
+            share_for_training=True,
+            salt=b64encode(salt).decode('utf-8'),
+            ipfs_hash="cid",
+            user_id=admin_payload['user_id']
+        )
+        db.add(user_voice_data)
+        db.commit()
+        db.refresh(user_voice_data)
+
+        # Return the encrypted data and salt
         return {
+            "id": voice_id,
             "encrypted_voice": b64encode(encrypted_content).decode('utf-8'),
             "original_filename": audio_file.filename
         }
@@ -200,19 +218,25 @@ async def share_voice_for_training(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/save/ipfs/{cid}")
+@router.post("/save/ipfs/{cid}/{voice_id}/{name}")
 async def clone_ipfs_voice(
         cid: str,
+        voice_id: str,
+        name: str,
         admin_payload: dict = Depends(verify_admin),
         db: Session = Depends(get_db),
 ):
     try:
-        user_voice_data = Voices(
-            voice_id=cid,
-            voice_bytes=get_dummy_voice_bytes(),
-            share_for_training=False,
-            user_id=admin_payload['user_id']
-        )
+        user_voice_data = db.query(Voices).filter(
+            Voices.user_id == admin_payload['user_id'],
+            Voices.voice_id == voice_id
+        ).first()
+        
+        if not user_voice_data:
+            raise HTTPException(status_code=404, detail="Voice not found")
+            
+        user_voice_data.ipfs_hash = cid
+        user_voice_data.name = name
         db.add(user_voice_data)
         db.commit()
         db.refresh(user_voice_data)

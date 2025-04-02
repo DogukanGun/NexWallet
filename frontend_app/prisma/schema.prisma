@@ -165,11 +165,13 @@ model TwitterUser {
 }
 
 model Voice {
-  id                Int      @id @default(autoincrement())
-  voice_id          String   @unique
+  id                Int       @id @default(autoincrement())
+  voice_id          String    @unique
   voice_bytes       Bytes
   user_id           String
-  ipfs_hash         String   @default("")
+  ipfs_hash         String    @default("")
+  salt              String    @default("")
+  name              String?
   share_for_training Boolean  @default(false)
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
