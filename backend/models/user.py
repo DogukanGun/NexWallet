@@ -9,6 +9,8 @@ class Voices(Base):
     voice_bytes = Column(LargeBinary)
     user_id = Column(String, ForeignKey('TwitterUsers.user_id'))
     ipfs_hash = Column(String, default="")
+    salt = Column(String, default="")
+    name = Column(String, default="")
     share_for_training = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

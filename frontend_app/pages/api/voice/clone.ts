@@ -8,6 +8,7 @@ import lighthouse from '@lighthouse-web3/sdk';
 interface EncryptedResponse {
   encrypted_voice: string;
   original_filename: string;
+  id: string;
 }
 
 interface LighthouseResponse {
@@ -107,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ) as LighthouseResponse;
 
       // Save the voice with the IPFS hash
-      const ipfsResponse = await fetch(`${process.env.BACKEND_API_URL}/voice/save/ipfs/${response.data.Hash}`, {
+      const ipfsResponse = await fetch(`${process.env.BACKEND_API_URL}/voice/save/ipfs/${response.data.Hash}/${encryptedData.id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
