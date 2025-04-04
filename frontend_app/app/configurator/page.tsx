@@ -25,6 +25,11 @@ const knowledgeBases: KnowledgeBase[] = [
     id: "cookieDao",
     name: "Cookie Dao",
     disabled: false,
+  },
+  {
+    id: "messari",
+    name: "Messari",
+    disabled: false,
   }
 ];
 
@@ -39,7 +44,7 @@ const chains: AppChain[] = [
   {
     id: ChainId.BASE,
     name: "Base",
-    disabled: false,
+    disabled: true,
     isEmbedded: true,
     icon: "/icons/base.svg",
   },
@@ -47,20 +52,20 @@ const chains: AppChain[] = [
     id: ChainId.ETHEREUM,
     name: "Ethereum",
     isEmbedded: true,
-    disabled: false,
+    disabled: true,
     icon: "/icons/ethereum.svg",
   },
   {
     id: ChainId.ARBITRUM,
     name: "Arbitrum",
     isEmbedded: true,
-    disabled: false,
+    disabled: true,
     icon: "/icons/arbitrum.svg",
   },
   {
     id: ChainId.OPTIMISM,
     name: "Optimism",
-    disabled: false,
+    disabled: true,
     isEmbedded: false,
     icon: "/icons/optimism.svg",
   },
@@ -96,17 +101,25 @@ const chains: AppChain[] = [
 
 const llmProviders = [
   {
-    id: "openai", name: "OpenAI"
+    id: "openai", 
+    name: "OpenAI"
   },
   {
-    id: "llama_onchain", name: "Llama 3.1 Onchain - Powered by Gaia"
+    id: "llama_onchain", 
+    name: "Llama 3.1 Onchain - Powered by Lilypad"
   },
   {
-    id: "claude", disabled: true,
+    id: "deepseek_onchain", 
+    name: "DeepSeek Onchain - Powered by Lilypad"
+  },
+  {
+    id: "claude", 
+    disabled: true,
     name: "Claude"
   },
   {
-    id: "llama", disabled: true,
+    id: "llama", 
+    disabled: true,
     name: "Llama 3.1"
   },
 ];
@@ -258,11 +271,6 @@ export default function Configurator() {
     const isSolanaSelected = selectedChains.some(chain => chain.id === "solana");
     const isBaseSelected = selectedChains.some(chain => chain.id === "base");
     const isEthereumSelected = selectedChains.some(chain => chain.id === "ethereum");
-
-    if (isSolanaSelected && llmId === "llama_onchain") {
-      return;
-    }
-
     if ((isBaseSelected || isEthereumSelected) && llmId === "claude") {
       return;
     }
@@ -459,8 +467,15 @@ export default function Configurator() {
       if (selectedAgentType === 'voice') {
         setIsLoadingVoices(true);
         try {
-          const voices = await apiService.getMyVoices();
-          setSavedVoices(voices);
+          const [regularVoices, ipfsVoices] = await Promise.all([
+            apiService.getMyVoices(),
+            apiService.getMyIpfsVoices()
+          ]);
+          
+          // Combine and deduplicate voices based on voice_id
+          const allVoices = [...regularVoices, ...ipfsVoices];
+          const uniqueVoices = Array.from(new Map(allVoices.map(voice => [voice.voice_id, voice])).values());
+          setSavedVoices(uniqueVoices);
         } catch (error) {
           console.error('Error loading voices:', error);
         } finally {
@@ -705,7 +720,7 @@ export default function Configurator() {
                 <h2 className="text-xl font-bold mb-4 text-white text-left">Select LLM Provider</h2>
                 <div className={cardContainerClass}>
                   {llmProviders.map((provider) => {
-                    const isDisabled = (provider.id === "llama_onchain" && selectedChains.some(chain => chain.id === "solana")) ||
+                    const isDisabled = 
                       (provider.id === "claude" && (selectedChains.some(chain => chain.id === "base") || selectedChains.some(chain => chain.id === "ethereum"))) ||
                       (selectedChains.length === 0); // Disable if no chains are selected
 
@@ -807,9 +822,9 @@ export default function Configurator() {
                               className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                               <option value="">Select a voice</option>
-                              {savedVoices.map((voice, index) => (
-                                <option key={index} value={voice.voice_id}>
-                                  {voice.voice_id}
+                              {savedVoices.map((voice) => (
+                                <option key={voice.voice_id} value={voice.voice_id}>
+                                  {voice.name || voice.voice_id}
                                 </option>
                               ))}
                             </select>

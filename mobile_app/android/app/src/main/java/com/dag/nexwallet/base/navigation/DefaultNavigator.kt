@@ -1,10 +1,8 @@
-package com.dag.nexq_app.base.navigation
-import androidx.compose.runtime.mutableStateOf
+package com.dag.nexwallet.base.navigation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import androidx.navigation.NavOptionsBuilder
-import javax.inject.Inject
 
 interface Navigator {
     val startDestination: Destination
@@ -28,10 +26,12 @@ class DefaultNavigator(
         destination: Destination,
         navOptions: NavOptionsBuilder.() -> Unit
     ) {
-        _navigationActions.send(NavigationAction.Navigate(
-            destination = destination,
-            navOptions = navOptions
-        ))
+        _navigationActions.send(
+            NavigationAction.Navigate(
+                destination = destination,
+                navOptions = navOptions
+            )
+        )
     }
 
     override suspend fun navigateUp() {

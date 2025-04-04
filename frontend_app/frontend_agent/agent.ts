@@ -8,8 +8,10 @@ import { StructuredToolInterface } from '@langchain/core/tools';
 import { AskSolanaSdkAgent } from './tools/solona/askSolanaAgent';
 import { AskCdpAgents } from './tools/cdp/askCdpAgents';
 import { GetUniswapTool } from './tools/components/uniswapTool';
-
-export type agent = 'cookie';
+import { VoiceComponentTool } from './tools/voice/voiceComponents';
+import { PDFReportGenerator } from './tools/messari/pdfGenerator';
+import { MessariAPI } from './tools/messari';
+export type agent = 'cookie' | 'messari';
 
 export function createKnowledgeReactAgentV2(
     agentName: LLMConfig,
@@ -30,8 +32,12 @@ export function createKnowledgeReactAgentV2(
             tools.push(tool)
         })
     }
+    if (agents.includes('messari')) {
+        tools.push(new MessariAPI())
+    }
     tools.push(new AskSolanaSdkAgent(wallet))
     tools.push(new GetUniswapTool())
     tools.push(new AskCdpAgents(supportedChains))
+    tools.push(new VoiceComponentTool())
     return createAgent(agentName, tools, messageModifier, isOnchain);
 } 

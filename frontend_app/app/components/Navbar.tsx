@@ -10,7 +10,6 @@ import { useState } from "react";
 
 const Navbar = () => {
   const path = usePathname();
-  const { isConnected } = useAppKitAccount();
   const router = useRouter();
   const [showTelegramNotice, setShowTelegramNotice] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
@@ -90,15 +89,6 @@ const Navbar = () => {
                   </Link>
                 </li>
               )}
-              <li>
-                <button
-                  onClick={handleTelegramClick}
-                  className="nav-button bg-gradient-to-r from-blue-400 to-blue-500 relative"
-                >
-                  Chat in Telegram
-                  <span className="absolute -top-2 -right-2 bg-pink-500 text-xs px-1.5 py-0.5 rounded-full font-semibold">BETA</span>
-                </button>
-              </li>
               <li>
                 <button
                   onClick={() => setShowRoadmap(true)}

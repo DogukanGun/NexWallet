@@ -1,6 +1,6 @@
 package com.dag.nexq_app.base
 
-import com.dag.nexq_app.base.navigation.Destination
+import com.dag.nexwallet.base.navigation.Destination
 import com.dag.nexq_app.data.AlertDialogButton
 import com.dag.nexq_app.data.AlertDialogButtonType
 import com.dag.nexq_app.data.AlertDialogModel

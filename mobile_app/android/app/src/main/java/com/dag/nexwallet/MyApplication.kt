@@ -1,4 +1,5 @@
 package com.dag.nexwallet
 
-class MyApplication {
-}
+import androidx.multidex.MultiDexApplication
+
+class MyApplication: MultiDexApplication()
