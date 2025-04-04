@@ -20,6 +20,13 @@ import { TextUIPart, UIMessage } from "@ai-sdk/ui-utils";
 import { Tools } from './tools/Tools';
 import { ToolConfig } from '../config/tools';
 import { motion, AnimatePresence } from "framer-motion";
+import { AppChain } from "@/app/configurator/data";
+
+interface LLMProvider {
+  id: string;
+  name: string;
+  disabled?: boolean;
+}
 
 interface ChatPageProps {
   initialChatId?: string;
@@ -76,6 +83,12 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const [securityLevel, setSecurityLevel] = React.useState<'basic' | 'advanced'>('basic');
   const [showSecurityBadge, setShowSecurityBadge] = React.useState(false);
   const [securityTransition, setSecurityTransition] = React.useState(false);
+  const [selectedChains, setSelectedChains] = React.useState<AppChain[]>([]);
+  const [llmProviders, setLlmProviders] = React.useState<LLMProvider[]>([]);
+  const [selectedProvider, setSelectedProvider] = React.useState<string>("Claude");
+  const [showPaymentModal, setShowPaymentModal] = React.useState(false);
+  const [selectedLLM, setSelectedLLM] = React.useState<string>("");
+  const [showWarningModal, setShowWarningModal] = React.useState(false);
 
   // Enhanced animation variants
   const pageVariants = {
@@ -148,7 +161,14 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     setInput("");
 
     try {
-      const { text, op, transaction } = await apiService.postChat(input, address ?? "", messages, stores.chains, stores.knowledgeBase);
+      const { text, op, transaction } = await apiService.postChat(
+        input, 
+        address ?? "", 
+        messages, 
+        stores.chains, 
+        stores.knowledgeBase,
+        stores.llmProvider  // Pass the llmProvider from the config store
+      );
       console.log("text", text);
       console.log("op", op);
       console.log("transaction", transaction);
@@ -367,6 +387,43 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       )}
     </AnimatePresence>
   );
+
+  const handleLLMSelection = (llmId: string) => {
+    if (selectedChains.length === 0) {
+      setShowWarningModal(true);
+      return;
+    }
+
+    const selectedProvider = llmProviders.find(provider => provider.id === llmId);
+    if (selectedProvider?.disabled) {
+      return;
+    }
+
+    const isSolanaSelected = selectedChains.some(chain => chain.id === "solana");
+    const isBaseSelected = selectedChains.some(chain => chain.id === "base");
+    const isEthereumSelected = selectedChains.some(chain => chain.id === "ethereum");
+    if ((isBaseSelected || isEthereumSelected) && llmId === "claude") {
+      return;
+    }
+
+    if (llmId === 'claude' || llmId === 'openai') {
+      setSelectedProvider(llmId === 'claude' ? 'Claude' : 'OpenAI');
+      setShowPaymentModal(true);
+    }
+    
+    // Update the selected LLM in local state
+    setSelectedLLM((prev) => {
+      const newLLM = prev === llmId ? "" : llmId;
+      
+      // Update the config store with the new LLM provider
+      useConfigStore.getState().setConfig({
+        ...useConfigStore.getState(),
+        llmProvider: newLLM
+      });
+      
+      return newLLM;
+    });
+  };
 
   return (
     <motion.main

@@ -37,6 +37,7 @@ type ChatResponse = {
   transaction?: string;
   audio?: string;
   op?: string;
+  components?: string;
 };
 
 type BotResponse = {
@@ -111,11 +112,14 @@ export type SavedAgent = {
 };
 
 // Add this type with other types
-export type SavedVoice = {
+export interface SavedVoice {
   voice_id: string;
+  name: string;
+  ipfs_hash: string;
   share_for_training: boolean;
-  voice_bytes: string; // base64 encoded audio bytes
-};
+  created_at: string;
+  voice_bytes?: string;
+}
 
 // Add this type
 type VoiceProcessResponse = {
@@ -124,6 +128,20 @@ type VoiceProcessResponse = {
 };
 
 class ApiService {
+  private baseUrl: string;
+
+  constructor() {
+    this.baseUrl = process.env.BACKEND_API_URL || 'http://localhost:8000';
+  }
+
+  private getHeaders(): HeadersInit {
+    const token = localStorage.getItem('token');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  }
+
   private async fetchWithToken<T>(url: string, options: FetchOptions = {}): Promise<T> {
     const token = localStorage.getItem("token");
     options.headers = {
@@ -232,12 +250,13 @@ class ApiService {
     wallet: string,
     messageHistory: ChatCompletionMessageParam[] | Message[],
     chains: AppChain[],
-    knowledge: string[]
+    knowledge: string[],
+    llmId: string
   ): Promise<ChatResponse> {
     return this.fetchWithToken("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({wallet, caption, messageHistory, chains: chains.map((chain)=>chain.name), knowledge }),
+      body: JSON.stringify({wallet, caption, messageHistory, chains: chains.map((chain)=>chain.name), knowledge, llmId }),
     });
   }
 
@@ -458,9 +477,19 @@ class ApiService {
   }
 
   async getMyVoices(): Promise<SavedVoice[]> {
-    return this.fetchWithToken("/api/voice/my", {
-      method: "GET",
+    const response = await fetch(`${this.baseUrl}/voice/my`, {
+      headers: this.getHeaders(),
     });
+    if (!response.ok) throw new Error('Failed to fetch voices');
+    return response.json();
+  }
+
+  async getMyIpfsVoices(): Promise<SavedVoice[]> {
+    const response = await fetch(`${this.baseUrl}/voice/ipfs`, {
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch IPFS voices');
+    return response.json();
   }
 
   async processVoiceResponse(text: string, voiceId: string): Promise<VoiceProcessResponse> {

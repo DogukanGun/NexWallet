@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.navigation
+package com.dag.nexwallet.base.navigation
 
 import androidx.navigation.NavOptionsBuilder
 

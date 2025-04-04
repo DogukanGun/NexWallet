@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.navigation
+package com.dag.nexwallet.base.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,21 +9,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.dag.nexq_app.base.extensions.ObserveAsEvents
-import com.dag.nexq_app.presentation.home.presentation.Home
-import com.dag.nexq_app.presentation.onboard.Onboard
-import com.dag.nexq_app.presentation.onboard.OnboardVM
-import com.dag.nexq_app.presentation.quiz.add.presentation.QuizAdd
-import com.dag.nexq_app.presentation.quiz.add.presentation.QuizAddVM
-import com.dag.nexq_app.presentation.quiz.create.presentation.CreateQuiz
-import com.dag.nexq_app.presentation.quiz.create.presentation.CreateQuizVM
-import com.dag.nexq_app.presentation.quiz.createwithpdf.presentation.CreateQuizWithPDF
-import com.dag.nexq_app.presentation.quiz.createwithpdf.presentation.CreateQuizWithPDFVM
-import com.dag.nexq_app.presentation.quiz.my.presentation.MyQuizzes
-import com.dag.nexq_app.presentation.quiz.my.presentation.MyQuizzesVM
-import com.dag.nexq_app.presentation.splash.Splash
-import com.dag.nexq_app.presentation.splash.SplashVM
-import com.dag.nexq_app.presentation.userop.presentation.login.Login
-import com.dag.nexq_app.presentation.userop.presentation.login.LoginVM
 
 @Composable
 fun DefaultNavigationHost(

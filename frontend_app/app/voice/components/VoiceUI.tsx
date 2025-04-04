@@ -14,6 +14,14 @@ import { useAppKitProvider } from "@reown/appkit/react";
 import { VersionedTransaction } from "@solana/web3.js";
 import { toast } from "sonner";
 
+interface ComponentConfig {
+  name: string;
+  type: string;
+  validation: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
 interface VoiceUIProps {
   onCancel?: () => void;
 }
@@ -42,6 +50,10 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
   const [isVoiceProcessing, setIsVoiceProcessing] = useState(false);
   const { selectedVoice,  } = useConfigStore();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formComponents, setFormComponents] = useState<ComponentConfig[]>([]);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -138,6 +150,20 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
         stores.knowledgeBase
       );
 
+      // Check if response contains form components
+      if (response.components) {
+        try {
+          const components = JSON.parse(response.components) as ComponentConfig[];
+          setFormComponents(components);
+          setShowForm(true);
+          setIsProcessing(false);
+          return; // Exit early to show form
+        } catch (e) {
+          console.error('Error parsing components:', e);
+        }
+      }
+
+      // Continue with normal flow if no form components
       if (response.op === ChainId.SOLANA && response.transaction) {
         await handleSolAi(response.transaction);
       }
@@ -186,6 +212,93 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsFormSubmitting(true);
+
+    try {
+      // Validate required fields
+      const missingFields = formComponents
+        .filter(comp => comp.required && !formData[comp.name])
+        .map(comp => comp.name);
+
+      if (missingFields.length > 0) {
+        toast.error(`Please fill in required fields: ${missingFields.join(', ')}`);
+        return;
+      }
+
+      const response = await apiService.postChat(
+        JSON.stringify({ action: 'form_submission', data: formData }),
+        address ?? "",
+        voiceHistory,
+        stores.chains,
+        stores.knowledgeBase
+      );
+
+      if (response.op === ChainId.SOLANA && response.transaction) {
+        await handleSolAi(response.transaction);
+      }
+
+      // Add form submission to chat history
+      addMessage({
+        type: 'user',
+        content: `Submitted form with values: ${JSON.stringify(formData)}`,
+      });
+
+      // Process AI response
+      setIsVoiceProcessing(true);
+      const voiceResponse = await apiService.processVoiceResponse(
+        response.text,
+        selectedVoice
+      );
+
+      let currentText = '';
+      const textToType = response.text;
+      setIsAIResponding(true);
+
+      addMessage({
+        type: 'assistant',
+        content: '',
+      });
+
+      const audio = new Audio(`data:audio/wav;base64,${voiceResponse.audioData}`);
+      audio.onended = () => {
+        setIsAIResponding(false);
+        setIsVoiceProcessing(false);
+      };
+      
+      audio.play();
+      
+      for (let i = 0; i < textToType.length; i++) {
+        currentText += textToType[i];
+        setVoiceHistory(prev => {
+          const newHistory = [...prev];
+          newHistory[newHistory.length - 1].content = currentText;
+          return newHistory;
+        });
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+
+      // Reset form state
+      setShowForm(false);
+      setFormData({});
+      setFormComponents([]);
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error("Error submitting form. Please try again.");
+    } finally {
+      setIsFormSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const generateUniqueId = () => {
@@ -286,6 +399,77 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
               </div>
             </motion.div>
           ))}
+          
+          {/* Form Display */}
+          <AnimatePresence>
+            {showForm && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white rounded-lg p-6 shadow-lg"
+              >
+                <h3 className="text-lg font-semibold mb-4">Please provide the following information:</h3>
+                <form onSubmit={handleFormSubmit} className="space-y-4">
+                  {formComponents.map((component, index) => (
+                    <div key={index} className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {component.name} {component.required && <span className="text-red-500">*</span>}
+                      </label>
+                      {component.type === 'text_area' ? (
+                        <textarea
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={component.placeholder}
+                          value={formData[component.name] || ''}
+                          onChange={(e) => handleInputChange(component.name, e.target.value)}
+                          required={component.required}
+                        />
+                      ) : component.type === 'select' ? (
+                        <select
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value={formData[component.name] || ''}
+                          onChange={(e) => handleInputChange(component.name, e.target.value)}
+                          required={component.required}
+                        >
+                          <option value="">Select {component.name}</option>
+                          {/* Add options based on your requirements */}
+                        </select>
+                      ) : (
+                        <input
+                          type={component.validation === 'number' ? 'number' : 'text'}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={component.placeholder}
+                          value={formData[component.name] || ''}
+                          onChange={(e) => handleInputChange(component.name, e.target.value)}
+                          required={component.required}
+                        />
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForm(false);
+                        setFormData({});
+                      }}
+                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isFormSubmitting}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300"
+                    >
+                      {isFormSubmitting ? 'Submitting...' : 'Submit'}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
           <div ref={messagesEndRef} />
         </div>
 
@@ -335,7 +519,7 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
           </div>
           
           <div className="flex justify-center items-center mt-6 space-x-4">
-            {!isListening && !isProcessing && !showVerification && (
+            {!isListening && !isProcessing && !showVerification && !showForm && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

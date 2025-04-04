@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.network
+package com.dag.nexwallet.base.network
 
 import com.dag.nexq_app.domain.DataPreferencesStore
 import kotlinx.coroutines.flow.collectLatest

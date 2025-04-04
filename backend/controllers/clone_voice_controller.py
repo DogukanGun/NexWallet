@@ -244,3 +244,35 @@ async def clone_ipfs_voice(
         return {"message": "Voice cloned successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/ipfs")
+async def get_ipfs_voices(
+    admin_payload: dict = Depends(verify_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Fetch all voices that have been saved to IPFS for the authenticated user.
+    Only returns voices where ipfs_hash is not empty.
+    """
+    try:
+        user_voices = db.query(Voices).filter(
+            Voices.user_id == admin_payload['user_id'],
+            Voices.ipfs_hash != "",
+            Voices.ipfs_hash != None
+        ).all()
+        
+        # Prepare the response data
+        response_data = [
+            {
+                "voice_id": voice.voice_id,
+                "name": voice.name,
+                "ipfs_hash": voice.ipfs_hash,
+                "share_for_training": voice.share_for_training,
+                "created_at": voice.created_at.isoformat() if voice.created_at else None
+            }
+            for voice in user_voices
+        ]
+        
+        return response_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -24,6 +24,15 @@ interface CloneResponse {
   [key: string]: any;
 }
 
+interface SavedVoice {
+  voice_id: string;
+  name: string;
+  ipfs_hash: string;
+  share_for_training: boolean;
+  created_at: string;
+  voice_bytes?: string;
+}
+
 export const config = {
   api: {
     bodyParser: false, // Disabling built-in bodyParser
