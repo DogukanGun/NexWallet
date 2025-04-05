@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.extensions
+package com.dag.nexwallet.base.extensions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

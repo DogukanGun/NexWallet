@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.components
+package com.dag.nexwallet.base.components
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn

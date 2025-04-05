@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.extensions
+package com.dag.nexwallet.base.extensions
 
 fun <T : Any, R : Any> Collection<T?>.whenAllNotNull(block: (List<T>) -> R) {
     if (this.all { it != null }) {

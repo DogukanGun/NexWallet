@@ -1,4 +1,4 @@
-package com.dag.nexq_app.base.components
+package com.dag.nexwallet.base.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,12 +26,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.dag.nexq_app.R
+import com.dag.nexwallet.R
 import com.dag.nexwallet.base.navigation.DefaultNavigator
 import com.dag.nexwallet.base.navigation.Destination
-import com.dag.nexq_app.data.AlertDialogButton
-import com.dag.nexq_app.data.AlertDialogButtonType
-import com.dag.nexq_app.data.AlertDialogModel
+import com.dag.nexwallet.data.AlertDialogButton
+import com.dag.nexwallet.data.AlertDialogButtonType
+import com.dag.nexwallet.data.AlertDialogModel
 import kotlinx.coroutines.launch
 
 @Composable
