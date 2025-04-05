@@ -1,7 +1,6 @@
 package com.dag.nexwallet.base.network
 
-import com.dag.nexq_app.domain.DataPreferencesStore
-import kotlinx.coroutines.flow.collectLatest
+import com.dag.nexwallet.domain.DataPreferencesStore
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor

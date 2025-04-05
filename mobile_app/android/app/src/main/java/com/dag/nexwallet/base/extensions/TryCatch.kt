@@ -1,7 +1,7 @@
-package com.dag.nexq_app.base.extensions
+package com.dag.nexwallet.base.extensions
 
 import android.util.Log
-import com.dag.nexq_app.BuildConfig
+import com.dag.nexwallet.BuildConfig
 
 const val L_TRY_CATCH = "TRY_CATCH_"
 

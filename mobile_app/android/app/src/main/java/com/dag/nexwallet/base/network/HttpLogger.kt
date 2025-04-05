@@ -1,9 +1,8 @@
-package com.dag.nexq_app.base.network
+package com.dag.nexwallet.base.network
 
 import android.util.Log
-import com.dag.nexq_app.base.AlertDialogManager
-import com.dag.nexq_app.base.extensions.tryCatch
-import kotlinx.coroutines.coroutineScope
+import com.dag.nexwallet.base.AlertDialogManager
+import com.dag.nexwallet.base.extensions.tryCatch
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Response

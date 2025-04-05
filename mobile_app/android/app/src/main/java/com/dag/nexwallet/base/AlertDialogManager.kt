@@ -1,9 +1,9 @@
-package com.dag.nexq_app.base
+package com.dag.nexwallet.base
 
 import com.dag.nexwallet.base.navigation.Destination
-import com.dag.nexq_app.data.AlertDialogButton
-import com.dag.nexq_app.data.AlertDialogButtonType
-import com.dag.nexq_app.data.AlertDialogModel
+import com.dag.nexwallet.data.AlertDialogButton
+import com.dag.nexwallet.data.AlertDialogButtonType
+import com.dag.nexwallet.data.AlertDialogModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow

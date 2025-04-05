@@ -1,3 +1,3 @@
-package com.dag.nexq_app.base
+package com.dag.nexwallet.base
 
 interface BaseVS

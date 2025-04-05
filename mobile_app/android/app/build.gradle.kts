@@ -3,7 +3,10 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
-
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -64,7 +67,14 @@ dependencies {
 
     //HILT
     implementation(libs.androidx.hilt.navigation.fragment)
-
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.android)
+    androidTestImplementation(libs.hilt.android.testing)
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
+    kaptAndroidTest(libs.hilt.android.compiler)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.work)
     //Serialization
     implementation(libs.kotlinx.serialization.json)
 
@@ -75,7 +85,18 @@ dependencies {
     //Multidex
     implementation(libs.androidx.multidex)
 
+    //Network
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
 
+    //Datastore
+    implementation(libs.androidx.datastore.preferences)
 
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
 }
