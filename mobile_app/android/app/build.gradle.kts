@@ -7,6 +7,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     kotlin("plugin.serialization")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -57,13 +58,16 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.generativeai)
+    implementation(libs.vision.internal.vkp)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    
+    // Test dependencies with fixed versions
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     //HILT
     implementation(libs.androidx.hilt.navigation.fragment)
@@ -96,7 +100,21 @@ dependencies {
 
     //Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.analytics.ktx)
+
+    //Solana
+    implementation(libs.mobile.wallet.adapter.clientlib.ktx)
+    implementation(libs.web3.solana)
+    implementation(libs.rpc.core)
+    implementation(libs.multimult)
+
+    //EncryptedSharedPreferences
+    implementation(libs.androidx.security.crypto)
+
+    //Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
 
 }

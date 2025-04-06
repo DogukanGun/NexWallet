@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.lifecycleScope
+import com.dag.nexwallet.base.ActivityHolder
 import com.dag.nexwallet.base.AlertDialogManager
 import com.dag.nexwallet.base.components.CustomAlertDialog
 import com.dag.nexwallet.base.navigation.DefaultNavigationHost
@@ -46,8 +47,12 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var preferencesStore: DataPreferencesStore
 
+    @Inject
+    lateinit var activityHolder: ActivityHolder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activityHolder.setActivity(this)
         val showAlert = mutableStateOf(false)
         val alertDialogModel = mutableStateOf<AlertDialogModel?>(null)
         
@@ -103,5 +108,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityHolder.clearActivity()
     }
 }
