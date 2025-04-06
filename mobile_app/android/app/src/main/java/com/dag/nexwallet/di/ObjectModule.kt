@@ -1,6 +1,7 @@
 package com.dag.nexwallet.di
 
 import android.content.Context
+import android.content.pm.PackageManager
 import com.dag.nexwallet.base.network.HttpLogger
 import com.dag.nexwallet.base.AlertDialogManager
 import com.dag.nexwallet.base.navigation.DefaultNavigator
@@ -54,6 +55,14 @@ class ObjectModules {
         ).addInterceptor(httpLogger).connectTimeout(10000L, TimeUnit.MILLISECONDS)
             .readTimeout(10000L, TimeUnit.MILLISECONDS).writeTimeout(10000L, TimeUnit.MILLISECONDS)
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun providePackageManager(
+        @ApplicationContext context: Context
+    ): PackageManager {
+        return context.packageManager
     }
 
 }

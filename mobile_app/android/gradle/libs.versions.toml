@@ -1,5 +1,7 @@
 [versions]
+accompanistNavigationAnimation = "0.37.2"
 agp = "8.8.0"
+coilCompose = "3.1.0"
 converterGson = "2.9.0"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.4"
@@ -20,15 +22,22 @@ composeBom = "2024.04.01"
 generativeai = "0.9.0"
 googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 loggingInterceptor = "4.10.0"
+mobileWalletAdapterClientlibKtx = "2.0.3"
 multidex = "2.0.1"
+multimult = "0.2.3"
 navigationCompose = "2.8.9"
 navigationComposeVersion = "2.8.3"
 okhttp = "4.12.0"
 retrofit = "2.9.0"
+rpcCore = "0.2.7"
+securityCrypto = "1.1.0-alpha06"
+web3Solana = "0.2.5"
 workRuntimeKtx = "2.10.0"
 serialization = "1.9.25"
+visionInternalVkp = "18.2.3"
 
 [libraries]
+accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
@@ -38,9 +47,14 @@ androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNa
 androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-compose-v283 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
@@ -63,8 +77,13 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+mobile-wallet-adapter-clientlib-ktx = { module = "com.solanamobile:mobile-wallet-adapter-clientlib-ktx", version.ref = "mobileWalletAdapterClientlibKtx" }
+multimult = { module = "io.github.funkatronics:multimult", version.ref = "multimult" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+rpc-core = { module = "com.solanamobile:rpc-core", version.ref = "rpcCore" }
+web3-solana = { module = "com.solanamobile:web3-solana", version.ref = "web3Solana" }
+vision-internal-vkp = { group = "com.google.mlkit", name = "vision-internal-vkp", version.ref = "visionInternalVkp" }
 
 [plugins]
 google-devtools = { id = "com.google.devtools.ksp" }
