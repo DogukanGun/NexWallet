@@ -58,10 +58,11 @@ class LoginVM @Inject constructor(
         } ?: setActivityNotFoundError()
     }
 
-    private fun getToken(userId: String){
+    private fun getToken(user: User){
         viewModelScope.launch {
-            generateTokenUseCase.execute(TokenRequest(userId)).collect {
-                userRepository.saveToken(userId)
+            generateTokenUseCase.execute(TokenRequest(user.id)).collect { res->
+                userRepository.saveToken(res.token)
+                _viewState.value = LoginVS.NavigateToHome(user)
             }
         }
     }
@@ -71,10 +72,7 @@ class LoginVM @Inject constructor(
         try {
             userRepository.saveUser(user).fold(
                 onSuccess = {
-                    runBlocking {
-                        getToken(user.id)
-                    }
-                    _viewState.value = LoginVS.NavigateToHome(user)
+                    getToken(user)
                 },
                 onFailure = { exception ->
                     Log.e("LOGIN", "Error saving user data", exception)

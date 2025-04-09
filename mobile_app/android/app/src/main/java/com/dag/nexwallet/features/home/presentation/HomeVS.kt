@@ -2,6 +2,7 @@ package com.dag.nexwallet.features.home.presentation
 
 import com.dag.nexwallet.base.BaseVS
 import com.dag.nexwallet.data.model.User
+import com.dag.nexwallet.features.home.domain.model.GetMyAgentsResponse
 
 sealed class HomeVS : BaseVS {
     data object Loading : HomeVS()
@@ -9,6 +10,7 @@ sealed class HomeVS : BaseVS {
     data class Error(val message: String) : HomeVS()
     data class Success(
         val user: User?,
+        val myAgents: List<GetMyAgentsResponse>,
         val isSignedIn: Boolean = false
     ) : HomeVS()
 
