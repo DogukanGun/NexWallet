@@ -73,5 +73,6 @@ class SecureStorage @Inject constructor(
         const val KEY_FOLLOWING_COUNT = "following_count"
         const val KEY_IS_VERIFIED = "is_verified"
         const val KEY_CREATED_AT = "created_at"
+        const val KEY_TOKEN = "token"
     }
 } 

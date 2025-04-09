@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.home
+package com.dag.nexwallet.features.home.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
