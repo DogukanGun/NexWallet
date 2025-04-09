@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.home
+package com.dag.nexwallet.features.home.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.dag.nexwallet.R
+import com.dag.nexwallet.base.navigation.Destination
 import com.dag.nexwallet.data.model.User
 
 sealed class QuickActionIcon {
@@ -236,13 +237,13 @@ fun QuickActionGrid(navController: NavController) {
             text = "Create Agent",
             icon = QuickActionIcon.VectorIcon(Icons.Default.Add)
         ) { 
-            navController.navigate("create_bot") 
+            navController.navigate(Destination.ConfigurationScreen)
         }
         QuickActionItem(
             text = "Upload Voice",
             icon = QuickActionIcon.DrawableIcon(painterResource(R.drawable.baseline_keyboard_voice))
         ) { 
-            navController.navigate("upload_voice") 
+            navController.navigate(Destination.AddVoiceScreen)
         }
     }
 }

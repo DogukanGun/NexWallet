@@ -1,39 +1,27 @@
-package com.dag.nexwallet.features.login
+package com.dag.nexwallet.features.login.presentation
 
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.dag.nexwallet.base.ActivityHolder
 import com.dag.nexwallet.base.BaseVM
 import com.dag.nexwallet.data.model.User
 import com.dag.nexwallet.data.repository.UserRepository
+import com.dag.nexwallet.features.login.domain.model.TokenRequest
+import com.dag.nexwallet.features.login.domain.usecase.GenerateTokenUseCase
 import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginVM @Inject constructor(
     private val activityHolder: ActivityHolder,
     private val userRepository: UserRepository,
+    private val generateTokenUseCase: GenerateTokenUseCase
 ): BaseVM<LoginVS>() {
-
-    private fun registerDataAndNavigateToHome(user: User) {
-        _viewState.value = LoginVS.Loading
-        try {
-            userRepository.saveUser(user).fold(
-                onSuccess = {
-                    _viewState.value = LoginVS.NavigateToHome(user)
-                },
-                onFailure = { exception ->
-                    Log.e("LOGIN", "Error saving user data", exception)
-                    _viewState.value = LoginVS.Error("Failed to save user data: ${exception.message}")
-                }
-            )
-        } catch (e: Exception) {
-            Log.e("LOGIN", "Error in registration process", e)
-            _viewState.value = LoginVS.Error("Registration failed: ${e.message}")
-        }
-    }
 
     fun loginWithX() {
         _viewState.value = LoginVS.Loading
@@ -68,6 +56,35 @@ class LoginVM @Inject constructor(
                     }
                 }
         } ?: setActivityNotFoundError()
+    }
+
+    private fun getToken(userId: String){
+        viewModelScope.launch {
+            generateTokenUseCase.execute(TokenRequest(userId)).collect {
+                userRepository.saveToken(userId)
+            }
+        }
+    }
+
+    private fun registerDataAndNavigateToHome(user: User) {
+        _viewState.value = LoginVS.Loading
+        try {
+            userRepository.saveUser(user).fold(
+                onSuccess = {
+                    runBlocking {
+                        getToken(user.id)
+                    }
+                    _viewState.value = LoginVS.NavigateToHome(user)
+                },
+                onFailure = { exception ->
+                    Log.e("LOGIN", "Error saving user data", exception)
+                    _viewState.value = LoginVS.Error("Failed to save user data: ${exception.message}")
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("LOGIN", "Error in registration process", e)
+            _viewState.value = LoginVS.Error("Registration failed: ${e.message}")
+        }
     }
 
     private fun setActivityNotFoundError() {

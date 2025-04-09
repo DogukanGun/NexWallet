@@ -32,6 +32,17 @@ class UserRepository @Inject constructor(
         }
     }
 
+    fun saveToken(token: String): Result<Unit> {
+        return try {
+            with(secureStorage) {
+               saveString(SecureStorage.KEY_TOKEN,token)
+            }
+            Result.success(Unit)
+        }catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun getUser(): Result<User?> {
         return try {
             with(secureStorage) {
@@ -51,6 +62,21 @@ class UserRepository @Inject constructor(
                         isVerified = getBoolean(SecureStorage.KEY_IS_VERIFIED),
                         createdAt = getString(SecureStorage.KEY_CREATED_AT) ?: ""
                     ))
+                } else {
+                    Result.success(null)
+                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getToken(): Result<String?> {
+        return try {
+            with(secureStorage) {
+                val userId = getString(SecureStorage.KEY_USER_ID)
+                if (userId != null) {
+                    Result.success(getString(SecureStorage.KEY_TOKEN))
                 } else {
                     Result.success(null)
                 }

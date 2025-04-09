@@ -147,7 +147,8 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
         address ?? "",
         voiceHistory,
         stores.chains,
-        stores.knowledgeBase
+        stores.knowledgeBase,
+        stores.llmProvider
       );
 
       // Check if response contains form components
@@ -234,7 +235,8 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
         address ?? "",
         voiceHistory,
         stores.chains,
-        stores.knowledgeBase
+        stores.knowledgeBase,
+        stores.llmProvider
       );
 
       if (response.op === ChainId.SOLANA && response.transaction) {

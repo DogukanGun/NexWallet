@@ -139,14 +139,16 @@ fun ChainItem(
             .fillMaxWidth()
             .height(48.dp)
     ) {
+        val shape = RoundedCornerShape(24.dp)
         // Main Surface for the chain
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .alpha(if (chain.disabled) 0.6f else 1f)
+                .clip(shape)
                 .clickable(enabled = !chain.disabled) { onSelect() },
-            shape = RoundedCornerShape(24.dp),
+            shape = shape,
             color = if (isSelected) Color(0xFF6366F1) else Color(0xFF2A2A2A) // Primary color matching the app's theme
         ) {
             Row(
@@ -160,7 +162,18 @@ fun ChainItem(
                     painter = painterResource(id = getChainIcon(chain.icon)),
                     contentDescription = chain.name,
                     modifier = Modifier.size(24.dp),
-                    tint = Color.White
+                    tint = when (chain.icon) {
+                        "solana_icon" -> Color(0xFF9945FF) // Solana purple
+                        "base_icon" -> Color(0xFF0052FF) // Base blue
+                        "ethereum_icon" -> Color(0xFF627EEA) // Ethereum blue
+                        "arbitrum_icon" -> Color(0xFF28A0F0) // Arbitrum blue
+                        "optimism_icon" -> Color(0xFFFF0420) // Optimism red
+                        "bnb_icon" -> Color(0xFFF0B90B) // BNB yellow
+                        "polygon_icon" -> Color(0xFF8247E5) // Polygon purple
+                        "avalanche_icon" -> Color(0xFFE84142) // Avalanche red
+                        "chainlink_icon" -> Color(0xFF2A5ADA) // Chainlink blue
+                        else -> Color.White // Default color
+                    }
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
@@ -170,26 +183,6 @@ fun ChainItem(
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
-                )
-            }
-        }
-        
-        // "Soon" tag as a separate overlay
-        if (chain.disabled) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFD0BCFF), // Purple80
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 4.dp, y = 6.dp)
-                    .zIndex(2f)
-            ) {
-                Text(
-                    text = "Soon",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                 )
             }
         }
@@ -207,14 +200,16 @@ fun KnowledgeBaseItem(
             .fillMaxWidth()
             .height(48.dp)
     ) {
+        val shape = RoundedCornerShape(24.dp)
         // Main Surface for the knowledge base
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .alpha(if (knowledgeBase.disabled) 0.6f else 1f)
+                .clip(shape)
                 .clickable(enabled = !knowledgeBase.disabled) { onSelect() },
-            shape = RoundedCornerShape(24.dp),
+            shape = shape,
             color = if (isSelected) Color(0xFF6366F1) else Color(0xFF2A2A2A) // Primary color matching the app's theme
         ) {
             Row(
@@ -268,14 +263,16 @@ fun LLMProviderItem(
             .fillMaxWidth()
             .heightIn(min = 48.dp)
     ) {
+        val shape = RoundedCornerShape(24.dp)
         // Main Surface for the provider
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
                 .alpha(if (provider.disabled) 0.6f else 1f)
+                .clip(shape)
                 .clickable(enabled = !provider.disabled) { onSelect() },
-            shape = RoundedCornerShape(24.dp),
+            shape = shape,
             color = if (isSelected) Color(0xFF6366F1) else Color(0xFF2A2A2A) // Primary color matching the app's theme
         ) {
             Row(
@@ -335,14 +332,16 @@ fun AgentTypeItem(
             .fillMaxWidth()
             .height(48.dp)
     ) {
+        val shape = RoundedCornerShape(24.dp)
         // Main Surface for the agent type
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .alpha(if (agentType.disabled) 0.6f else 1f)
+                .clip(shape)
                 .clickable(enabled = !agentType.disabled) { onSelect() },
-            shape = RoundedCornerShape(24.dp),
+            shape = shape,
             color = if (isSelected) Color(0xFF6366F1) else Color(0xFF2A2A2A) // Primary color matching the app's theme
         ) {
             Row(

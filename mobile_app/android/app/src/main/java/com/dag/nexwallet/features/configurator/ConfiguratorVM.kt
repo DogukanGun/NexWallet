@@ -120,12 +120,14 @@ class ConfiguratorVM @Inject constructor() : BaseVM<ConfiguratorVS>(Configurator
 
     fun selectLLMProvider(provider: LLMProvider) {
         val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
-        updateState(currentState.copy(selectedLLMProvider = provider))
+        val newSelection = if (currentState.selectedLLMProvider == provider) null else provider
+        updateState(currentState.copy(selectedLLMProvider = newSelection))
     }
 
     fun selectAgentType(type: AgentType) {
         val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
-        updateState(currentState.copy(selectedAgentType = type))
+        val newSelection = if (currentState.selectedAgentType == type) null else type
+        updateState(currentState.copy(selectedAgentType = newSelection))
     }
 
     fun isStepValid(step: Int): Boolean {

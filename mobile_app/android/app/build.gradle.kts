@@ -13,6 +13,18 @@ plugins {
 android {
     namespace = "com.dag.nexwallet"
     compileSdk = 35
+    flavorDimensions += "version"
+    testBuildType = "debug"
+    productFlavors {
+        create("localB"){
+            dimension = "version"
+            versionNameSuffix = "-lcl"
+        }
+        create("relaseB"){
+            dimension = "version"
+            versionNameSuffix = "-rls"
+        }
+    }
 
     defaultConfig {
         applicationId = "com.dag.nexwallet"
@@ -22,15 +34,33 @@ android {
         versionName = "1.0"
         multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        productFlavors {
+            getByName("relaseB") {
+                buildConfigField(
+                    "String",
+                    "BASE_URL",
+                    "\"https://bacai.nexarb.com/\""
+                )
+            }
+            getByName("localB"){
+                buildConfigField(
+                    "String",
+                    "BASE_URL",
+                    "\"http://10.0.0.1:8000/\""
+                )
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            isDebuggable = false
         }
     }
     compileOptions {
@@ -99,9 +129,10 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     //Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.analytics)
 
     //Solana
     implementation(libs.mobile.wallet.adapter.clientlib.ktx)
@@ -116,5 +147,13 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    //Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.core.engine)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.serialization)
+    implementation(libs.ktor.serialization.kotlinx.json)
 
 }

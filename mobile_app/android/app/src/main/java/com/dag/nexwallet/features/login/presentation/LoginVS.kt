@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.login
+package com.dag.nexwallet.features.login.presentation
 
 import com.dag.nexwallet.base.BaseVS
 import com.dag.nexwallet.data.model.User
