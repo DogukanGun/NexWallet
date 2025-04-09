@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.clone_voice
+package com.dag.nexwallet.features.clone_voice.presentation
 
 import android.content.Context
 import android.net.Uri
@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,8 +64,7 @@ fun CloneVoiceView(
     // Handle UI state based on viewModel state
     LaunchedEffect(viewState) {
         when (viewState) {
-            is CloneVoiceViewState.Success -> {
-                // Handle success - could show a snackbar or dialog
+            is CloneVoiceVS.Success -> {
                 // Reset state after handling
                 selectedFile = null
                 voiceModelName = ""
@@ -257,8 +257,7 @@ fun CloneVoiceView(
                     onValueChange = { voiceModelName = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .background(Color(0xFF1E293B), RoundedCornerShape(8.dp)),
+                        .padding(top = 8.dp),
                     shape = RoundedCornerShape(8.dp),
                     placeholder = {
                         Text(
@@ -268,6 +267,13 @@ fun CloneVoiceView(
                     },
                     textStyle = androidx.compose.ui.text.TextStyle(
                         color = Color.White
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color(0xFF1E293B),
+                        focusedBorderColor = Color(0xFF6366F1),
+                        unfocusedContainerColor = Color(0xFF1E293B),
+                        focusedContainerColor = Color(0xFF1E293B),
+                        cursorColor = Color(0xFF6366F1)
                     )
                 )
                 
@@ -427,7 +433,7 @@ fun CloneVoiceView(
                 contentPadding = PaddingValues(0.dp),
                 enabled = isUploadButtonEnabled
             ) {
-                if (viewState is CloneVoiceViewState.Loading) {
+                if (viewState is CloneVoiceVS.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = Color.White,
@@ -452,9 +458,9 @@ fun CloneVoiceView(
         }
         
         // Error message
-        if (viewState is CloneVoiceViewState.Error) {
+        if (viewState is CloneVoiceVS.Error) {
             Text(
-                text = (viewState as CloneVoiceViewState.Error).message,
+                text = (viewState as CloneVoiceVS.Error).message,
                 color = Color.Red,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(top = 8.dp)
@@ -462,7 +468,7 @@ fun CloneVoiceView(
         }
         
         // Success message
-        if (viewState is CloneVoiceViewState.Success) {
+        if (viewState is CloneVoiceVS.Success) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -483,7 +489,7 @@ fun CloneVoiceView(
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = (viewState as CloneVoiceViewState.Success).message,
+                        text = (viewState as CloneVoiceVS.Success).message,
                         color = Color(0xFF10B981),
                         fontSize = 14.sp,
                         modifier = Modifier.padding(start = 8.dp)

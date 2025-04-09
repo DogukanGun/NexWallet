@@ -19,6 +19,6 @@ sealed interface Destination {
     data object AddVoiceScreen: Destination
 
     companion object {
-        val NAV_WITHOUT_BOTTOM_NAVBAR = listOf(Splash)
+        val NAV_WITHOUT_BOTTOM_NAVBAR = listOf(Splash, LoginScreen, AddVoiceScreen)
     }
 }
