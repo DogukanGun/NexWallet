@@ -143,7 +143,26 @@ class ApiService {
   }
 
   private async fetchWithToken<T>(url: string, options: FetchOptions = {}): Promise<T> {
-    const token = localStorage.getItem("token");
+    let token = localStorage.getItem("token");
+    if (!token) {
+      const storedUserData = sessionStorage.getItem('userData');
+      if(!storedUserData) {
+        throw new Error("No token found");
+      }
+      const userData = JSON.parse(storedUserData);
+      const userId = userData.id;
+      const response = await fetch(`/api/user/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+      token = data.token;
+      if(!token) {
+        throw new Error("No token found");
+      }
+      localStorage.setItem("token", token);
+    }
     options.headers = {
       ...(options.headers || {}),
     };
