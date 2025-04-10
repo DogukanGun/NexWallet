@@ -15,6 +15,7 @@ class EnvironmentKeys(Enum):
     TWITTER_CLIENT_SECRET = "TWITTER_CLIENT_SECRET"
     FRONTEND_URL = "FRONTEND_URL"
     PRIVATE_KEY = "PRIVATE_KEY"
+    BACKEND_API_URL = "BACKEND_API_URL"
 
 
 class TestEnvironmentKeys(Enum):

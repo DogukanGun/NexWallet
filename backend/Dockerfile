@@ -25,7 +25,7 @@ RUN poetry install
 COPY . .
 
 # Expose the port the app runs on.
-EXPOSE 8080
+EXPOSE 8000
 
 # Start the application.
 CMD ["python", "main.py"]
