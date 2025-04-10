@@ -8,13 +8,15 @@ interface UserData {
   name: string;
 }
 
-export type Config = {
+export interface Config {
   chains: AppChain[];
   llmProvider: string;
   agentType: string;
   isPointSystemJoined: boolean;
   selectedVoice?: string;
-};
+  modelName: string;
+  isOnchain: boolean;
+}
 
 interface ConfigState {
   chains: AppChain[]
@@ -54,6 +56,7 @@ export const useConfigStore = create<ConfigState>()(
         set((state) => ({ 
           ...state,
           ...config,
+          isConfigured: true,
           selectedVoice: config.selectedVoice || state.selectedVoice
         })),
       clearConfig: () => 

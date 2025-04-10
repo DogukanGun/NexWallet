@@ -279,7 +279,21 @@ export default function Configurator() {
       setSelectedProvider(llmId === 'claude' ? 'Claude' : 'OpenAI');
       setShowPaymentModal(true);
     }
-    setSelectedLLM((prev) => (prev === llmId ? "" : llmId));
+    
+    // Update the selected LLM in local state
+    setSelectedLLM((prev) => {
+      const newLLM = prev === llmId ? "" : llmId;
+      
+      // Update the config store with the new LLM provider and isOnchain flag
+      useConfigStore.getState().setConfig({
+        ...useConfigStore.getState(),
+        llmProvider: newLLM,
+        isOnchain: newLLM === 'llama_onchain' || newLLM === 'deepseek_onchain',
+        modelName: newLLM
+      });
+      
+      return newLLM;
+    });
   };
 
   const handleAgentTypeSelection = (typeId: string) => {
@@ -307,6 +321,8 @@ export default function Configurator() {
       agentType: selectedAgentType,
       isPointSystemJoined: selectedConnectionType === "join",
       selectedVoice: selectedVoice || 'voice1',
+      modelName: selectedLLM,
+      isOnchain: selectedLLM === 'llama_onchain' || selectedLLM === 'deepseek_onchain'
     };
 
     useConfigStore.getState().setConfig(config);
