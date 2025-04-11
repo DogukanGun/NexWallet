@@ -268,7 +268,6 @@ export default function Configurator() {
       return;
     }
 
-    const isSolanaSelected = selectedChains.some(chain => chain.id === "solana");
     const isBaseSelected = selectedChains.some(chain => chain.id === "base");
     const isEthereumSelected = selectedChains.some(chain => chain.id === "ethereum");
     if ((isBaseSelected || isEthereumSelected) && llmId === "claude") {

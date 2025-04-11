@@ -1,7 +1,8 @@
-import { Message } from "ai";
-import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import { Message } from "@ai-sdk/react";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { AppChain } from "../configurator/data";
 import { Chain } from "@prisma/client";
+import { ComponentConfig } from "../voice/types";
 
 type FetchOptions = RequestInit & {
   headers?: Record<string, string>;
@@ -13,12 +14,6 @@ type UserCodeType = {
   used_by: string;
 };
 
-// Define proper types instead of any
-type ApiResponse<T> = {
-  data: T;
-  status: number;
-  message?: string;
-};
 
 // Define response types based on your API endpoints
 type UserCode = {
@@ -37,7 +32,11 @@ type ChatResponse = {
   transaction?: string;
   audio?: string;
   op?: string;
-  components?: string;
+  components?: ComponentConfig[];
+  params?: {
+    action: string;
+    known_values: Record<string, any>;
+  };
 };
 
 type BotResponse = {
