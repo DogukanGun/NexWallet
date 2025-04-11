@@ -76,11 +76,113 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                                         });
                                     }
                                 }
-                            } else if (tempResponse.includes("component")) {
-                                console.log("component", tempResponse);
-                                const component = tempResponse.split("component:")[1].trim();
-                                const params = JSON.parse(tempResponse.split("params:")[1].trim());
-                                return res.status(200).json({ component: component, params: params });
+                            } else if (tempResponse.includes('component:')) {
+                                console.log("Found component in response:", tempResponse);
+                                try {
+                                    // More robust handling of component responses
+                                    // If the response contains an error message, check if it's from the voice component tool
+                                    if (tempResponse.includes("Failed to process voice component request")) {
+                                        console.log("Detected error from voice component tool, using fallback components");
+                                        // Return a fallback form with default components for sending SOL
+                                        return res.status(200).json({
+                                            components: [
+                                                {
+                                                    name: "receiver_wallet_address",
+                                                    type: "input_box",
+                                                    validation: "string",
+                                                    placeholder: "Enter receiver's wallet address",
+                                                    required: true
+                                                },
+                                                {
+                                                    name: "amount",
+                                                    type: "input_box", 
+                                                    validation: "number",
+                                                    placeholder: "Enter amount in SOL",
+                                                    required: true
+                                                }
+                                            ],
+                                            params: {
+                                                action: "send_sol",
+                                                known_values: {}
+                                            },
+                                            text: "Please provide the required information to complete the transaction."
+                                        });
+                                    }
+                                    
+                                    // Try to extract component and params parts
+                                    const [componentPart, paramsPart] = tempResponse.split('\nparams:').map((part: string) => part.trim());
+                                    const componentJson = componentPart.replace('component:', '').trim();
+                                    
+                                    console.log("Component part:", componentJson);
+                                    console.log("Params part:", paramsPart);
+                                    
+                                    // Parse the components and params, with better error handling
+                                    try {
+                                        const components = JSON.parse(componentJson);
+                                        const params = paramsPart ? JSON.parse(paramsPart) : {};
+
+                                        console.log("Successfully parsed components:", components);
+                                        console.log("Successfully parsed params:", params);
+
+                                        return res.status(200).json({ 
+                                            components,
+                                            params,
+                                            text: "Please provide the required information to complete the transaction."
+                                        });
+                                    } catch (parseError: Error | unknown) {
+                                        console.error("JSON parse error:", parseError);
+                                        console.log("componentJson:", componentJson);
+                                        console.log("paramsPart:", paramsPart);
+                                        
+                                        // Get error message safely
+                                        const errorMessage = parseError instanceof Error 
+                                            ? parseError.message 
+                                            : String(parseError);
+                                        
+                                        // Attempt fallback parsing
+                                        if (componentJson.includes('[') && componentJson.includes(']')) {
+                                            try {
+                                                // Try to extract valid JSON
+                                                const jsonMatch = componentJson.match(/(\[.*\])/);
+                                                if (jsonMatch && jsonMatch[1]) {
+                                                    const fallbackComponents = JSON.parse(jsonMatch[1]);
+                                                    console.log("Fallback parsing succeeded:", fallbackComponents);
+                                                    
+                                                    return res.status(200).json({
+                                                        components: fallbackComponents,
+                                                        params: { 
+                                                            action: "send_sol",
+                                                            known_values: {}
+                                                        },
+                                                        text: "Please provide the required information to complete the transaction."
+                                                    });
+                                                }
+                                            } catch (fallbackError) {
+                                                console.error("Fallback parsing failed:", fallbackError);
+                                            }
+                                        }
+                                        
+                                        return res.status(400).json({ 
+                                            error: "Failed to parse component response",
+                                            details: errorMessage,
+                                            text: "There was an error processing your request. Please try again."
+                                        });
+                                    }
+                                } catch (e: Error | unknown) {
+                                    console.error("Error parsing component response:", e);
+                                    console.log("Raw response:", tempResponse);
+                                    
+                                    // Get error message safely
+                                    const errorMessage = e instanceof Error
+                                        ? e.message
+                                        : String(e);
+                                        
+                                    return res.status(400).json({ 
+                                        error: "Failed to parse component response",
+                                        details: errorMessage,
+                                        text: "There was an error processing your request. Please try again."
+                                    });
+                                }
                             }
 
                         } catch (e) {

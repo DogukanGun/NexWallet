@@ -13,7 +13,10 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+<<<<<<< HEAD
 import com.dag.nexwallet.features.clone_voice.presentation.CloneVoiceView
+=======
+>>>>>>> feat/lilypad_integration
 import com.dag.nexwallet.features.configurator.ConfiguratorView
 import com.dag.nexwallet.features.home.presentation.HomeView
 
@@ -145,6 +148,7 @@ fun DefaultNavigationHost(
         ) {
             ConfiguratorView()
         }
+<<<<<<< HEAD
 
         composable<Destination.AddVoiceScreen>(
             enterTransition = {
@@ -176,5 +180,7 @@ fun DefaultNavigationHost(
         }
 
 
+=======
+>>>>>>> feat/lilypad_integration
     }
 }

@@ -15,9 +15,17 @@ class EnvironmentKeys(Enum):
     TWITTER_CLIENT_SECRET = "TWITTER_CLIENT_SECRET"
     FRONTEND_URL = "FRONTEND_URL"
     PRIVATE_KEY = "PRIVATE_KEY"
+<<<<<<< HEAD
+=======
+    BACKEND_API_URL = "BACKEND_API_URL"
+>>>>>>> feat/lilypad_integration
 
 
 class TestEnvironmentKeys(Enum):
     CONNECTION_STRING = "CONNECTION_STRING"
     SECRET_KEY = "SECRET_KEY"
+<<<<<<< HEAD
     PRIVATE_KEY = "PRIVATE_KEY"
+=======
+    PRIVATE_KEY = "PRIVATE_KEY"
+>>>>>>> feat/lilypad_integration

@@ -1,7 +1,8 @@
-import { Message } from "ai";
-import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import { Message } from "@ai-sdk/react";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { AppChain } from "../configurator/data";
 import { Chain } from "@prisma/client";
+import { ComponentConfig } from "../voice/types";
 
 type FetchOptions = RequestInit & {
   headers?: Record<string, string>;
@@ -13,12 +14,6 @@ type UserCodeType = {
   used_by: string;
 };
 
-// Define proper types instead of any
-type ApiResponse<T> = {
-  data: T;
-  status: number;
-  message?: string;
-};
 
 // Define response types based on your API endpoints
 type UserCode = {
@@ -37,7 +32,15 @@ type ChatResponse = {
   transaction?: string;
   audio?: string;
   op?: string;
+<<<<<<< HEAD
   components?: string;
+=======
+  components?: ComponentConfig[];
+  params?: {
+    action: string;
+    known_values: Record<string, string | number | boolean | null>;
+  };
+>>>>>>> feat/lilypad_integration
 };
 
 type BotResponse = {
@@ -143,7 +146,26 @@ class ApiService {
   }
 
   private async fetchWithToken<T>(url: string, options: FetchOptions = {}): Promise<T> {
-    const token = localStorage.getItem("token");
+    let token = localStorage.getItem("token");
+    if (!token) {
+      const storedUserData = sessionStorage.getItem('userData');
+      if(!storedUserData) {
+        throw new Error("No token found");
+      }
+      const userData = JSON.parse(storedUserData);
+      const userId = userData.id;
+      const response = await fetch(`/api/user/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+      token = data.token;
+      if(!token) {
+        throw new Error("No token found");
+      }
+      localStorage.setItem("token", token);
+    }
     options.headers = {
       ...(options.headers || {}),
     };

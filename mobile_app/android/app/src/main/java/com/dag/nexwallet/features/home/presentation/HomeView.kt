@@ -16,7 +16,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.dag.nexwallet.base.extensions.startAsTopComposable
 import com.dag.nexwallet.base.navigation.Destination
+<<<<<<< HEAD
 import com.dag.nexwallet.features.home.domain.model.GetMyAgentsResponse
+=======
+>>>>>>> feat/lilypad_integration
 
 @Composable
 fun HomeView(
@@ -98,6 +101,7 @@ fun HomeView(
                         QuickActionGrid(navController)
                     }
 
+<<<<<<< HEAD
                     // My Agents Section
                     item {
                         Text(
@@ -134,6 +138,8 @@ fun HomeView(
                         }
                     }
 
+=======
+>>>>>>> feat/lilypad_integration
                     // AI Agents Section
                     item {
                         Text(
@@ -155,6 +161,7 @@ fun HomeView(
     }
 }
 
+<<<<<<< HEAD
 @Composable
 private fun MyAgentCard(agent: GetMyAgentsResponse) {
     Card(
@@ -279,6 +286,8 @@ private fun MyAgentCard(agent: GetMyAgentsResponse) {
         }
     }
 }
+=======
+>>>>>>> feat/lilypad_integration
 
 @Preview
 @Composable

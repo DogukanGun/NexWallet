@@ -418,7 +418,13 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       // Update the config store with the new LLM provider
       useConfigStore.getState().setConfig({
         ...useConfigStore.getState(),
+<<<<<<< HEAD
         llmProvider: newLLM
+=======
+        llmProvider: newLLM,
+        modelName: newLLM,
+        isOnchain: newLLM === 'llama_onchain' || newLLM === 'deepseek_onchain'
+>>>>>>> feat/lilypad_integration
       });
       
       return newLLM;

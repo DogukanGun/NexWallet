@@ -14,14 +14,14 @@ const roadmapItems: RoadmapItem[] = [
     description: 'Initial release of the web application with core features'
   },
   {
-    title: 'Telegram Integration',
-    status: 'testnet',
-    description: 'Connect and interact with your AI assistant through Telegram'
+    title: 'Mobile App',
+    status: 'in-progress',
+    description: 'Native mobile applications for iOS and Android'
   },
   {
-    title: 'Mobile App',
+    title: 'Voice Customization (Beta)',
     status: 'planned',
-    description: 'Native mobile applications for iOS and Android'
+    description: 'Customize your AI assistant with different voice profiles and styles'
   },
   {
     title: 'Advanced Analytics',

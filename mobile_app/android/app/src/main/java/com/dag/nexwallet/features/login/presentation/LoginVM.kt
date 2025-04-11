@@ -58,11 +58,18 @@ class LoginVM @Inject constructor(
         } ?: setActivityNotFoundError()
     }
 
+<<<<<<< HEAD
     private fun getToken(user: User){
         viewModelScope.launch {
             generateTokenUseCase.execute(TokenRequest(user.id)).collect { res->
                 userRepository.saveToken(res.token)
                 _viewState.value = LoginVS.NavigateToHome(user)
+=======
+    private fun getToken(userId: String){
+        viewModelScope.launch {
+            generateTokenUseCase.execute(TokenRequest(userId)).collect {
+                userRepository.saveToken(userId)
+>>>>>>> feat/lilypad_integration
             }
         }
     }
@@ -72,7 +79,14 @@ class LoginVM @Inject constructor(
         try {
             userRepository.saveUser(user).fold(
                 onSuccess = {
+<<<<<<< HEAD
                     getToken(user)
+=======
+                    runBlocking {
+                        getToken(user.id)
+                    }
+                    _viewState.value = LoginVS.NavigateToHome(user)
+>>>>>>> feat/lilypad_integration
                 },
                 onFailure = { exception ->
                     Log.e("LOGIN", "Error saving user data", exception)

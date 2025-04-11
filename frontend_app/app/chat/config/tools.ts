@@ -259,7 +259,9 @@ const ConfigurationComponent: FC<{}> = ({}) => {
       chains: selectedChains,
       llmProvider: store.llmProvider,
       agentType: store.agentType,
-      isPointSystemJoined: store.isPointSystemJoined
+      isPointSystemJoined: store.isPointSystemJoined,
+      modelName: store.llmProvider,
+      isOnchain: store.llmProvider === 'llama_onchain' || store.llmProvider === 'deepseek_onchain'
     });
 
     // Go back to the main tools page

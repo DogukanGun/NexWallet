@@ -3,15 +3,22 @@ package com.dag.nexwallet.features.home.presentation
 import androidx.lifecycle.viewModelScope
 import com.dag.nexwallet.base.BaseVM
 import com.dag.nexwallet.data.repository.UserRepository
+<<<<<<< HEAD
 import com.dag.nexwallet.features.home.domain.usecase.GetMyAgentsUseCase
+=======
+>>>>>>> feat/lilypad_integration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeVM @Inject constructor(
+<<<<<<< HEAD
     private val userRepository: UserRepository,
     private val getMyAgentsUseCase: GetMyAgentsUseCase
+=======
+    private val userRepository: UserRepository
+>>>>>>> feat/lilypad_integration
 ) : BaseVM<HomeVS>(initialValue = HomeVS.initial()) {
 
     init {
@@ -26,10 +33,15 @@ class HomeVM @Inject constructor(
                     .onSuccess { user ->
                         _viewState.value = HomeVS.Success(
                             user = user,
+<<<<<<< HEAD
                             isSignedIn = user != null,
                             myAgents = emptyList()
                         )
                         getMyAgents()
+=======
+                            isSignedIn = user != null
+                        )
+>>>>>>> feat/lilypad_integration
                     }
                     .onFailure { exception ->
                         _viewState.value = HomeVS.Error(
@@ -50,6 +62,7 @@ class HomeVM @Inject constructor(
             _viewState.value = HomeVS.LoggedOut
         }
     }
+<<<<<<< HEAD
 
     private fun getMyAgents(){
         viewModelScope.launch {
@@ -69,4 +82,6 @@ class HomeVM @Inject constructor(
             }
         }
     }
+=======
+>>>>>>> feat/lilypad_integration
 }

@@ -1,5 +1,6 @@
 package com.dag.nexwallet.features.home.data.datasource
 
+<<<<<<< HEAD
 import com.dag.nexwallet.features.home.domain.model.GetMyAgentsResponse
 import com.dag.nexwallet.features.home.domain.repository.IMyAgentsService
 import io.ktor.client.HttpClient
@@ -29,4 +30,7 @@ class MyAgentsService @Inject constructor(@Named("AuthorizedKtor") val ktor: Htt
             }
         }
     }
+=======
+class MyAgentsService {
+>>>>>>> feat/lilypad_integration
 }

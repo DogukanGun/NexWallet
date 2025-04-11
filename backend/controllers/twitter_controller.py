@@ -34,8 +34,7 @@ async def login(
     environment_manager: EnvironmentManager = Depends(get_environment_manager)
 ):
     # Dynamically construct the REDIRECT_URI
-    REDIRECT_URI = f"{request.base_url}api/twitter/callback"
-    
+    REDIRECT_URI = f"{environment_manager.get_key(EnvironmentKeys.BACKEND_API_URL.name)}/api/twitter/callback"
     code_verifier = generate_code_verifier()
     code_challenge = generate_code_challenge(code_verifier)
 
@@ -69,7 +68,7 @@ async def callback(
     db: Session = Depends(get_db),
     environment_manager: EnvironmentManager = Depends(get_environment_manager)
 ):
-    REDIRECT_URI = f"{request.base_url}api/twitter/callback"
+    REDIRECT_URI = f"{environment_manager.get_key(EnvironmentKeys.BACKEND_API_URL.name)}/api/twitter/callback"
     print(f"Received code: {code}")  # Log the received code
     code_verifier = request.session.get("code_verifier")
     if code_verifier is None:
@@ -146,7 +145,7 @@ async def callback(
         user = None
     
     # Create redirect URL with user data as query parameters
-    frontend_base_url = f"{environment_manager.get_key(EnvironmentKeys.FRONTEND_URL.name)}auth-success"
+    frontend_base_url = f"{environment_manager.get_key(EnvironmentKeys.FRONTEND_URL.name)}/auth-success"
     
     # Only add query parameters if we have user data
     if user:

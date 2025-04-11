@@ -19,17 +19,29 @@ const LILYPAD_MODEL_MAPPING: Record<LilypadModelType, string> = {
     'deepseek_onchain': 'deepseek-r1:7b'
 };
 
+<<<<<<< HEAD
 // Create a custom class for Lilypad integration if needed
+=======
+// Create a custom class for Lilypad integration
+>>>>>>> feat/lilypad_integration
 class LilypadChatModel extends BaseChatModel {
     private model: string;
     private temperature: number;
     private apiKey: string;
     
+<<<<<<< HEAD
     constructor(model: string, temperature: number, apiKey: string) {
         super({});
         this.model = model;
         this.temperature = temperature;
         this.apiKey = apiKey;
+=======
+    constructor(model: string, temperature: number) {
+        super({});
+        this.model = model;
+        this.temperature = temperature;
+        this.apiKey = process.env.LILYPAD_API_KEY || "";
+>>>>>>> feat/lilypad_integration
     }
     
     _llmType(): string {
@@ -37,12 +49,16 @@ class LilypadChatModel extends BaseChatModel {
     }
     
     bindTools(tools: StructuredToolInterface[]): BaseChatModel {
+<<<<<<< HEAD
         // Return self when binding tools - we'll handle tool usage in _generate
+=======
+>>>>>>> feat/lilypad_integration
         return this;
     }
     
     async _generate(messages: ChatMessage[]): Promise<any> {
         try {
+<<<<<<< HEAD
             const formattedMessages = messages.map(message => {
                 if (message instanceof HumanMessage) {
                     return { role: "user", content: message.content };
@@ -56,6 +72,21 @@ class LilypadChatModel extends BaseChatModel {
             });
             
             const response = await fetch("https://anura-testnet.lilypad.tech/api/v1/chat/completions", {
+=======
+            // Format the conversation history into a prompt string
+            const prompt = messages.map(message => {
+                let role = "user";
+                if (message instanceof AIMessage) {
+                    role = "assistant";
+                } else if (message instanceof SystemMessage) {
+                    role = "system";
+                }
+                return `${role}: ${message.content}`;
+            }).join('\n');
+
+            // Make a direct API call to Lilypad's inference endpoint
+            const response = await fetch("https://anura-testnet.lilypad.tech/api/v1/inference", {
+>>>>>>> feat/lilypad_integration
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -63,6 +94,7 @@ class LilypadChatModel extends BaseChatModel {
                 },
                 body: JSON.stringify({
                     model: this.model,
+<<<<<<< HEAD
                     messages: formattedMessages,
                     temperature: this.temperature,
                     max_tokens: 2048
@@ -81,6 +113,31 @@ class LilypadChatModel extends BaseChatModel {
                     {
                         text: result.choices[0].message.content,
                         message: new AIMessage(result.choices[0].message.content)
+=======
+                    prompt: prompt,
+                    temperature: this.temperature,
+                    max_tokens: 2048,
+                    stream: false
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Lilypad API error: ${response.status} ${response.statusText} ${JSON.stringify(errorData)}`);
+            }
+
+            const result = await response.json();
+            console.log("Lilypad API response:", JSON.stringify(result, null, 2));
+
+            // Extract the generated text from Lilypad's response format
+            const generatedText = result.response || result.output || "";
+
+            return {
+                generations: [
+                    {
+                        text: generatedText,
+                        message: new AIMessage(generatedText)
+>>>>>>> feat/lilypad_integration
                     }
                 ]
             };
@@ -101,6 +158,7 @@ export const createAgent = (llmConfig: LLMConfig, tools: StructuredToolInterface
             throw new Error(`Unsupported onchain model: ${llmConfig.modelName}`);
         }
 
+<<<<<<< HEAD
         llm = new ChatOpenAI({
             modelName: lilypadModel,
             temperature: llmConfig.temperature,
@@ -134,6 +192,27 @@ export const createAgent = (llmConfig: LLMConfig, tools: StructuredToolInterface
         llm = new ChatOpenAI({
             ...llmConfig,
             modelName,
+=======
+        llm = new LilypadChatModel(lilypadModel, llmConfig.temperature);
+    } else {
+        // Handle OpenAI models
+        let modelName: string;
+        
+        // Map provider IDs to actual model names
+        if (llmConfig.modelName.toLowerCase() === "openai") {
+            modelName = "gpt-4";
+        } else if (llmConfig.modelName === "gpt-4o-mini") {
+            modelName = "gpt-4";
+        } else if (llmConfig.modelName.startsWith("gpt-")) {
+            modelName = llmConfig.modelName;
+        } else {
+            throw new Error(`Invalid OpenAI model name: ${llmConfig.modelName}. Expected 'openai' (case-insensitive) or a model name starting with 'gpt-'`);
+        }
+        
+        llm = new ChatOpenAI({
+            modelName: modelName,
+            temperature: llmConfig.temperature,
+>>>>>>> feat/lilypad_integration
             apiKey: process.env.OPEN_AI_KEY
         });
     }

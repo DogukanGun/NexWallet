@@ -96,6 +96,13 @@ export default function Home() {
   }, []);
 
   const handleAgentSelect = (agent: Agent) => {
+    // Determine if this is an onchain LLM
+    const llmProvider = agent.id === '1' || agent.id === '2' || agent.id === '3' ? 'OpenAI' : 
+                         agent.id === '4' ? 'llama_onchain' : ''; 
+    
+    // Check if this is an onchain model
+    const isOnchain = llmProvider === 'llama_onchain';
+    
     const config = {
       chains: agent.id === '1' ? [{ id: ChainId.SOLANA, name: 'Solana', isEmbedded: false, disabled: false, icon: '' }] :
         agent.id === '2' ? [{ id: ChainId.BASE, name: 'Base', isEmbedded: false, disabled: false, icon: '' }] :
@@ -103,9 +110,11 @@ export default function Home() {
             agent.id === '4' ? [{ id: ChainId.BASE, name: 'Base with Llama 3.1', isEmbedded: false, disabled: false, icon: '' }] :
               agent.id === '5' ? [{ id: ChainId.ARBITRUM, name: 'Arbitrum', isEmbedded: false, disabled: false, icon: '' }] :
                 agent.id === '6' ? [{ id: ChainId.OPTIMISM, name: 'Optimism', isEmbedded: false, disabled: false, icon: '' }] : [],
-      llmProvider: agent.id === '1' || agent.id === '2' || agent.id === '3' ? 'OpenAI' : '',
+      llmProvider: llmProvider,
       agentType: agent.name,
-      isPointSystemJoined: false
+      isPointSystemJoined: false,
+      modelName: llmProvider, // Set modelName to match llmProvider
+      isOnchain: isOnchain // Add isOnchain property
     }
     setConfig(config)
     router.push("/chat");

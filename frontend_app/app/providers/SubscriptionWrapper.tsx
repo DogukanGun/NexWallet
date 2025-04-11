@@ -14,7 +14,7 @@ import { useAppKitConnection } from "@reown/appkit-adapter-solana/react";
 import { useSnackbar } from "notistack";
 import { apiService } from "../services/ApiService";
 import PopupComponent from "../components/PopupComponent";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import useCurrentUserId from "../hooks/useCurrentUserId";
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -34,6 +34,10 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const { enqueueSnackbar } = useSnackbar();
   const { userId } = useCurrentUserId();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Check if we're on the configurator page
+  const isConfigPage = pathname === '/app' || pathname === '/configurator';
 
   const handleCheckCode = async (accessCode: string) => {
     try {
@@ -121,8 +125,9 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
       try {
-        if (!userId) {
+        if (!userId || isConfigPage) {
           setIsLoading(false);
+          setIsAllowed(true); // Allow access if we're on config page
           return;
         }
 
@@ -134,17 +139,19 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         }
       } catch (error) {
         console.error("Error checking subscription status:", error);
-        setShowPopup(true);
+        if (!isConfigPage) {
+          setShowPopup(true);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     checkSubscriptionStatus();
-  }, [userId]);
+  }, [userId, isConfigPage]);
 
   useEffect(() => {
-    if (showPopup) {
+    if (showPopup && !isConfigPage) {
       openModal(
         <PopupComponent 
           handleCheckCode={handleCheckCode} 
@@ -164,7 +171,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         closeModal();
       }
     };
-  }, [showPopup]);
+  }, [showPopup, isConfigPage]);
 
   return (
     <>
@@ -173,7 +180,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
           <LoadingSpinner size="large" text="Checking subscription..." />
         </div>
       )}
-      {isAllowed && children}
+      {(isAllowed || isConfigPage) && children}
     </>
   );
 };

@@ -54,6 +54,10 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
   const [formComponents, setFormComponents] = useState<ComponentConfig[]>([]);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+<<<<<<< HEAD
+=======
+  const [isValidForm, setIsValidForm] = useState(false);
+>>>>>>> feat/lilypad_integration
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -62,6 +66,21 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
   useEffect(() => {
     scrollToBottom();
   }, [voiceHistory]);
+
+  // Validate the form whenever formData or formComponents change
+  useEffect(() => {
+    if (formComponents.length === 0) {
+      setIsValidForm(false);
+      return;
+    }
+
+    // Check if all required fields have values
+    const allRequiredFieldsFilled = formComponents
+      .filter(comp => comp.required)
+      .every(comp => formData[comp.name] && formData[comp.name].trim() !== '');
+
+    setIsValidForm(allRequiredFieldsFilled);
+  }, [formData, formComponents]);
 
   const startRecording = async () => {
     try {
@@ -133,6 +152,7 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
     if (!approved) return;
 
     try {
+<<<<<<< HEAD
       toast.loading("Converting your voice to text...");
       
       setIsProcessing(true);
@@ -199,20 +219,215 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
           const newHistory = [...prev];
           newHistory[newHistory.length - 1].content = currentText;
           return newHistory;
+=======
+        toast.loading("Converting your voice to text...");
+        
+        setIsProcessing(true);
+        addMessage({
+            type: 'user',
+            content: transcribedText,
+>>>>>>> feat/lilypad_integration
         });
-        await new Promise(resolve => setTimeout(resolve, 30));
-      }
 
-      toast.success("Response complete!");
+        toast.loading("Processing your request...");
+        const response = await apiService.postChat(
+            transcribedText,
+            address ?? "",
+            voiceHistory,
+            stores.chains,
+            stores.knowledgeBase,
+            stores.llmProvider
+        );
+
+        // Check if response contains form components
+        if (response.components) {
+            try {
+                if (Array.isArray(response.components) && response.components.length > 0) {
+                    // Pre-fill form with known values from params
+                    setFormData(response.params?.known_values as Record<string, string>);
+                    setFormComponents(response.components);
+                    setShowForm(true);
+                    
+                    // Add AI's response to chat
+                    addMessage({
+                        type: 'assistant',
+                        content: response.text || "Please provide the following information:",
+                    });
+                    
+                    setIsProcessing(false);
+                    return;
+                }
+            } catch (e) {
+                console.error('Error handling form components:', e);
+            }
+        }
+
+        // Continue with normal flow if no form components
+        if (response.op === ChainId.SOLANA && response.transaction) {
+            await handleSolAi(response.transaction);
+        }
+
+        toast.loading("Converting response to voice...");
+        setIsVoiceProcessing(true);
+        const voiceResponse = await apiService.processVoiceResponse(
+            response.text,
+            selectedVoice
+        );
+
+        let currentText = '';
+        const textToType = response.text;
+        setIsAIResponding(true);
+
+        addMessage({
+            type: 'assistant',
+            content: '',
+        });
+
+        const audio = new Audio(`data:audio/wav;base64,${voiceResponse.audioData}`);
+        audio.onended = () => {
+            setIsAIResponding(false);
+            setIsVoiceProcessing(false);
+        };
+        
+        audio.play();
+        
+        for (let i = 0; i < textToType.length; i++) {
+            currentText += textToType[i];
+            setVoiceHistory(prev => {
+                const newHistory = [...prev];
+                newHistory[newHistory.length - 1].content = currentText;
+                return newHistory;
+            });
+            await new Promise(resolve => setTimeout(resolve, 30));
+        }
+
+        toast.success("Response complete!");
 
     } catch (error) {
-      console.error('Error processing chat:', error);
-      toast.error("Error processing your message. Please try again.");
-      setIsAIResponding(false);
-      setIsVoiceProcessing(false);
+        console.error('Error processing chat:', error);
+        toast.error("Error processing your message. Please try again.");
+        setIsAIResponding(false);
+        setIsVoiceProcessing(false);
     } finally {
-      setIsProcessing(false);
+        setIsProcessing(false);
     }
+};
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsFormSubmitting(true);
+
+    try {
+        // Validate required fields
+        const missingFields = formComponents
+            .filter(comp => comp.required && !formData[comp.name])
+            .map(comp => comp.name);
+
+        if (missingFields.length > 0) {
+            toast.error(`Please fill in required fields: ${missingFields.join(', ')}`);
+            setIsFormSubmitting(false);
+            return;
+        }
+
+        // Combine existing conversation context with form data
+        const lastUserMessage = voiceHistory[voiceHistory.length - 2]?.content || '';
+        const formSubmissionData = {
+            original_request: lastUserMessage,
+            form_data: formData,
+            action: 'form_submission'
+        };
+
+        const response = await apiService.postChat(
+            JSON.stringify(formSubmissionData),
+            address ?? "",
+            voiceHistory,
+            stores.chains,
+            stores.knowledgeBase,
+            stores.llmProvider
+        );
+
+        // Check if we need more information
+        if (response.components) {
+            try {
+                if (Array.isArray(response.components) && response.components.length > 0) {
+                    // Keep existing form data and add new components
+                    setFormComponents(response.components);
+                    toast.info("Please provide additional information");
+                    setIsFormSubmitting(false);
+                    return;
+                }
+            } catch (e) {
+                console.error('Error handling form components:', e);
+            }
+        }
+
+        // If we have a transaction, execute it
+        if (response.op === ChainId.SOLANA && response.transaction) {
+            await handleSolAi(response.transaction);
+        }
+
+        // Add form submission to chat history
+        addMessage({
+            type: 'user',
+            content: `Submitted: ${JSON.stringify(formData)}`,
+        });
+
+        // Process AI response
+        setIsVoiceProcessing(true);
+        const voiceResponse = await apiService.processVoiceResponse(
+            response.text,
+            selectedVoice
+        );
+
+        let currentText = '';
+        const textToType = response.text;
+        setIsAIResponding(true);
+
+        addMessage({
+            type: 'assistant',
+            content: '',
+        });
+
+        const audio = new Audio(`data:audio/wav;base64,${voiceResponse.audioData}`);
+        audio.onended = () => {
+            setIsAIResponding(false);
+            setIsVoiceProcessing(false);
+        };
+        
+        audio.play();
+        
+        for (let i = 0; i < textToType.length; i++) {
+            currentText += textToType[i];
+            setVoiceHistory(prev => {
+                const newHistory = [...prev];
+                newHistory[newHistory.length - 1].content = currentText;
+                return newHistory;
+            });
+            await new Promise(resolve => setTimeout(resolve, 30));
+        }
+
+        // Reset form state only if we're done with all inputs
+        if (!response.components) {
+            setShowForm(false);
+            setFormData({});
+            setFormComponents([]);
+        }
+
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        toast.error("Error submitting form. Please try again.");
+        setIsFormSubmitting(false);
+    } finally {
+        // Always reset the form submitting state, regardless of components
+        setIsFormSubmitting(false);
+    }
+};
+
+  const handleInputChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -409,6 +624,7 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
+<<<<<<< HEAD
                 className="bg-white rounded-lg p-6 shadow-lg"
               >
                 <h3 className="text-lg font-semibold mb-4">Please provide the following information:</h3>
@@ -421,50 +637,110 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
                       {component.type === 'text_area' ? (
                         <textarea
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+=======
+                className="bg-white rounded-lg p-8 shadow-xl border border-gray-200 mx-auto my-4 max-w-2xl"
+              >
+                <h3 className="text-xl font-semibold mb-6 text-gray-800 border-b pb-3">Please provide the following information:</h3>
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  {formComponents.map((component, index) => (
+                    <div key={index} className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1 capitalize">
+                        {component.name.replace(/_/g, ' ')} {component.required && <span className="text-red-500">*</span>}
+                      </label>
+                      {component.type === 'text_area' ? (
+                        <textarea
+                          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base bg-white shadow-inner"
+>>>>>>> feat/lilypad_integration
                           placeholder={component.placeholder}
                           value={formData[component.name] || ''}
                           onChange={(e) => handleInputChange(component.name, e.target.value)}
                           required={component.required}
+<<<<<<< HEAD
                         />
                       ) : component.type === 'select' ? (
                         <select
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+=======
+                          rows={4}
+                        />
+                      ) : component.type === 'select' ? (
+                        <select
+                          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base bg-white shadow-inner"
+>>>>>>> feat/lilypad_integration
                           value={formData[component.name] || ''}
                           onChange={(e) => handleInputChange(component.name, e.target.value)}
                           required={component.required}
                         >
+<<<<<<< HEAD
                           <option value="">Select {component.name}</option>
+=======
+                          <option value="">Select {component.name.replace(/_/g, ' ')}</option>
+>>>>>>> feat/lilypad_integration
                           {/* Add options based on your requirements */}
                         </select>
                       ) : (
                         <input
                           type={component.validation === 'number' ? 'number' : 'text'}
+<<<<<<< HEAD
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+=======
+                          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 text-base bg-white shadow-inner"
+>>>>>>> feat/lilypad_integration
                           placeholder={component.placeholder}
                           value={formData[component.name] || ''}
                           onChange={(e) => handleInputChange(component.name, e.target.value)}
                           required={component.required}
                         />
                       )}
+<<<<<<< HEAD
                     </div>
                   ))}
                   <div className="flex justify-end space-x-3">
+=======
+                      {component.placeholder && (
+                        <p className="text-xs text-gray-500 mt-1">{component.placeholder}</p>
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex justify-end space-x-3 mt-8">
+>>>>>>> feat/lilypad_integration
                     <button
                       type="button"
                       onClick={() => {
                         setShowForm(false);
                         setFormData({});
                       }}
+<<<<<<< HEAD
                       className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+=======
+                      className="px-5 py-2.5 text-gray-700 bg-white hover:bg-gray-100 rounded-md transition-colors border border-gray-300 font-medium text-sm"
+>>>>>>> feat/lilypad_integration
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isFormSubmitting}
+<<<<<<< HEAD
                       className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300"
                     >
                       {isFormSubmitting ? 'Submitting...' : 'Submit'}
+=======
+                      className={`px-5 py-2.5 text-white rounded-md transition-all shadow-sm font-medium text-sm flex items-center justify-center min-w-[100px] ${
+                        isFormSubmitting 
+                          ? 'bg-blue-400' 
+                          : isValidForm 
+                            ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' 
+                            : 'bg-blue-500 opacity-80'
+                      }`}
+                    >
+                      {isFormSubmitting ? (
+                        <>
+                          <span className="animate-pulse mr-2">⚪</span>
+                          <span>Submitting...</span>
+                        </>
+                      ) : 'Submit'}
+>>>>>>> feat/lilypad_integration
                     </button>
                   </div>
                 </form>

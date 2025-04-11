@@ -19,6 +19,10 @@ sealed interface Destination {
     data object AddVoiceScreen: Destination
 
     companion object {
+<<<<<<< HEAD
         val NAV_WITHOUT_BOTTOM_NAVBAR = listOf(Splash, LoginScreen, AddVoiceScreen)
+=======
+        val NAV_WITHOUT_BOTTOM_NAVBAR = listOf(Splash)
+>>>>>>> feat/lilypad_integration
     }
 }
