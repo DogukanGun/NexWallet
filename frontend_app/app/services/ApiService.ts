@@ -35,7 +35,7 @@ type ChatResponse = {
   components?: ComponentConfig[];
   params?: {
     action: string;
-    known_values: Record<string, any>;
+    known_values: Record<string, string | number | boolean | null>;
   };
 };
 

@@ -172,7 +172,7 @@ export default function VoiceUI({ onCancel }: VoiceUIProps) {
             try {
                 if (Array.isArray(response.components) && response.components.length > 0) {
                     // Pre-fill form with known values from params
-                    setFormData(response.params?.known_values || {});
+                    setFormData(response.params?.known_values as Record<string, string>);
                     setFormComponents(response.components);
                     setShowForm(true);
                     

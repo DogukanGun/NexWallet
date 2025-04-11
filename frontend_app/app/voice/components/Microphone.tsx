@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Recording from "../../../public/recording.svg";
 import SiriWave from "react-siriwave";
 import TypingEffect from "./TypingEffect";
@@ -16,11 +16,23 @@ export default function Microphone() {
   const [microphone, setMicrophone] = useState<MediaRecorder | null>();
   const [userMedia, setUserMedia] = useState<MediaStream | null>();
   const [caption, setCaption] = useState<string>("");
-  const [audio] = useState<HTMLAudioElement>(new Audio());
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [messageHistory, setMessageHistory] = useState<ChatCompletionMessageParam[]>([]);
   const { walletProvider } = useAppKitProvider<Provider>("solana");
   const { address } = useAppKitAccount();
   const stores = useConfigStore();
+
+  const readVoice = async (formData: FormData) => {
+    try {
+      const result = await apiService.postTranscribe(formData);
+      console.log("Transcription:", result.text);
+      setCaption(result.text);
+      setMessageHistory((prev) => [...prev, { role: "user", content: result.text }]);
+      generateAudio(result.text);
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+    }
+  };
 
   const toggleMicrophone = useCallback(async () => {
     if (microphone && userMedia) {
@@ -53,19 +65,8 @@ export default function Microphone() {
       setUserMedia(userMedia);
       setMicrophone(microphone);
     }
-  }, [microphone, userMedia]);
+  }, [microphone, userMedia, readVoice]);
 
-  const readVoice = async (formData: FormData) => {
-    try {
-      const result = await apiService.postTranscribe(formData);
-      console.log("Transcription:", result.text);
-      setCaption(result.text);
-      setMessageHistory((prev) => [...prev, { role: "user", content: result.text }]);
-      generateAudio(result.text);
-    } catch (error) {
-      console.error("Error transcribing audio:", error);
-    }
-  };
   const handleSolAi = async (text: string) => {
     const res = await apiService.postBotSolana(text, address!);
     console.log("Bot response", res.text);
@@ -111,8 +112,12 @@ export default function Microphone() {
   };
 
   function handleAudio(): boolean {
-    return audio && audio.currentTime > 0 && !audio.paused && !audio.ended && audio.readyState > 2;
+    return !!audio && audio.currentTime > 0 && !audio.paused && !audio.ended && audio.readyState > 2;
   }
+
+  useEffect(() => {
+    // ... existing code ...
+  }, []);
 
   return (
     <div className="w-full relative">

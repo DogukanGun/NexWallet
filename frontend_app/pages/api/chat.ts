@@ -129,10 +129,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                                             params,
                                             text: "Please provide the required information to complete the transaction."
                                         });
-                                    } catch (parseError: any) {
+                                    } catch (parseError: Error | unknown) {
                                         console.error("JSON parse error:", parseError);
                                         console.log("componentJson:", componentJson);
                                         console.log("paramsPart:", paramsPart);
+                                        
+                                        // Get error message safely
+                                        const errorMessage = parseError instanceof Error 
+                                            ? parseError.message 
+                                            : String(parseError);
                                         
                                         // Attempt fallback parsing
                                         if (componentJson.includes('[') && componentJson.includes(']')) {
@@ -159,16 +164,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                                         
                                         return res.status(400).json({ 
                                             error: "Failed to parse component response",
-                                            details: parseError.message,
+                                            details: errorMessage,
                                             text: "There was an error processing your request. Please try again."
                                         });
                                     }
-                                } catch (e: any) {
+                                } catch (e: Error | unknown) {
                                     console.error("Error parsing component response:", e);
                                     console.log("Raw response:", tempResponse);
+                                    
+                                    // Get error message safely
+                                    const errorMessage = e instanceof Error
+                                        ? e.message
+                                        : String(e);
+                                        
                                     return res.status(400).json({ 
                                         error: "Failed to parse component response",
-                                        details: e.message,
+                                        details: errorMessage,
                                         text: "There was an error processing your request. Please try again."
                                     });
                                 }
