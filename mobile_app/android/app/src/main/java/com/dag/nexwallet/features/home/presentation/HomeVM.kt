@@ -40,6 +40,10 @@ class HomeVM @Inject constructor(
         }
     }
 
+    fun retry() {
+        getUser()
+    }
+
     fun signOut() {
         viewModelScope.launch {
             userRepository.clearUser()

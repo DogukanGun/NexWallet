@@ -22,11 +22,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 return res.status(400).json({ error: "Caption is required and should be a string, and chains must be an array." });
             }
             let response = "";
-            const openai = new OpenAI(
-                {
-                    apiKey: process.env.OPEN_AI_KEY
-                }
-            );
             try {
                 const agent = createKnowledgeReactAgentV2(
                     { modelName: llmId || "gpt-4o-mini", temperature: 0.5 },

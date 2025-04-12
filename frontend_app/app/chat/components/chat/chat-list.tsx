@@ -4,9 +4,7 @@ import { cn } from "@/app/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatProps } from "./chat";
 import Image from "next/image";
-import CodeDisplayBlock from "../code-display-block";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MessageRenderer from "../MessageRenderer";
 
 export default function ChatList({ messages, isLoading, loadingSubmit }: ChatProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -102,22 +100,7 @@ export default function ChatList({ messages, isLoading, loadingSubmit }: ChatPro
                     />
                   </Avatar>
                   <span className="bg-black p-3 rounded-md max-w-xs sm:max-w-2xl overflow-x-auto">
-                    {/* Check if the message content contains a code block */}
-                    {message.content.split("```").map((part, index) => {
-                      if (index % 2 === 0) {
-                        return (
-                          <Markdown key={index} remarkPlugins={[remarkGfm]}>
-                            {part}
-                          </Markdown>
-                        );
-                      } else {
-                        return (
-                          <pre className="whitespace-pre-wrap" key={index}>
-                            <CodeDisplayBlock code={part} lang="" />
-                          </pre>
-                        );
-                      }
-                    })}
+                    <MessageRenderer content={message.content} />
                     {isLoading && messages.indexOf(message) === messages.length - 1 && (
                       <span className="animate-pulse bg-black" aria-label="Typing">
                         ...

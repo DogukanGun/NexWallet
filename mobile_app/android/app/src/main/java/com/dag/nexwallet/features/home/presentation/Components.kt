@@ -182,16 +182,6 @@ fun ProfileCard(
                     )
                 }
             }
-
-            if (user != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    StatItem("Followers", "${user.followersCount}", Color.White)
-                    StatItem("Following", "${user.followingCount}", Color.White)
-                }
-            }
         }
     }
 }
@@ -241,9 +231,10 @@ fun QuickActionGrid(navController: NavController) {
         }
         QuickActionItem(
             text = "Upload Voice",
-            icon = QuickActionIcon.DrawableIcon(painterResource(R.drawable.baseline_keyboard_voice))
+            icon = QuickActionIcon.DrawableIcon(painterResource(R.drawable.baseline_keyboard_voice)),
+            isComingSoon = true
         ) { 
-            navController.navigate(Destination.AddVoiceScreen)
+            // No navigation for coming soon feature
         }
     }
 }
@@ -252,13 +243,18 @@ fun QuickActionGrid(navController: NavController) {
 fun QuickActionItem(
     text: String,
     icon: QuickActionIcon,
+    isComingSoon: Boolean = false,
     onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFF1E293B))
-            .clickable(onClick = onClick)
+            .then(if (!isComingSoon) {
+                Modifier.clickable(onClick = onClick)
+            } else {
+                Modifier.alpha(0.7f)
+            })
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -281,12 +277,25 @@ fun QuickActionItem(
                 )
             }
         }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            if (isComingSoon) {
+                Text(
+                    text = "Coming Soon",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
@@ -299,6 +308,13 @@ fun AIAgentsList() {
             Color(0xFF14F195),
             true,
             "Interact with Solana blockchain, manage tokens, and get real-time information. Works in text and voice mode."
+        ),
+        AgentInfo(
+            "Voice AI Bot",
+            "NexAI",
+            Color(0xFF6366F1).copy(alpha = 0.5f),
+            false,
+            "Interact with your AI agents through voice commands. Natural language processing for seamless voice interactions."
         ),
         AgentInfo(
             "Base AI Bot",

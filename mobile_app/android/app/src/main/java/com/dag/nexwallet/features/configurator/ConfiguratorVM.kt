@@ -141,6 +141,20 @@ class ConfiguratorVM @Inject constructor() : BaseVM<ConfiguratorVS>(Configurator
         }
     }
 
+    fun getCompletedSteps(): Set<Int> {
+        val completedSteps = mutableSetOf<Int>()
+        (1..4).forEach { step ->
+            if (isStepValid(step)) {
+                completedSteps.add(step)
+            }
+        }
+        return completedSteps
+    }
+
+    fun canStartAgent(): Boolean {
+        return isStepValid(1) && isStepValid(3) && isStepValid(4)
+    }
+
     private fun updateState(newState: ConfiguratorVS.Content) {
         _viewState.value = newState
     }
