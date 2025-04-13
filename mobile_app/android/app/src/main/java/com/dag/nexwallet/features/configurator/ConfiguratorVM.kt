@@ -155,6 +155,54 @@ class ConfiguratorVM @Inject constructor() : BaseVM<ConfiguratorVS>(Configurator
         return isStepValid(1) && isStepValid(3) && isStepValid(4)
     }
 
+    fun showChainSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showChainSelector = true))
+    }
+    
+    fun hideChainSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showChainSelector = false))
+    }
+    
+    fun showKnowledgeBaseSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showKnowledgeBaseSelector = true))
+    }
+    
+    fun hideKnowledgeBaseSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showKnowledgeBaseSelector = false))
+    }
+    
+    fun showLLMProviderSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showLLMProviderSelector = true))
+    }
+    
+    fun hideLLMProviderSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showLLMProviderSelector = false))
+    }
+    
+    fun showAgentTypeSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showAgentTypeSelector = true))
+    }
+    
+    fun hideAgentTypeSelector() {
+        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        updateState(currentState.copy(showAgentTypeSelector = false))
+    }
+    
+    fun startAgent() {
+        // TODO: Implement starting the agent with the selected configuration
+    }
+    
+    fun showSavedAgents() {
+        // TODO: Implement navigation to saved agents screen
+    }
+
     private fun updateState(newState: ConfiguratorVS.Content) {
         _viewState.value = newState
     }

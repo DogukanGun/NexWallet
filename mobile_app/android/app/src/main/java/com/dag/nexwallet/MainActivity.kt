@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.dag.nexwallet.base.ActivityHolder
 import com.dag.nexwallet.base.AlertDialogManager
 import com.dag.nexwallet.base.components.CustomAlertDialog
+import com.dag.nexwallet.base.components.bottomnav.BottomNavigationBar
 import com.dag.nexwallet.base.navigation.DefaultNavigationHost
 import com.dag.nexwallet.base.navigation.DefaultNavigator
 import com.dag.nexwallet.data.AlertDialogModel
@@ -86,7 +87,11 @@ class MainActivity : ComponentActivity() {
                                     ?.split(".")?.last()
                             }
                             if (mainVM.isBottomNavActive(currentRoute.value)) {
-
+                                BottomNavigationBar {
+                                    lifecycleScope.launch {
+                                        defaultNavigator.navigate(it)
+                                    }
+                                }
                             }
                         }
                     }

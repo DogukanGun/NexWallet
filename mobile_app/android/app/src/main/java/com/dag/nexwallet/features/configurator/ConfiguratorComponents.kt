@@ -8,427 +8,238 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dag.nexwallet.features.home.presentation.cardBackgroundColor
 
 @Composable
-fun ChainSelector(
-    selectedChains: List<Chain>,
-    availableChains: List<Chain>,
-    onChainSelected: (Chain) -> Unit
+fun ConfigOption(
+    title: String,
+    iconContent: @Composable () -> Unit,
+    iconGradient: Brush,
+    borderGradient: Brush,
+    isCompleted: Boolean,
+    isComingSoon: Boolean = false,
+    selectedCount: Int,
+    totalCount: Int,
+    onClick: () -> Unit
 ) {
-    Column {
-        // Search/Filter field
-        OutlinedTextField(
-            value = "",
-            onValueChange = { /* TODO: Implement filtering */ },
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clickable(enabled = !isComingSoon) { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = cardBackgroundColor
+        )
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            placeholder = { Text("Filter Chain") },
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFF1E293B),
-                focusedBorderColor = Color(0xFF8B5CF6),
-                unfocusedContainerColor = Color(0xFF1E293B),
-                focusedContainerColor = Color(0xFF1E293B)
-            )
-        )
-
-        // Grid of chains
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.height(200.dp)
-        ) {
-            items(availableChains) { chain ->
-                ChainItem(
-                    chain = chain,
-                    isSelected = selectedChains.contains(chain),
-                    onSelect = { onChainSelected(chain) }
+                .clip(RoundedCornerShape(20.dp))
+                .background(cardBackgroundColor)
+                .border(
+                    width = 1.dp,
+                    brush = borderGradient,
+                    shape = RoundedCornerShape(20.dp)
                 )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(cardBackgroundColor),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Icon circle with unique gradient for each option
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = if (isCompleted) {
+                                Brush.linearGradient(
+                                    colors = listOf(Color(0xFF00E5B3), Color(0xFF3B82F6))
+                                )
+                            } else {
+                                iconGradient
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isCompleted) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    } else {
+                        iconContent()
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = title,
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp
+                    )
+
+                    if (isComingSoon) {
+                        Text(
+                            text = "Coming Soon",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "$selectedCount of $totalCount selected",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
+                if (!isComingSoon) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun LoadingScreen() {
+fun ConfigLoadingScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F172A)), // Dark blue background matching HomeView
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF00E5B3),
+                        Color(0xFF3B82F6),
+                        Color(0xFF8B5CF6)
+                    )
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            color = Color(0xFF6366F1), // Indigo color matching accent in other screens
-            modifier = Modifier.size(56.dp),
+            modifier = Modifier.size(64.dp),
+            color = Color.White,
             strokeWidth = 4.dp
         )
     }
 }
 
 @Composable
-fun ErrorScreen(message: String) {
+fun ConfigErrorScreen(message: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F172A)) // Dark blue background matching HomeView
-            .padding(32.dp),
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF00E5B3),
+                        Color(0xFF3B82F6),
+                        Color(0xFF8B5CF6)
+                    )
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(16.dp)
+                ),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.9f)
+            )
         ) {
-            Text(
-                text = "Error",
-                color = Color.Red,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Text(
-                text = message,
-                color = Color.White,
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-fun KnowledgeBaseSelector(
-    selectedBases: List<KnowledgeBase>,
-    availableBases: List<KnowledgeBase>,
-    onBaseSelected: (KnowledgeBase) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.height(120.dp)
-    ) {
-        items(availableBases) { base ->
-            KnowledgeBaseItem(
-                knowledgeBase = base,
-                isSelected = selectedBases.contains(base),
-                onSelect = { onBaseSelected(base) }
-            )
-        }
-    }
-}
-
-@Composable
-fun LLMProviderSelector(
-    selectedProvider: LLMProvider?,
-    availableProviders: List<LLMProvider>,
-    onProviderSelected: (LLMProvider) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.height(200.dp)
-    ) {
-        items(availableProviders) { provider ->
-            LLMProviderItem(
-                provider = provider,
-                isSelected = selectedProvider == provider,
-                onSelect = { onProviderSelected(provider) }
-            )
-        }
-    }
-}
-
-@Composable
-fun AgentTypeSelector(
-    selectedType: AgentType?,
-    availableTypes: List<AgentType>,
-    onTypeSelected: (AgentType) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.height(120.dp)
-    ) {
-        items(availableTypes) { type ->
-            AgentTypeItem(
-                agentType = type,
-                isSelected = selectedType == type,
-                onSelect = { onTypeSelected(type) }
-            )
-        }
-    }
-}
-
-@Composable
-fun ChainItem(
-    chain: Chain,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (!chain.disabled) {
-                    Modifier
-                        .clickable(onClick = onSelect)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Color(0xFF8B5CF6) else Color(0xFF1E293B),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                } else {
-                    Modifier.alpha(0.8f)
-                }
-            )
-            .background(
-                if (isSelected && !chain.disabled) Color(0xFF8B5CF6).copy(alpha = 0.1f)
-                else Color(0xFF1E293B)
-            )
-            .padding(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Chain icon would go here
-                Text(
-                    text = chain.name,
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            if (chain.disabled) {
-                Surface(
-                    color = Color(0xFF8B5CF6).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f))
-                ) {
-                    Text(
-                        text = "Coming Soon",
-                        color = Color(0xFF8B5CF6),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun KnowledgeBaseItem(
-    knowledgeBase: KnowledgeBase,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (!knowledgeBase.disabled) {
-                    Modifier
-                        .clickable(onClick = onSelect)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Color(0xFF8B5CF6) else Color(0xFF1E293B),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                } else {
-                    Modifier.alpha(0.8f)
-                }
-            )
-            .background(
-                if (isSelected && !knowledgeBase.disabled) Color(0xFF8B5CF6).copy(alpha = 0.1f)
-                else Color(0xFF1E293B)
-            )
-            .padding(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = knowledgeBase.name,
-                color = Color.White,
-                fontWeight = FontWeight.Medium
-            )
-            if (isSelected && !knowledgeBase.disabled) {
                 Icon(
-                    Icons.Default.Check,
+                    imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = Color(0xFF8B5CF6),
-                    modifier = Modifier.size(16.dp)
+                    tint = Color.Red,
+                    modifier = Modifier.size(48.dp)
                 )
-            }
-            if (knowledgeBase.disabled) {
-                Surface(
-                    color = Color(0xFF8B5CF6).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f))
-                ) {
-                    Text(
-                        text = "Coming Soon",
-                        color = Color(0xFF8B5CF6),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun LLMProviderItem(
-    provider: LLMProvider,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (!provider.disabled) {
-                    Modifier
-                        .clickable(onClick = onSelect)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Color(0xFF8B5CF6) else Color(0xFF1E293B),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                } else {
-                    Modifier.alpha(0.8f)
-                }
-            )
-            .background(
-                if (isSelected && !provider.disabled) Color(0xFF8B5CF6).copy(alpha = 0.1f)
-                else Color(0xFF1E293B)
-            )
-            .padding(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
-                    text = provider.name,
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium
+                    text = "Error",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black
                 )
-                if (provider.disabled) {
-                    Surface(
-                        color = Color(0xFF8B5CF6).copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f))
-                    ) {
-                        Text(
-                            text = "Coming Soon",
-                            color = Color(0xFF8B5CF6),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                        )
-                    }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = message,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { /* Handle retry */ },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3B82F6)
+                    )
+                ) {
+                    Text(
+                        text = "Retry",
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
     }
 }
 
-@Composable
-fun AgentTypeItem(
-    agentType: AgentType,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (!agentType.disabled) {
-                    Modifier
-                        .clickable(onClick = onSelect)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Color(0xFF8B5CF6) else Color(0xFF1E293B),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                } else {
-                    Modifier.alpha(0.8f)
-                }
-            )
-            .background(
-                if (isSelected && !agentType.disabled) Color(0xFF8B5CF6).copy(alpha = 0.1f)
-                else Color(0xFF1E293B)
-            )
-            .padding(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = agentType.name,
-                color = Color.White,
-                fontWeight = FontWeight.Medium
-            )
-            if (isSelected && !agentType.disabled) {
-                Icon(
-                    Icons.Default.Check,
-                    contentDescription = null,
-                    tint = Color(0xFF8B5CF6),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-            if (agentType.disabled) {
-                Surface(
-                    color = Color(0xFF8B5CF6).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f))
-                ) {
-                    Text(
-                        text = "Coming Soon",
-                        color = Color(0xFF8B5CF6),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
-            }
-        }
-    }
-} 

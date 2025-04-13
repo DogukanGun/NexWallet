@@ -5,7 +5,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,6 +38,9 @@ import com.dag.nexwallet.base.extensions.startAsTopComposable
 import com.dag.nexwallet.base.navigation.Destination
 import com.dag.nexwallet.R
 
+val cardBackgroundColor = Color(0xFF162240).copy(alpha = 0.85f)
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView(
@@ -46,8 +48,7 @@ fun HomeView(
     viewModel: HomeVM = hiltViewModel()
 ) {
     val state by viewModel.viewState.collectAsState()
-    var missingProfileImage by remember { mutableStateOf(false) }
-    
+
     // Animation properties
     val animatedProgress = remember { Animatable(0f) }
     LaunchedEffect(true) {
@@ -63,14 +64,6 @@ fun HomeView(
             Color(0xFF00E5B3), // Turquoise/Green
             Color(0xFF3B82F6), // Blue
             Color(0xFF8B5CF6)  // Purple
-        )
-    )
-    
-    // Elegant card background
-    val cardGradient = Brush.linearGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.13f),
-            Color.White.copy(alpha = 0.07f)
         )
     )
     
@@ -244,7 +237,9 @@ fun HomeView(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(16.dp),
+                                            .background(cardBackgroundColor)
+                                            .padding(16.dp)
+                                            .clip(RoundedCornerShape(16.dp)),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         // Profile picture
@@ -398,8 +393,7 @@ fun AgentCard(
     onClick: () -> Unit
 ) {
     // Card background with dark semi-transparent overlay
-    val cardBackgroundColor = Color(0xFF162240).copy(alpha = 0.85f)
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -414,12 +408,14 @@ fun AgentCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .background(cardBackgroundColor)
+                .padding(16.dp)
+                .clip(RoundedCornerShape(16.dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Left column with icon and titles
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).background(Color.Transparent)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
