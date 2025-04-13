@@ -16,6 +16,84 @@ NexWallet is a cutting-edge platform that combines blockchain technology with ar
 - **Frontend**:
   - **React Components**: Reusable UI components for a seamless user experience.
 
+### Detailed Architecture
+![Architecture Diagram](public/architecture.png)
+
+Our architecture follows a modern cloud-native approach with specialized components for blockchain interactions:
+
+#### User Interaction Layer
+- **Frontend**: Built with React.js for web browsers and Android mobile applications, providing a cohesive experience across platforms
+- **User Flow**: Users interact with our frontend applications, which route requests through a load balancer to ensure high availability
+
+#### Cloud Infrastructure
+- **AWS Cloud**: Hosts our primary infrastructure components
+- **Load Balancer**: Distributes traffic efficiently between frontend and backend servers
+- **Digital Ocean**: Hosts our database service for cost-efficient and reliable data storage
+
+#### API Gateway Layer
+- **Inner Gateway**: Central routing component that handles communication between frontend API and backend API services
+- **Frontend API**: Manages user-facing functionality and interfaces with the Frontend Agent
+- **Backend API**: Provides core blockchain functionality and specialized services
+
+#### Agent Layer
+- **Frontend Agent**:
+  - **IPFS Module**: Handles decentralized file storage and retrieval
+  - **Solana Agent by SENDAI**: Specialized component for Solana blockchain interactions
+- **Backend API Services**:
+  - **Agent for EVM Chains By CDP**: Manages interactions with Ethereum Virtual Machine compatible blockchains
+  - **Voice Cloning**: Provides voice synthesis capabilities for AI interactions
+  - **User Management**: Handles user authentication and profile management
+
+#### External Services
+- **IPFS Entrypoint**: Connection to the InterPlanetary File System for decentralized data storage
+- **Lilypad Inference API**: AI inference services for transaction analysis and predictions
+- **OpenAI**: Integration for natural language processing and AI-driven interactions
+
+This architecture enables NexWallet to provide seamless multi-chain support with AI-powered features while maintaining high performance and security. The modular design allows us to easily add support for additional blockchains and extend functionality as needed.
+
+### User Flow
+![User Flow Demo](https://www.youtube.com/watch?v=fIx24i4zyTw)
+
+The user journey through our NexWallet platform follows an intuitive flow designed to maximize ease of use while providing powerful blockchain functionality:
+
+1. **Initial Access**: Users interact with our platform through either the web interface (React) or mobile application (Android).
+
+2. **Authentication Flow**:
+   - New users complete a streamlined signup process with secure authentication
+   - Returning users authenticate using credentials or biometric options
+   - Authentication is routed through our load balancer to the User Management service
+
+3. **Dashboard Experience**:
+   - Upon successful login, users are presented with their personalized dashboard
+   - The dashboard displays wallet balances across multiple chains
+   - AI recommendations appear based on user history and market conditions
+
+4. **Transaction Flow**:
+   - When initiating a transaction, the request flows from frontend to load balancer
+   - The Inner Gateway routes the request to the appropriate blockchain agent:
+     - Solana transactions are handled by the Solana Agent by SENDAI
+     - Ethereum and other EVM-based transactions route to the Agent for EVM Chains
+   - Smart contract interactions are verified and executed
+   - Confirmations flow back through the system to the user interface
+
+5. **AI-Assisted Operations**:
+   - Voice or text commands are processed through our Frontend Agent
+   - Natural language is interpreted via OpenAI integration
+   - Commands are translated to blockchain operations
+   - The system can generate voice responses using Voice Cloning services
+
+6. **Data Storage Flow**:
+   - User profile data is securely stored in our Digital Ocean database
+   - Decentralized content is routed through the IPFS Module to IPFS Entrypoint
+   - Transaction history is maintained with links to respective blockchain explorers
+
+7. **Advanced Analytics Path**:
+   - Users requesting analytics trigger the Lilypad Inference API
+   - AI models analyze transaction patterns and blockchain data
+   - Insights are returned to the user with actionable recommendations
+
+This carefully crafted user flow ensures that complex blockchain operations become accessible to users of all technical levels. Through intuitive design and AI assistance, we've created a wallet experience that feels natural while providing the full power of multiple blockchain networks.
+
 ## Main changes done in SEND AI
  
  - SolanaAgentKit now includes a callback mechanism.
