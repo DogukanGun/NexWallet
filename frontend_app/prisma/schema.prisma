@@ -1,0 +1,227 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PROD")
+}
+
+model Transaction {
+  id              Int      @id @default(autoincrement())
+  transaction_hash String   @unique
+  user_wallet      String
+  createdAt       DateTime @default(now())
+
+  @@map("Transactions")
+}
+
+model RegisteredUser { 
+  id              Int      @id @default(autoincrement())
+  user_id         String?   @unique
+
+  @@map("RegisteredUsers")
+}
+
+model SpecialUserCode {
+  id              Int      @id @default(autoincrement())
+  code            String 
+  is_used         Boolean @default(false)
+  used_by         String
+
+  @@map("SpecialUserCodes")
+}
+
+model ArbitrumWallet {
+  id              Int      @id @default(autoincrement())
+  wallet_address  String   @unique
+  private_key     String
+  is_verified     Boolean @default(false)
+  mnemonic        String?
+  user_id         String
+
+  @@map("ArbitrumWallets")
+}
+
+model BaseWallet {
+  id              Int      @id @default(autoincrement())
+  wallet_address  String   @unique
+  private_key     String
+  is_verified     Boolean @default(false)
+  mnemonic        String?
+
+  @@map("BaseWallets")
+}
+
+model UserWallet {
+  id              Int      @id @default(autoincrement())
+  wallet_address  String   @unique
+  is_verified     Boolean @default(false)
+  user_id         String
+
+  @@map("UserWallet")
+}
+
+model Admin {
+  user_id         String   @id @default("")
+
+  @@map("Admins")
+}
+
+model Interaction {
+  id              Int      @id @default(autoincrement())
+  user            String 
+  page            String
+
+  @@map("Interations") // Note: keeping the typo as it exists in both files
+}
+
+model WalletInteraction {
+  id              Int      @id @default(autoincrement())
+  user            String
+  operation       String
+  success         Boolean @default(false)
+
+  @@map("WalletInteraction")
+}
+
+model Chain {
+  id          String   @id
+  name        String
+  isEmbedded  Boolean  @default(false)
+  disabled    Boolean  @default(false)
+  icon        String
+  agents      Agent[]  @relation("ChainAgents")
+  agentChains AgentChain[] @relation("ChainAgents")
+
+  @@map("Chains")
+}
+
+model LlmProvider {
+  id          String   @id
+  name        String
+  disabled    Boolean  @default(false)
+  agents      Agent[]  @relation("AgentLlmProviders")
+  agentLlmProviders AgentLlmProvider[] @relation("AgentLlmProviders")
+
+  @@map("LlmProviders")
+}
+
+model KnowledgeBase {
+  id          String   @id
+  name        String
+  disabled    Boolean  @default(false)
+  agents      Agent[]  @relation("KnowledgeBaseAgents")
+  agentKnowledgeBases AgentKnowledgeBase[] @relation("KnowledgeBaseAgents")
+
+  @@map("KnowledgeBases")
+}
+
+model Agent {
+  id              String           @id
+  name            String
+  description     String
+  isOnPointSystem Boolean          @default(false)
+  chains          Chain[]          @relation("ChainAgents")
+  llmProviders    LlmProvider[]    @relation("AgentLlmProviders")
+  agentLlmProviders AgentLlmProvider[] @relation("AgentLlmProviders")
+  knowledgeBases  KnowledgeBase[]  @relation("KnowledgeBaseAgents")
+  agentKnowledgeBases AgentKnowledgeBase[] @relation("AgentKnowledgeBases")
+  user_id         Int
+  user            TwitterUser      @relation(fields: [user_id], references: [id])
+  points          AgentPoint[]     
+  agentChains     AgentChain[]     @relation("AgentChains")
+
+  @@map("Agents")
+}
+
+model AgentPoint {
+  id        String  @id
+  agentId   String
+  points    Int
+  agent     Agent   @relation(fields: [agentId], references: [id])
+
+  @@map("AgentPoints")
+}
+
+model TwitterUser {
+  id        Int      @id @default(autoincrement())
+  user_id   String   @unique
+  username  String
+  name      String
+  agents    Agent[]
+  
+  voices    Voice[]
+  userVoices UserVoice[]
+
+  @@map("TwitterUsers")
+}
+
+model Voice {
+  id                Int       @id @default(autoincrement())
+  voice_id          String    @unique
+  voice_bytes       Bytes
+  user_id           String
+  ipfs_hash         String    @default("")
+  salt              String    @default("")
+  name              String?
+  share_for_training Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  user              TwitterUser @relation(fields: [user_id], references: [user_id])
+  userVoices        UserVoice[]
+
+  @@map("Voices")
+}
+
+model UserVoice {
+  user_id String
+  voice_id Int  // Changed from String to Int to match Voice.id
+
+  user   TwitterUser @relation(fields: [user_id], references: [user_id])
+  voice  Voice       @relation(fields: [voice_id], references: [id])
+
+  @@id([user_id, voice_id])
+  @@map("user_voice")
+}
+
+model AgentChain {
+  agentId String @map("agent_id")
+  chainId String @map("chain_id")
+
+  agent Agent @relation(fields: [agentId], references: [id], name: "AgentChains")
+  chain Chain @relation(fields: [chainId], references: [id], name: "ChainAgents")
+
+  @@id([agentId, chainId])
+  @@map("agent_chain")
+}
+
+model AgentLlmProvider {
+  agentId String @map("agent_id")
+  llmProviderId String @map("llm_provider_id")
+
+  agent LlmProvider @relation(fields: [llmProviderId], references: [id], name: "AgentLlmProviders")
+  provider Agent @relation(fields: [agentId], references: [id], name: "AgentLlmProviders")
+
+  @@id([agentId, llmProviderId])
+  @@map("agent_llm_provider")
+}
+
+model AgentKnowledgeBase {
+  agentId String @map("agent_id")
+  knowledgeBaseId String @map("knowledge_base_id")
+
+  agent Agent @relation(fields: [agentId], references: [id], name: "AgentKnowledgeBases")
+  knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], name: "KnowledgeBaseAgents")
+
+  @@id([agentId, knowledgeBaseId])
+  @@map("agent_knowledge_base")
+}
