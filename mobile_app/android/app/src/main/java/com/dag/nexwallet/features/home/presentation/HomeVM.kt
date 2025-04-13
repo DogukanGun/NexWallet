@@ -44,10 +44,5 @@ class HomeVM @Inject constructor(
         getUser()
     }
 
-    fun signOut() {
-        viewModelScope.launch {
-            userRepository.clearUser()
-            _viewState.value = HomeVS.LoggedOut
-        }
-    }
+
 }

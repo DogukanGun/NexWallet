@@ -84,7 +84,7 @@ fun ConfiguratorView(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(20.dp)
+                            .padding(top = 32.dp, start = 16.dp, end = 16.dp)
                             .alpha(animatedProgress.value)
                     ) {
                         // Animated Header
@@ -96,7 +96,7 @@ fun ConfiguratorView(
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 40.dp, bottom = 8.dp)
+                                .padding(bottom = 8.dp)
                         )
                         
                         Text(

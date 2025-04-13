@@ -37,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dag.nexwallet.base.extensions.startAsTopComposable
 import com.dag.nexwallet.base.navigation.Destination
 import com.dag.nexwallet.R
+import com.dag.nexwallet.ui.theme.gradientBackground
 
 val cardBackgroundColor = Color(0xFF162240).copy(alpha = 0.85f)
 
@@ -57,19 +58,7 @@ fun HomeView(
             animationSpec = tween(800, easing = FastOutSlowInEasing)
         )
     }
-    
-    // Same gradient background as splash screen
-    val gradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF00E5B3), // Turquoise/Green
-            Color(0xFF3B82F6), // Blue
-            Color(0xFF8B5CF6)  // Purple
-        )
-    )
-    
-    // Card background with dark semi-transparent overlay (for both profile and agent cards)
-    val cardBackgroundColor = Color(0xFF162240).copy(alpha = 0.85f)
-    
+
     LaunchedEffect(state) {
         if (state is HomeVS.LoggedOut) {
             navController.startAsTopComposable(Destination.LoginScreen)
@@ -80,9 +69,7 @@ fun HomeView(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = gradientBackground)
     ) {
-        // Semi-transparent overlay for better readability
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -148,62 +135,16 @@ fun HomeView(
                 }
                 
                 is HomeVS.Success -> {
-                    val successState = state as HomeVS.Success
-                    
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(top = 32.dp, start = 16.dp, end = 16.dp)
                             .alpha(animatedProgress.value)
                     ) {
-                        // Top App Bar with notifications and sign out
-                        TopAppBar(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent
-                            ),
-                            title = {
-                                Text(
-                                    text = "NexWallet",
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            },
-                            actions = {
-                                // Notification icon
-                                IconButton(
-                                    onClick = { /* Handle notifications */ }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Notifications,
-                                        contentDescription = "Notifications",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                
-                                // Sign out icon
-                                if (successState.isSignedIn) {
-                                    IconButton(
-                                        onClick = { viewModel.signOut() }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ExitToApp,
-                                            contentDescription = "Sign Out",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        )
-                        
                         // Main content
                         LazyColumn(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 20.dp),
+                                .fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             // Profile section with welcome and user info

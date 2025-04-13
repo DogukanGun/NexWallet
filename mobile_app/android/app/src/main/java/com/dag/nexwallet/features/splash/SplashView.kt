@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.dag.nexwallet.R
 import com.dag.nexwallet.base.navigation.Destination
+import com.dag.nexwallet.ui.theme.gradientBackground
 
 @Composable
 fun SplashView(
@@ -77,13 +78,7 @@ fun SplashView(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF00E5B3), // Turquoise/Green
-                        Color(0xFF3B82F6), // Blue
-                        Color(0xFF8B5CF6)  // Purple
-                    )
-                )
+                gradientBackground
             )
     ) {
         Image(

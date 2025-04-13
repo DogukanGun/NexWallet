@@ -10,6 +10,7 @@ import com.dag.nexwallet.features.login.presentation.LoginView
 import com.dag.nexwallet.features.splash.SplashView
 import com.dag.nexwallet.features.configurator.ConfiguratorView
 import com.dag.nexwallet.features.home.presentation.HomeView
+import com.dag.nexwallet.features.voice.add.AddVoiceView
 
 @Composable
 fun DefaultNavigationHost(
@@ -60,7 +61,7 @@ fun DefaultNavigationHost(
         }
 
         composableWithAnimations<Destination.AddVoiceScreen> {
-            ConfiguratorView()
+            AddVoiceView()
         }
     }
 }
