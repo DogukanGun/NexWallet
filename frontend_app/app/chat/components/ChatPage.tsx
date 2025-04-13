@@ -21,6 +21,7 @@ import { Tools } from './tools/Tools';
 import { ToolConfig } from '../config/tools';
 import { motion, AnimatePresence } from "framer-motion";
 import { AppChain } from "@/app/configurator/data";
+import { handleMessariCommand } from '../commands/MessariCommands';
 
 interface LLMProvider {
   id: string;
@@ -157,10 +158,20 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
 
   const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    addMessage({ role: "user", content: input, id: chatId });
-    setInput("");
-
+    
     try {
+      // Try to handle with Messari command handler first
+      const messariHandled = await handleMessariCommand(messages, setMessages, input);
+      if (messariHandled) {
+        setInput("");
+        setLoadingSubmit(false);
+        return;
+      }
+      
+      // Continue with regular flow if not handled by Messari
+      addMessage({ role: "user", content: input, id: chatId });
+      setInput("");
+      
       const { text, op, transaction } = await apiService.postChat(
         input, 
         address ?? "", 

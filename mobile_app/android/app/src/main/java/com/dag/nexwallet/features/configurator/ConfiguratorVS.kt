@@ -35,7 +35,11 @@ sealed class ConfiguratorVS : BaseVS {
         val selectedLLMProvider: LLMProvider? = null,
         val selectedAgentType: AgentType? = null,
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val showChainSelector: Boolean = false,
+        val showKnowledgeBaseSelector: Boolean = false,
+        val showLLMProviderSelector: Boolean = false,
+        val showAgentTypeSelector: Boolean = false
     ) : ConfiguratorVS()
 
     data class Error(val message: String) : ConfiguratorVS()

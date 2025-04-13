@@ -1,4 +1,3 @@
-
 import { createAgent, LLMConfig } from '@/frontend_agent/agentHelpers';
 import { GetAgentByContractAddressTool } from '../frontend_agent/tools/cookie/getAgentByContractAddressTool';
 import { GetAgentByTwitterUsernameTool } from '../frontend_agent/tools/cookie/getAgentByTwitterUsernameTool';
@@ -9,8 +8,9 @@ import { AskSolanaSdkAgent } from './tools/solona/askSolanaAgent';
 import { AskCdpAgents } from './tools/cdp/askCdpAgents';
 import { GetUniswapTool } from './tools/components/uniswapTool';
 import { VoiceComponentTool } from './tools/voice/voiceComponents';
-import { PDFReportGenerator } from './tools/messari/pdfGenerator';
 import { MessariAPI } from './tools/messari';
+import { MessariPDFTool } from './tools/messari/pdfGenerator';
+import { createMessariPDFContextModifier } from './messariMiddleware';
 export type agent = 'cookie' | 'messari';
 
 export function createKnowledgeReactAgentV2(
@@ -22,6 +22,18 @@ export function createKnowledgeReactAgentV2(
     wallet: string
 ) {
     let tools: StructuredToolInterface[] = [];
+    
+    // Add PDF generation tools first for better prioritization
+    if (agents.includes('messari')) {
+        const messariAPI = new MessariAPI();
+        tools.push(new MessariPDFTool(messariAPI)); // PDF Tool first for better routing
+        tools.push(messariAPI);
+        
+        // Add Messari context to the message modifier
+        messageModifier = messageModifier + '\n' + createMessariPDFContextModifier();
+    }
+    
+    // Add cookie tools
     if (agents.includes('cookie')) {
         [
             new GetAgentByTwitterUsernameTool(),
@@ -32,12 +44,12 @@ export function createKnowledgeReactAgentV2(
             tools.push(tool)
         })
     }
-    if (agents.includes('messari')) {
-        tools.push(new MessariAPI())
-    }
+    
+    // Add other blockchain tools
     tools.push(new AskSolanaSdkAgent(wallet))
     tools.push(new GetUniswapTool())
     tools.push(new AskCdpAgents(supportedChains))
     tools.push(new VoiceComponentTool())
+    
     return createAgent(agentName, tools, messageModifier, isOnchain);
 } 

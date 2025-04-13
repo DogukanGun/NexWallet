@@ -1,53 +1,71 @@
 package com.dag.nexwallet.features.configurator
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
+import com.dag.nexwallet.R
 
 @Composable
 @Preview
 fun ConfiguratorView(
     viewModel: ConfiguratorVM = hiltViewModel()
 ) {
-    var selectedStep by remember { mutableIntStateOf(1) }
     val scrollState = rememberScrollState()
     val state by viewModel.viewState.collectAsState()
+    val scope = rememberCoroutineScope()
+    
+    // Animation properties
+    val animatedProgress = remember { Animatable(0f) }
+    LaunchedEffect(true) {
+        animatedProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(800, easing = FastOutSlowInEasing)
+        )
+    }
 
-    // Define the gradient background matching LoginView
+    // Beautiful gradient background like in SplashView
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF0F172A),  // Dark blue color from HomeView
-            Color(0xFF1E293B)   // Slightly lighter blue as in HomeView cards
+            Color(0xFF00E5B3), // Turquoise/Green
+            Color(0xFF3B82F6), // Blue
+            Color(0xFF8B5CF6)  // Purple
+        )
+    )
+
+    // Border gradient
+    val borderGradient = Brush.linearGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.3f),
+            Color.White.copy(alpha = 0.1f)
         )
     )
 
     when (state) {
-        null -> {
-            LoadingScreen()
-        }
-        is ConfiguratorVS.Loading -> {
-            LoadingScreen()
-        }
-        is ConfiguratorVS.Error -> {
-            ErrorScreen((state as ConfiguratorVS.Error).message)
-        }
+        null -> ConfigLoadingScreen()
+        is ConfiguratorVS.Loading -> ConfigLoadingScreen()
+        is ConfiguratorVS.Error -> ConfigErrorScreen((state as ConfiguratorVS.Error).message)
         is ConfiguratorVS.Content -> {
             val content = state as ConfiguratorVS.Content
             
@@ -56,264 +74,266 @@ fun ConfiguratorView(
                     .fillMaxSize()
                     .background(brush = gradientBackground)
             ) {
-                Column(
+                // Semi-transparent overlay to make content more readable
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(20.dp)
+                        .background(Color.Black.copy(alpha = 0.2f))
                 ) {
-                    // Header Section with gradient text
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                            .alpha(animatedProgress.value)
                     ) {
+                        // Animated Header
                         Text(
-                            text = "Welcome to NexAI Configurator",
-                            fontSize = 28.sp,
+                            text = "Create Your Assistant",
+                            fontSize = 36.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(bottom = 8.dp)
                         )
+                        
                         Text(
-                            text = "Create your personalized AI assistant in just a few steps",
+                            text = "Customize your AI experience",
                             fontSize = 16.sp,
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = Color.White.copy(alpha = 0.9f),
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 24.dp)
-                        )
-                    }
-
-                    // Progress Indicator with improved visuals
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                    ) {
-                        // Connector line between steps
-                        Spacer(
                             modifier = Modifier
-                                .height(2.dp)
                                 .fillMaxWidth()
-                                .background(Color(0xFF333333))
-                                .align(Alignment.Center)
+                                .padding(bottom = 40.dp)
                         )
                         
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            (1..4).forEach { step ->
-                                StepIndicator(
-                                    step = step,
-                                    isSelected = step == selectedStep,
-                                    isCompleted = viewModel.isStepValid(step),
-                                    label = when (step) {
-                                        1 -> "Chains"
-                                        2 -> "Knowledge"
-                                        3 -> "LLM"
-                                        else -> "Agent Type"
-                                    }
+                        // Configuration Options in a simpler format with better cards
+                        ConfigOption(
+                            title = "Blockchain Networks",
+                            iconContent = {
+                                Icon(
+                                    painterResource(R.drawable.baseline_code),
+                                    contentDescription = null,
+                                    tint = Color.White
                                 )
-                            }
-                        }
-                    }
-
-                    // Configuration Sections with improved card design
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF1E293B)  // Matching the card color from HomeView
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            // Chain Selection Section
-                            ConfigSection(
-                                step = 1,
-                                title = "Select Chains",
-                                isSelected = selectedStep == 1,
-                                onSelect = { selectedStep = 1 }
-                            ) {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    modifier = Modifier
-                                        .height(200.dp)
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(viewModel.getAvailableChains()) { chain ->
-                                        ChainItem(
-                                            chain = chain,
-                                            isSelected = content.selectedChains.contains(chain),
-                                            onSelect = { viewModel.toggleChain(chain) }
-                                        )
-                                    }
+                            },
+                            iconGradient = Brush.linearGradient(
+                                colors = listOf(Color(0xFF3B82F6), Color(0xFF00E5B3))
+                            ),
+                            borderGradient = borderGradient,
+                            isCompleted = viewModel.isStepValid(1),
+                            selectedCount = content.selectedChains.size,
+                            totalCount = viewModel.getAvailableChains().size,
+                            onClick = {
+                                scope.launch {
+                                    viewModel.showChainSelector()
                                 }
                             }
-
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                                color = Color(0xFF333333),
-                                thickness = 1.dp
-                            )
-
-                            // Knowledge Base Section
-                            ConfigSection(
-                                step = 2,
-                                title = "Knowledge Bases",
-                                isSelected = selectedStep == 2,
-                                onSelect = { selectedStep = 2 }
-                            ) {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    modifier = Modifier
-                                        .height(120.dp)
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(viewModel.getAvailableKnowledgeBases()) { kb ->
-                                        KnowledgeBaseItem(
-                                            knowledgeBase = kb,
-                                            isSelected = content.selectedKnowledgeBases.contains(kb),
-                                            onSelect = { viewModel.toggleKnowledgeBase(kb) }
-                                        )
-                                    }
+                        )
+                        
+                        ConfigOption(
+                            title = "Knowledge Bases",
+                            iconContent = {
+                                Icon(
+                                    painterResource(R.drawable.baseline_bookmarks),
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            },
+                            iconGradient = Brush.linearGradient(
+                                colors = listOf(Color(0xFF8B5CF6), Color(0xFF3B82F6))
+                            ),
+                            borderGradient = borderGradient,
+                            isCompleted = viewModel.isStepValid(2),
+                            selectedCount = content.selectedKnowledgeBases.size,
+                            totalCount = viewModel.getAvailableKnowledgeBases().size,
+                            onClick = {
+                                scope.launch {
+                                    viewModel.showKnowledgeBaseSelector()
                                 }
                             }
-
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                                color = Color(0xFF333333),
-                                thickness = 1.dp
-                            )
-
-                            // LLM Provider Section
-                            ConfigSection(
-                                step = 3,
-                                title = "Select LLM Provider",
-                                isSelected = selectedStep == 3,
-                                onSelect = { selectedStep = 3 }
-                            ) {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    modifier = Modifier
-                                        .heightIn(min = 200.dp, max = 250.dp)
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(viewModel.getAvailableLLMProviders()) { provider ->
-                                        LLMProviderItem(
-                                            provider = provider,
-                                            isSelected = content.selectedLLMProvider == provider,
-                                            onSelect = { viewModel.selectLLMProvider(provider) }
-                                        )
-                                    }
+                        )
+                        
+                        ConfigOption(
+                            title = "Language Model",
+                            iconContent = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Settings,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            },
+                            iconGradient = Brush.linearGradient(
+                                colors = listOf(Color(0xFFEC4899), Color(0xFF8B5CF6))
+                            ),
+                            borderGradient = borderGradient,
+                            isCompleted = viewModel.isStepValid(3),
+                            selectedCount = if (content.selectedLLMProvider != null) 1 else 0,
+                            totalCount = viewModel.getAvailableLLMProviders().size,
+                            onClick = {
+                                scope.launch {
+                                    viewModel.showLLMProviderSelector()
                                 }
                             }
-
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                                color = Color(0xFF333333),
-                                thickness = 1.dp
-                            )
-
-                            // Agent Type Section
-                            ConfigSection(
-                                step = 4,
-                                title = "Select Agent Type",
-                                isSelected = selectedStep == 4,
-                                onSelect = { selectedStep = 4 }
-                            ) {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    modifier = Modifier
-                                        .height(80.dp)
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(viewModel.getAvailableAgentTypes()) { type ->
-                                        AgentTypeItem(
-                                            agentType = type,
-                                            isSelected = content.selectedAgentType == type,
-                                            onSelect = { viewModel.selectAgentType(type) }
-                                        )
-                                    }
+                        )
+                        
+                        ConfigOption(
+                            title = "Interaction Type",
+                            iconContent = {
+                                Icon(
+                                    painterResource(R.drawable.baseline_chat),
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            },
+                            iconGradient = Brush.linearGradient(
+                                colors = listOf(Color(0xFF00E5B3), Color(0xFF10B981))
+                            ),
+                            borderGradient = borderGradient,
+                            isCompleted = viewModel.isStepValid(4),
+                            selectedCount = if (content.selectedAgentType != null) 1 else 0,
+                            totalCount = viewModel.getAvailableAgentTypes().size,
+                            onClick = {
+                                scope.launch {
+                                    viewModel.showAgentTypeSelector()
                                 }
                             }
-                        }
-                    }
-
-                    // Bottom Action Buttons with styles matching HomeView and LoginView
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                        )
+                        
+                        ConfigOption(
+                            title = "Voice & Personality",
+                            iconContent = {
+                                Icon(
+                                    painterResource(R.drawable.baseline_mic),
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            },
+                            iconGradient = Brush.linearGradient(
+                                colors = listOf(Color(0xFFF59E0B), Color(0xFFEF4444))
+                            ),
+                            borderGradient = borderGradient,
+                            isCompleted = false,
+                            isComingSoon = true,
+                            selectedCount = 0,
+                            totalCount = 0,
+                            onClick = { }
+                        )
+                        
+                        Spacer(modifier = Modifier.height(40.dp))
+                        
+                        // Action buttons with improved design
                         Button(
-                            onClick = { /* Handle saved agents click */ },
+                            onClick = { viewModel.startAgent() },
+                            enabled = viewModel.canStartAgent(),
                             modifier = Modifier
-                                .weight(1f)
-                                .height(56.dp),
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .shadow(
+                                    elevation = 8.dp,
+                                    shape = RoundedCornerShape(28.dp)
+                                ),
                             shape = RoundedCornerShape(28.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1E293B)
-                            ),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 4.dp,
-                                pressedElevation = 8.dp
+                                containerColor = Color.White,
+                                disabledContainerColor = Color.White.copy(alpha = 0.6f)
                             )
                         ) {
                             Text(
-                                text = "Saved Agents",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White
+                                text = "Launch Assistant",
+                                color = Color(0xFF3B82F6),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
                         }
                         
-                        Button(
-                            onClick = { /* Handle start agent click */ },
-                            enabled = viewModel.isStepValid(1) && viewModel.isStepValid(3) && viewModel.isStepValid(4),
+                        OutlinedButton(
+                            onClick = { viewModel.showSavedAgents() },
                             modifier = Modifier
-                                .weight(1f)
-                                .height(56.dp),
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .padding(top = 16.dp),
                             shape = RoundedCornerShape(28.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6366F1), // Indigo color matching the LoginView accent color
-                                disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = Brush.horizontalGradient(
+                                    listOf(Color.White, Color.White)
+                                )
                             ),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 4.dp,
-                                pressedElevation = 8.dp
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color.White
                             )
                         ) {
                             Text(
-                                text = "Start Agent",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                text = "Saved Assistants",
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp
                             )
+                        }
+                        
+                        // Add space for bottom navigation
+                        Spacer(modifier = Modifier.height(72.dp))
+                    }
+                    
+                    // Show dialogs when needed
+                    if (content.showChainSelector) {
+                        val showDialog = remember { mutableStateOf(true) }
+                        ChainSelectorDialog(
+                            viewModel = viewModel,
+                            showDialog = showDialog
+                        )
+                        
+                        // Hide dialog when dismissed
+                        LaunchedEffect(showDialog.value) {
+                            if (!showDialog.value) {
+                                viewModel.hideChainSelector()
+                            }
+                        }
+                    }
+                    
+                    if (content.showKnowledgeBaseSelector) {
+                        val showDialog = remember { mutableStateOf(true) }
+                        KnowledgeBaseSelectorDialog(
+                            viewModel = viewModel,
+                            showDialog = showDialog
+                        )
+                        
+                        // Hide dialog when dismissed
+                        LaunchedEffect(showDialog.value) {
+                            if (!showDialog.value) {
+                                viewModel.hideKnowledgeBaseSelector()
+                            }
+                        }
+                    }
+                    
+                    if (content.showLLMProviderSelector) {
+                        val showDialog = remember { mutableStateOf(true) }
+                        LLMProviderSelectorDialog(
+                            viewModel = viewModel,
+                            showDialog = showDialog
+                        )
+                        
+                        // Hide dialog when dismissed
+                        LaunchedEffect(showDialog.value) {
+                            if (!showDialog.value) {
+                                viewModel.hideLLMProviderSelector()
+                            }
+                        }
+                    }
+                    
+                    if (content.showAgentTypeSelector) {
+                        val showDialog = remember { mutableStateOf(true) }
+                        AgentTypeSelectorDialog(
+                            viewModel = viewModel,
+                            showDialog = showDialog
+                        )
+                        
+                        // Hide dialog when dismissed
+                        LaunchedEffect(showDialog.value) {
+                            if (!showDialog.value) {
+                                viewModel.hideAgentTypeSelector()
+                            }
                         }
                     }
                 }
