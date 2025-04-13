@@ -107,8 +107,9 @@ This guide explains how to set up and deploy the NexWallet application using Git
 
 ## Project Structure
 
-- `backend/`: Backend API service
-- `frontend_app/`: Frontend React application
+- `backend/`: Backend API service written in Python
+- `frontend_app/`: Frontend React/Next.js application
+- `mobile_app/`: Mobile applications for Android and iOS
 - `.github/workflows/`: GitHub Actions workflow definitions
 
 ## Prerequisites
@@ -171,26 +172,25 @@ cd /opt/nexwallet
 sudo chown -R RUNNER_USER:RUNNER_USER /opt/nexwallet
 ```
 
-## GitHub Secrets Setup
+## GitHub Secrets Setup (For Production Deployment)
 
-Add the following secrets to your GitHub repository (Settings → Secrets and variables → Actions):
+The following secrets need to be added to your GitHub repository (Settings → Secrets and variables → Actions) for production deployment. This section is for project maintainers and CI/CD setup.
 
 ### Docker Hub Credentials
 - `DOCKER_USERNAME`: Your Docker Hub username
 - `DOCKER_PASSWORD`: Your Docker Hub password
 
-### Common API and Service Keys
-- `OPEN_AI_KEY`: OpenAI API key
-- `OPENAI_API_KEY`: Alternative OpenAI API key
-- `REOWN_KEY`: Reown service key
+### API and Service Keys
+- `OPEN_AI_KEY`: OpenAI API key for AI features
+- `OPENAI_API_KEY`: Alternative OpenAI API key format
 - `SECRET_KEY`: Secret key for JWT authentication
-- `GRAPH_API_KEY`: GraphQL API key
-- `COOKIE_API_KEY`: Cookie API key
+- `GRAPH_API_KEY`: GraphQL API key for data queries
+- `COOKIE_API_KEY`: Cookie API key for data integration
 
-### Solana-related Variables
+### Blockchain Integration Keys
 - `RPC_URL`: Solana RPC URL
-- `SOLANA_PRIVATE_KEY`: Solana private key
-- `SOLANA_RPC_URL`: Solana RPC URL (same as RPC_URL)
+- `SOLANA_PRIVATE_KEY`: Solana private key (for testing only, use OIDC in production)
+- `SOLANA_RPC_URL`: Solana RPC URL
 - `HELIUS_API_KEY`: Helius API key for Solana
 - `FLEXLEND_API_KEY`: FlexLend API key
 - `PARA_API_KEY`: Para API key
@@ -199,15 +199,12 @@ Add the following secrets to your GitHub repository (Settings → Secrets and va
 - `JUPITER_REFERRAL_ACCOUNT`: Jupiter referral account
 - `JUPITER_FEE_BPS`: Jupiter fee basis points
 
-### OpenAI Variables
-- `OPEN_AI_AGENT_KEY`: OpenAI Agent key
-
-### Privy Authentication Variables
+### Authentication Variables
 - `NEXT_PUBLIC_PRIVY_APP_ID`: Privy app ID
 - `PRIVY_CLIENT_ID`: Privy client ID
 - `PRIVY_CLIENT_SECRET`: Privy client secret
 - `PRIVY_API_URL`: Privy API URL
-- `PRIVY_VERIFICATION_KEY`: Privy verification key (multi-line)
+- `PRIVY_VERIFICATION_KEY`: Privy verification key
 
 ### Database Variables
 - `CONNECTION_STRING`: Full database connection string
@@ -217,7 +214,7 @@ Add the following secrets to your GitHub repository (Settings → Secrets and va
 - `DB_PORT`: Database port
 - `DB_NAME`: Database name
 
-### Twitter API Variables
+### Twitter API Variables (Optional for social features)
 - `TWITTER_API_KEY`: Twitter API key
 - `TWITTER_API_SECRET`: Twitter API secret
 - `TWITTER_ACCESS_TOKEN`: Twitter access token
@@ -227,14 +224,133 @@ Add the following secrets to your GitHub repository (Settings → Secrets and va
 
 ### CDP API Variables
 - `CDP_API_KEY_NAME`: CDP API key name
-- `CDP_API_KEY_PRIVATE_KEY`: CDP API private key (multi-line)
+- `CDP_API_KEY_PRIVATE_KEY`: CDP API private key
 - `NETWORK_ID`: Network ID for CDP
 
-### Gaianet Variables
-- `GAIANET_API_KEY`: Gaianet API key
-
-### Frontend-specific Variables
+### Service URLs
 - `BACKEND_API_URL`: URL for the frontend to access the backend API
+
+## Developer Setup Guide
+
+If you're a developer looking to clone and run this project locally, follow these instructions:
+
+### Frontend Setup (Next.js)
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/YOUR_USERNAME/NexWallet.git
+   cd NexWallet/frontend_app
+   ```
+
+2. Install dependencies:
+   ```sh
+   # Using npm
+   npm install
+   
+   # Using pnpm (recommended)
+   pnpm install
+   ```
+
+3. Create a `.env.local` file with the minimum required environment variables:
+   ```
+   # Required for development
+   OPEN_AI_KEY=your_openai_key
+   BACKEND_API_URL=http://localhost:8000
+   NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
+   
+   # For Solana integration (can use devnet for testing)
+   SOLANA_RPC_URL=https://api.devnet.solana.com
+   
+   # Only if testing specific blockchain features
+   HELIUS_API_KEY=your_helius_key
+   ```
+
+4. Start the development server:
+   ```sh
+   npm run dev
+   # or
+   pnpm dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+### Backend Setup (Python)
+
+1. Navigate to the backend directory:
+   ```sh
+   cd NexWallet/backend
+   ```
+
+2. Set up a Python virtual environment (Python 3.9+ recommended):
+   ```sh
+   # Using venv
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Using Poetry (recommended)
+   poetry install
+   ```
+
+3. Create a `.env` file with the minimum required environment variables:
+   ```
+   # Core settings
+   SECRET_KEY=your_development_secret_key
+   
+   # Database (for local development)
+   DB_USER=postgres
+   DB_PASS=postgres
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=nexwallet
+   
+   # OpenAI for AI features
+   OPEN_AI_KEY=your_openai_key
+   ```
+
+4. Set up the database:
+   ```sh
+   # If using PostgreSQL locally
+   createdb nexwallet
+   
+   # Apply database migrations (use the appropriate command based on your ORM)
+   python -m alembic upgrade head
+   ```
+
+5. Start the backend server:
+   ```sh
+   python main.py
+   # or using Poetry
+   poetry run python main.py
+   ```
+
+6. The API will be available at [http://localhost:8000](http://localhost:8000).
+
+### Mobile App Setup
+
+1. Navigate to the mobile app directory:
+   ```sh
+   cd NexWallet/mobile_app
+   ```
+
+2. For Android development:
+   ```sh
+   # Open the project in Android Studio
+   # The app is written in native Kotlin
+   # After Gradle sync completes, you can run the app directly from Android Studio
+   ```
+
+3. iOS App Status:
+   ```
+   # The iOS native app is currently under development and not ready for use
+   # Updates will be provided when the iOS version becomes available
+   ```
+
+## Troubleshooting
+
+- **Frontend Connection Issues**: Ensure the `BACKEND_API_URL` points to your running backend server
+- **Database Errors**: Verify PostgreSQL is running and accessible with the provided credentials
+- **API Key Issues**: Confirm all necessary API keys are correctly set in your environment files
+- **Blockchain Integration**: For development, use devnet/testnet endpoints instead of mainnet
 
 ## How It Works
 
@@ -271,11 +387,4 @@ EOF
 # Deploy with docker-compose
 docker-compose pull
 docker-compose up -d
-```
-
-## Troubleshooting
-
-- Check GitHub Actions logs for errors
-- Verify the runner is online and working
-- Check Docker logs: `docker-compose logs`
-- Ensure all secrets are properly set in GitHub repository settings 
+``` 
