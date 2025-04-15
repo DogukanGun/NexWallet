@@ -1,7 +1,7 @@
 "use client";
 
 import { Message, useChat } from "@ai-sdk/react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import type { Provider } from "@reown/appkit-adapter-solana";
@@ -22,6 +22,7 @@ import { ToolConfig } from '../config/tools';
 import { motion, AnimatePresence } from "framer-motion";
 import { AppChain } from "@/app/configurator/data";
 import { handleMessariCommand } from '../commands/MessariCommands';
+import ElizaStatus from "@/app/components/ElizaStatus";
 
 interface LLMProvider {
   id: string;
@@ -31,6 +32,13 @@ interface LLMProvider {
 
 interface ChatPageProps {
   initialChatId?: string;
+}
+
+interface ChatRequestOptions {
+  data?: {
+    useCharacter?: boolean;
+    characterName?: string | null;
+  };
 }
 
 // Enhanced security theme with more vivid colors and clearer distinction
@@ -90,6 +98,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const [showPaymentModal, setShowPaymentModal] = React.useState(false);
   const [selectedLLM, setSelectedLLM] = React.useState<string>("");
   const [showWarningModal, setShowWarningModal] = React.useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>('Pirate');
 
   // Enhanced animation variants
   const pageVariants = {
@@ -156,7 +165,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     }
   };
 
-  const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>, chatRequestOptions?: ChatRequestOptions) => {
     e.preventDefault();
     
     try {
@@ -183,13 +192,31 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       console.log("text", text);
       console.log("op", op);
       console.log("transaction", transaction);
-      if (op === ChainId.SOLANA && transaction) {
+      
+      // Check if character rephrasing should be used
+      const useCharacter = chatRequestOptions?.data?.useCharacter ?? !!selectedCharacter;
+      const characterName = chatRequestOptions?.data?.characterName ?? selectedCharacter;
+      
+      if (useCharacter && characterName && text) {
+        // Use the Eliza character tool to rephrase the response
+        try {
+          // Call API to rephrase with character
+          const characterResponse = await apiService.postCharacterRephrase(text, characterName);
+          // Add the rephrased response
+          addMessage({ role: "assistant", content: characterResponse.text, id: chatId });
+        } catch (error) {
+          console.error("Error using character tool:", error);
+          // Fallback to original response
+          addMessage({ role: "assistant", content: text, id: chatId });
+        }
+      } else if (op === ChainId.SOLANA && transaction) {
         handleSolAi(transaction);
       } else {
         addMessage({ role: "assistant", content: text, id: chatId });
-        setMessages([...messages]);
-        setLoadingSubmit(false);
       }
+      
+      setMessages([...messages]);
+      setLoadingSubmit(false);
     } catch (error) {
       console.error("Error in chat:", error);
       toast.error("An error occurred. Please try again.");
@@ -452,6 +479,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     >
       <WalletModal />
       <SecurityTransition />
+      <ElizaStatus />
 
       <RequireConfig>
         <SubscriptionWrapper>

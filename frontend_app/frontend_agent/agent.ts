@@ -11,7 +11,9 @@ import { VoiceComponentTool } from './tools/voice/voiceComponents';
 import { MessariAPI } from './tools/messari';
 import { MessariPDFTool } from './tools/messari/pdfGenerator';
 import { createMessariPDFContextModifier } from './messariMiddleware';
-export type agent = 'cookie' | 'messari';
+import { ElizaCharacterTool } from './tools/eliza/elizaCharacterTool';
+
+export type agent = 'cookie' | 'messari' | 'eliza';
 
 export function createKnowledgeReactAgentV2(
     agentName: LLMConfig,
@@ -43,6 +45,12 @@ export function createKnowledgeReactAgentV2(
         ].forEach((tool) => {
             tools.push(tool)
         })
+    }
+    
+    // Add Eliza character tool if enabled
+    if (agents.includes('eliza')) {
+        // Add the Eliza character tool which now calls the API directly
+        tools.push(new ElizaCharacterTool());
     }
     
     // Add other blockchain tools

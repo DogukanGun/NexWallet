@@ -1,7 +1,10 @@
+import { useTheme } from "@/store/ThemeContext";
 import { UpcomingFeature } from "../data";
 import Link from 'next/link';
 
 const UpcomingFeatures: React.FC = () => {
+    const { theme } = useTheme();
+
     const upcomingFeatures: UpcomingFeature[] = [
         {
             id: 'character-analysis',
@@ -20,7 +23,7 @@ const UpcomingFeatures: React.FC = () => {
             eta: 'Q3 2025'
         }
     ];
-    
+
     const releasedFeatures: UpcomingFeature[] = [
         {
             id: 'voice-mod',
@@ -36,12 +39,12 @@ const UpcomingFeatures: React.FC = () => {
         <section className="mb-12">
             {releasedFeatures.length > 0 && (
                 <div className="mb-10">
-                    <h2 className="text-2xl font-bold mb-6 text-white flex items-center">
+                    <h2 className={`text-2xl font-bold mb-6 flex items-center ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         <span className="mr-2">✨</span> Recently Released
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {releasedFeatures.map((feature) => (
-                            <Link 
+                            <Link
                                 key={feature.id}
                                 href="/app/voice-customization"
                                 className="relative overflow-hidden p-6 bg-gradient-to-br from-blue-500/10 to-blue-700/10 
@@ -72,7 +75,7 @@ const UpcomingFeatures: React.FC = () => {
                 </div>
             )}
 
-            <h2 className="text-2xl font-bold mb-6 text-white flex items-center">
+            <h2 className={`text-2xl font-bold mb-6 flex items-center ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 <span className="mr-2">🔮</span> Coming Soon
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

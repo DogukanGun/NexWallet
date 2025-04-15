@@ -16,9 +16,11 @@ import QuickActions from './components/QuickActions'
 import UpcomingFeatures from './components/UpcomingFeatures'
 import PredefinedAgents from './components/PredefinedAgents'
 import SavedAgents from './components/SavedAgents'
+import { useTheme } from '@/store/ThemeContext'
 
 export default function Home() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [predefinedAgents, setPredefinedAgents] = useState<Agent[]>([
     {
       id: '1',
@@ -128,7 +130,11 @@ export default function Home() {
   return (
     <AuthContextProvider>
       <AuthProvider>
-        <main className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white page-with-navbar">
+        <main className={`min-h-screen ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-b from-black to-gray-900 text-white' 
+            : 'bg-gradient-to-b from-white to-gray-100 text-gray-900'
+          } page-with-navbar`}>
           <div className="container mx-auto px-4 py-8">
             {/* Header Section */}
             <Header />

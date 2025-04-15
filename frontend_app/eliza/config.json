@@ -1,0 +1,19 @@
+{
+  "runtime": {
+    "port": 3100,
+    "host": "localhost",
+    "character_directory": "./eliza/characters",
+    "debug": false,
+    "keep_alive": false,
+    "api": {
+      "enabled": true,
+      "cors": true,
+      "auth": false
+    }
+  },
+  "logs": {
+    "level": "info",
+    "file": false
+  },
+  "plugins": []
+} 

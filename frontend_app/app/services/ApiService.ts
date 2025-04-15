@@ -517,6 +517,30 @@ class ApiService {
       body: JSON.stringify({ text, voiceId }),
     });
   }
+
+  async postCharacterRephrase(text: string, character: string): Promise<{ text: string }> {
+    return this.fetchWithToken("/api/character/rephrase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        text, 
+        character 
+      }),
+    });
+  }
+
+  async getAvailableCharacters(): Promise<{ characters: string[] }> {
+    try {
+      const response = await fetch('/api/character/list');
+      if (!response.ok) {
+        throw new Error('Failed to fetch characters');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching characters:', error);
+      throw error;
+    }
+  }
 }
 
 // Export a single instance of the ApiService
