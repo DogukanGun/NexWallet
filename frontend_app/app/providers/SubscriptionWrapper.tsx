@@ -17,6 +17,7 @@ import PopupComponent from "../components/PopupComponent";
 import { useRouter, usePathname } from "next/navigation";
 import useCurrentUserId from "../hooks/useCurrentUserId";
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useConfigStore } from '../store/configStore';
 
 type SubscriptionWrapperProps = {
   children: ReactNode;
@@ -35,9 +36,11 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const { userId } = useCurrentUserId();
   const router = useRouter();
   const pathname = usePathname();
+  const config = useConfigStore();
 
-  // Check if we're on the configurator page
+  // Check if we're on the configurator page or using free LLMs
   const isConfigPage = pathname === '/app' || pathname === '/configurator';
+  const isUsingFreeLLM = config.llmProvider === 'llama_onchain' || config.llmProvider === 'deepseek_onchain';
 
   const handleCheckCode = async (accessCode: string) => {
     try {
@@ -125,9 +128,9 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
       try {
-        if (!userId || isConfigPage) {
+        if (!userId || isConfigPage || isUsingFreeLLM) {
           setIsLoading(false);
-          setIsAllowed(true); // Allow access if we're on config page
+          setIsAllowed(true); // Allow access if we're on config page or using free LLMs
           return;
         }
 
@@ -139,7 +142,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         }
       } catch (error) {
         console.error("Error checking subscription status:", error);
-        if (!isConfigPage) {
+        if (!isConfigPage && !isUsingFreeLLM) {
           setShowPopup(true);
         }
       } finally {
@@ -148,10 +151,10 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
     };
 
     checkSubscriptionStatus();
-  }, [userId, isConfigPage]);
+  }, [userId, isConfigPage, isUsingFreeLLM]);
 
   useEffect(() => {
-    if (showPopup && !isConfigPage) {
+    if (showPopup && !isConfigPage && !isUsingFreeLLM) {
       openModal(
         <PopupComponent 
           handleCheckCode={handleCheckCode} 
@@ -171,7 +174,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         closeModal();
       }
     };
-  }, [showPopup, isConfigPage]);
+  }, [showPopup, isConfigPage, isUsingFreeLLM]);
 
   return (
     <>
@@ -180,7 +183,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
           <LoadingSpinner size="large" text="Checking subscription..." />
         </div>
       )}
-      {(isAllowed || isConfigPage) && children}
+      {(isAllowed || isConfigPage || isUsingFreeLLM) && children}
     </>
   );
 };

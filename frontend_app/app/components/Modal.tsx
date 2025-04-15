@@ -1,38 +1,32 @@
 "use client";
+import { Dialog } from '@headlessui/react';
+import { ReactNode } from 'react';
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  title?: string;
+  children: ReactNode;
+  maxWidth?: string;
 }
 
-export default function Modal({ isOpen, onClose, children }: ModalProps) {
-  if (!isOpen) return null;
-
+const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }: ModalProps) => {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          position: "relative",
-          maxWidth: "90%",
-          maxHeight: "90%",
-        }}
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the video container
-      >
-        {children}
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
+      
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className={`modal-styled mx-auto w-full ${maxWidth}`}>
+          {title && (
+            <Dialog.Title className="text-2xl font-bold mb-4 text-gradient-primary">
+              {title}
+            </Dialog.Title>
+          )}
+          {children}
+        </Dialog.Panel>
       </div>
-    </div>
+    </Dialog>
   );
-}
+};
+
+export default Modal;

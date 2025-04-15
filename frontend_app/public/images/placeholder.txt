@@ -1,0 +1,12 @@
+Please add the following files to this directory:
+
+1. turkish-flag.png - A Turkish flag image (red with a white crescent moon and star)
+2. wolf-icon.png - A wolf icon, preferably in white or light gray color to contrast with the dark background
+
+You can download these images from royalty-free sites or use your own images.
+
+Recommended image dimensions:
+- turkish-flag.png: 300x200 pixels
+- wolf-icon.png: 80x80 pixels 
+/images/usa-flag.png - The main US flag image
+/images/eagle-icon.png - Optional eagle icon (currently hidden in the code)

@@ -18,20 +18,19 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[200px]">
+    <div className="flex justify-center items-center">
       <div className="relative">
-        {/* Outer spinning ring */}
-        <div className={`${sizeClasses[size]} border-4 border-t-blue-500 border-r-blue-500 border-b-transparent border-l-transparent rounded-full animate-spin`} />
-        
-        {/* Inner pulsing circle */}
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${size === 'small' ? 'w-3 h-3' : size === 'medium' ? 'w-5 h-5' : 'w-8 h-8'} bg-blue-500 rounded-full animate-pulse`} />
-      </div>
-      
-      {text && (
-        <div className="mt-4 text-gray-600 dark:text-gray-300 font-medium animate-pulse">
-          {text}
+        {/* Outer ring */}
+        <div className="w-12 h-12 rounded-full border-4 border-base-300 animate-spin">
+          <div className="absolute top-0 left-0 w-full h-full rounded-full border-t-4 border-primary animate-[spin_1s_linear_infinite]"></div>
         </div>
-      )}
+        {/* Inner ring */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-4 border-base-300">
+          <div className="absolute top-0 left-0 w-full h-full rounded-full border-t-4 border-secondary animate-[spin_2s_linear_infinite]"></div>
+        </div>
+        {/* Center dot */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+      </div>
     </div>
   );
 };
