@@ -31,3 +31,7 @@ class UseSpecialCodeByAdminRequest(BaseModel):
 
 class VerifySpecialCodeByAdminRequest(BaseModel):
     code: str
+
+class LazorRequest(BaseModel):
+    user_id: str
+    username: str

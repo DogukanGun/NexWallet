@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.configurator
+package com.dag.nexwallet.features.configurator.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,18 +18,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVM
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVS
+import com.dag.nexwallet.features.configurator.presentation.LLMProvider
 
 @Composable
-fun ChainSelectorDialog(
+fun LLMProviderSelectorDialog(
     viewModel: ConfiguratorVM,
     showDialog: MutableState<Boolean>
 ) {
-    val chains = viewModel.getAvailableChains()
-    val selectedChains = (viewModel.viewState.collectAsState().value as? ConfiguratorVS.Content)?.selectedChains ?: emptyList()
+    val providers = viewModel.getAvailableLLMProviders()
+    val selectedProvider = (viewModel.viewState.collectAsState().value as? ConfiguratorVS.Content)?.selectedLLMProvider
     
     Dialog(onDismissRequest = { showDialog.value = false }) {
         Card(
@@ -54,7 +56,7 @@ fun ChainSelectorDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Select Blockchain Networks",
+                        text = "Select Language Model",
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
@@ -71,23 +73,23 @@ fun ChainSelectorDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // List of chains
+                // List of providers
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 300.dp)
                 ) {
-                    items(chains) { chain ->
-                        val isSelected = selectedChains.contains(chain)
-                        val isDisabled = chain.disabled
+                    items(providers) { provider ->
+                        val isSelected = selectedProvider == provider
+                        val isDisabled = provider.disabled
                         
-                        ChainItem(
-                            chain = chain,
+                        LLMProviderItem(
+                            provider = provider,
                             isSelected = isSelected,
                             isDisabled = isDisabled,
                             onClick = {
                                 if (!isDisabled) {
-                                    viewModel.toggleChain(chain)
+                                    viewModel.selectLLMProvider(provider)
                                 }
                             }
                         )
@@ -127,8 +129,8 @@ fun ChainSelectorDialog(
 }
 
 @Composable
-fun ChainItem(
-    chain: Chain,
+fun LLMProviderItem(
+    provider: LLMProvider,
     isSelected: Boolean,
     isDisabled: Boolean,
     onClick: () -> Unit
@@ -147,22 +149,20 @@ fun ChainItem(
         )
     )
     
+    val selectedGradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFEC4899).copy(alpha = 0.5f), 
+            Color(0xFF8B5CF6).copy(alpha = 0.3f)
+        )
+    )
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(
-                brush = if (isSelected) {
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF3B82F6).copy(alpha = 0.5f),
-                            Color(0xFF00E5B3).copy(alpha = 0.3f)
-                        )
-                    )
-                } else {
-                    cardGradient
-                }
+                brush = if (isSelected) selectedGradient else cardGradient
             )
             .border(
                 width = 1.dp,
@@ -177,10 +177,8 @@ fun ChainItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // You could add an icon here using the chain.icon
-            
             Text(
-                text = chain.name,
+                text = provider.name,
                 color = if (isDisabled) Color.Gray else Color.White,
                 modifier = Modifier.weight(1f),
                 fontWeight = FontWeight.Medium

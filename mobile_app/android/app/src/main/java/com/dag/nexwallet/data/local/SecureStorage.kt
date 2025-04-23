@@ -61,6 +61,7 @@ class SecureStorage @Inject constructor(
     }
 
     companion object {
+        //USER MODEL KEYS
         const val KEY_USER_ID = "user_id"
         const val KEY_USER_NAME = "user_name"
         const val KEY_USERNAME = "username"
@@ -74,5 +75,10 @@ class SecureStorage @Inject constructor(
         const val KEY_IS_VERIFIED = "is_verified"
         const val KEY_CREATED_AT = "created_at"
         const val KEY_TOKEN = "token"
+
+        //CONFIG MODEL KEYS
+        const val KEY_CONFIG_LLM_PROVIDER = "config_llm_provider"
+        const val KEY_CONFIG_KNOWLEDGE_BASE = "config_knowledge_base"
+        const val KEY_CONFIG_CHAINS = "config_chains"
     }
 } 

@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.configurator
+package com.dag.nexwallet.features.configurator.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,14 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.dag.nexwallet.features.configurator.presentation.Chain
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVM
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVS
 
 @Composable
-fun KnowledgeBaseSelectorDialog(
+fun ChainSelectorDialog(
     viewModel: ConfiguratorVM,
     showDialog: MutableState<Boolean>
 ) {
-    val knowledgeBases = viewModel.getAvailableKnowledgeBases()
-    val selectedKnowledgeBases = (viewModel.viewState.collectAsState().value as? ConfiguratorVS.Content)?.selectedKnowledgeBases ?: emptyList()
+    val chains = viewModel.getAvailableChains()
+    val selectedChains = (viewModel.viewState.collectAsState().value as? ConfiguratorVS.Content)?.selectedChains ?: emptyList()
     
     Dialog(onDismissRequest = { showDialog.value = false }) {
         Card(
@@ -53,7 +56,7 @@ fun KnowledgeBaseSelectorDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Select Knowledge Bases",
+                        text = "Select Blockchain Networks",
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
@@ -70,23 +73,23 @@ fun KnowledgeBaseSelectorDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // List of knowledge bases
+                // List of chains
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 300.dp)
                 ) {
-                    items(knowledgeBases) { kb ->
-                        val isSelected = selectedKnowledgeBases.contains(kb)
-                        val isDisabled = kb.disabled
+                    items(chains) { chain ->
+                        val isSelected = selectedChains.contains(chain)
+                        val isDisabled = chain.disabled
                         
-                        KnowledgeBaseItem(
-                            knowledgeBase = kb,
+                        ChainItem(
+                            chain = chain,
                             isSelected = isSelected,
                             isDisabled = isDisabled,
                             onClick = {
                                 if (!isDisabled) {
-                                    viewModel.toggleKnowledgeBase(kb)
+                                    viewModel.toggleChain(chain)
                                 }
                             }
                         )
@@ -126,8 +129,8 @@ fun KnowledgeBaseSelectorDialog(
 }
 
 @Composable
-fun KnowledgeBaseItem(
-    knowledgeBase: KnowledgeBase,
+fun ChainItem(
+    chain: Chain,
     isSelected: Boolean,
     isDisabled: Boolean,
     onClick: () -> Unit
@@ -155,8 +158,8 @@ fun KnowledgeBaseItem(
                 brush = if (isSelected) {
                     Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF8B5CF6).copy(alpha = 0.5f),
-                            Color(0xFF3B82F6).copy(alpha = 0.3f)
+                            Color(0xFF3B82F6).copy(alpha = 0.5f),
+                            Color(0xFF00E5B3).copy(alpha = 0.3f)
                         )
                     )
                 } else {
@@ -176,8 +179,10 @@ fun KnowledgeBaseItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // You could add an icon here using the chain.icon
+            
             Text(
-                text = knowledgeBase.name,
+                text = chain.name,
                 color = if (isDisabled) Color.Gray else Color.White,
                 modifier = Modifier.weight(1f),
                 fontWeight = FontWeight.Medium

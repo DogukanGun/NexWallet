@@ -2,6 +2,7 @@ package com.dag.nexwallet.di
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Bundle
 import com.dag.nexwallet.BuildConfig
 import com.dag.nexwallet.base.network.HttpLogger
 import com.dag.nexwallet.base.AlertDialogManager
@@ -9,6 +10,9 @@ import com.dag.nexwallet.base.navigation.DefaultNavigator
 import com.dag.nexwallet.base.navigation.Destination
 import com.dag.nexwallet.data.repository.UserRepository
 import com.dag.nexwallet.domain.DataPreferencesStore
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.auth.Auth
@@ -50,6 +54,16 @@ class ObjectModules {
         return DefaultNavigator(startDestination = Destination.Splash)
     }
 
+    @Provides
+    @Singleton
+    fun provideFirebaseAnalytics(): FirebaseAnalytics {
+        val firebaseAnalytics =  Firebase.analytics
+        val parameters = Bundle().apply {
+            this.putString("build_version", BuildConfig.VERSION_NAME)
+        }
+        firebaseAnalytics.setDefaultEventParameters(parameters)
+        return firebaseAnalytics
+    }
 
     @Provides
     @Singleton

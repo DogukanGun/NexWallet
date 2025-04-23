@@ -15,5 +15,10 @@
     "level": "info",
     "file": false
   },
-  "plugins": []
+  "plugins": [
+    "./eliza/plugins/SentimentPlugin.ts",
+    "./eliza/plugins/TranslationPlugin.ts",
+    "./eliza/plugins/SonicSVMPlugin.ts",
+    "./eliza/plugins/BNBChainPlugin.ts"
+  ]
 } 

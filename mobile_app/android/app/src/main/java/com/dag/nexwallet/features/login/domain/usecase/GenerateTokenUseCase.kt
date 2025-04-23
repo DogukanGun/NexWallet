@@ -15,7 +15,9 @@ class GenerateTokenUseCase @Inject constructor(val tokenService: ITokenService):
         ifNull(
             params,
             notNullClosure = {
-                emit(tokenService.requestToken(it))
+                tokenService.requestToken(it)?.let {
+                    emit(it)
+                }
             }
         )
     }

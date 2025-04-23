@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.dag.nexwallet.base.ActivityHolder
 import com.dag.nexwallet.base.BaseVM
+import com.dag.nexwallet.base.Logger
 import com.dag.nexwallet.data.model.User
 import com.dag.nexwallet.data.repository.UserRepository
 import com.dag.nexwallet.features.login.domain.model.TokenRequest
@@ -20,8 +21,17 @@ import javax.inject.Inject
 class LoginVM @Inject constructor(
     private val activityHolder: ActivityHolder,
     private val userRepository: UserRepository,
-    private val generateTokenUseCase: GenerateTokenUseCase
+    private val generateTokenUseCase: GenerateTokenUseCase,
+    private val logger: Logger
 ): BaseVM<LoginVS>() {
+
+    companion object {
+        const val LOGIN_ERROR_X = "LOGIN_ERROR_X"
+        const val LOGIN_CANCELLED_X = "LOGIN_CANCELLED_X"
+        const val LOGIN_COMPLETED_X = "LOGIN_COMPLETED_X"
+        const val LOGIN_TOKEN = "LOGIN_TOKEN"
+        const val LOGIN_SAVE_USER = "LOGIN_SAVE_USER"
+    }
 
     fun loginWithX() {
         _viewState.value = LoginVS.Loading
@@ -36,17 +46,21 @@ class LoginVM @Inject constructor(
                 )
                 .addOnCanceledListener {
                     Log.i("LOGIN", "Login is cancelled")
+                    logger.logError(LOGIN_CANCELLED_X,"Login is canceled")
                     _viewState.value = LoginVS.Error("Login cancelled")
                 }
                 .addOnFailureListener { exception ->
                     Log.e("LOGIN", "Login failed", exception)
-                    _viewState.value = LoginVS.Error(exception.message ?: "Login failed")
+                    logger.logError(LOGIN_ERROR_X,
+                        exception.message ?: "Login error for unknown reason")
+                    _viewState.value = LoginVS.Error("Login failed")
                 }
                 .addOnCompleteListener { result ->
                     if (result.isSuccessful) {
                         result.result.additionalUserInfo?.profile?.let { profile ->
                             try {
                                 val user = User.fromTwitterProfile(profile as Map<String, Any?>)
+                                logger.logSuccess<User>(LOGIN_COMPLETED_X,user)
                                 registerDataAndNavigateToHome(user)
                             } catch (e: Exception) {
                                 Log.e("LOGIN", "Error parsing user data", e)
@@ -61,6 +75,7 @@ class LoginVM @Inject constructor(
     private fun getToken(userId: String){
         viewModelScope.launch {
             generateTokenUseCase.execute(TokenRequest(userId)).collect {
+                logger.logSuccess(LOGIN_TOKEN,"Token is taken from the db for the user $userId")
                 userRepository.saveToken(userId)
             }
         }
@@ -71,6 +86,7 @@ class LoginVM @Inject constructor(
         try {
             userRepository.saveUser(user).fold(
                 onSuccess = {
+                    logger.logSuccess(LOGIN_SAVE_USER,"User -${user.id}- is saved into local storage")
                     runBlocking {
                         getToken(user.id)
                     }

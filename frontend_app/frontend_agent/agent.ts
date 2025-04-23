@@ -12,6 +12,8 @@ import { MessariAPI } from './tools/messari';
 import { MessariPDFTool } from './tools/messari/pdfGenerator';
 import { createMessariPDFContextModifier } from './messariMiddleware';
 import { ElizaCharacterTool } from './tools/eliza/elizaCharacterTool';
+import { getElizaService } from '../eliza';
+import BlockchainTools from './tools/blockchainTools';
 
 export type agent = 'cookie' | 'messari' | 'eliza';
 
@@ -60,4 +62,72 @@ export function createKnowledgeReactAgentV2(
     tools.push(new VoiceComponentTool())
     
     return createAgent(agentName, tools, messageModifier, isOnchain);
+}
+
+export default class FrontendAgent {
+  private elizaService: any;
+  private blockchainTools: BlockchainTools;
+  
+  constructor() {
+    // Initialize Eliza service
+    this.elizaService = getElizaService();
+    
+    // Initialize blockchain tools
+    this.blockchainTools = new BlockchainTools(this.elizaService);
+  }
+  
+  /**
+   * Set wallet connections for blockchain operations
+   * @param chains Array of connected chains with their addresses
+   */
+  setWalletConnections(chains: Array<{ chainId: number; address: string; isEmbedded: boolean }>) {
+    for (const chain of chains) {
+      // BNB Chain (BSC) has chainId 56
+      if (chain.chainId === 56) {
+        this.blockchainTools.setBNBWallet(chain.address);
+      }
+      
+      // Solana has chainId 501
+      if (chain.chainId === 501) {
+        this.blockchainTools.setSolanaWallet(chain.address);
+      }
+    }
+  }
+  
+  /**
+   * Helper method to execute blockchain operations
+   * @param operation The operation to perform
+   * @param params Parameters for the operation
+   */
+  async executeBlockchainOperation(
+    operation: string, 
+    params: Record<string, any>
+  ): Promise<any> {
+    switch (operation) {
+      case 'bnb.getBalance':
+        return await this.blockchainTools.getBNBBalance(params.address);
+        
+      case 'bnb.getTokenInfo':
+        return await this.blockchainTools.getBNBTokenInfo(params.tokenAddress);
+        
+      case 'bnb.sendTransaction':
+        return await this.blockchainTools.sendBNBTransaction(
+          params.to,
+          params.amount,
+          params.data
+        );
+        
+      case 'solana.getAccountInfo':
+        return await this.blockchainTools.getSolanaAccountInfo(params.accountAddress);
+        
+      case 'solana.simulateTransaction':
+        return await this.blockchainTools.simulateSolanaTransaction(params.transaction);
+        
+      case 'solana.sendTransaction':
+        return await this.blockchainTools.sendSolanaTransaction(params.transaction);
+        
+      default:
+        throw new Error(`Unknown blockchain operation: ${operation}`);
+    }
+  }
 } 

@@ -7,6 +7,7 @@ import { ComponentConfig } from "../voice/types";
 type FetchOptions = RequestInit & {
   headers?: Record<string, string>;
 };
+
 type UserCodeType = {
   id: number;
   code: string;
@@ -14,6 +15,14 @@ type UserCodeType = {
   used_by: string;
 };
 
+type LazorAuthResponse = {
+  ok: boolean;
+  token: string;
+  user: {
+    id: string;
+    username: string;
+  };
+};
 
 // Define response types based on your API endpoints
 type UserCode = {
@@ -540,6 +549,18 @@ class ApiService {
       console.error('Error fetching characters:', error);
       throw error;
     }
+  }
+
+  async postLazorLogin(publicKey: string, signature: string): Promise<LazorAuthResponse> {
+    const response = await fetch("/api/user/lazor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ publicKey, signature }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch characters');
+    }
+    return response.json();
   }
 }
 

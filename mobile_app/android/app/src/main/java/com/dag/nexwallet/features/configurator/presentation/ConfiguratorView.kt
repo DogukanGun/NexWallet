@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.configurator
+package com.dag.nexwallet.features.configurator.presentation
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -7,11 +7,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
@@ -26,6 +24,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import com.dag.nexwallet.R
+import com.dag.nexwallet.features.configurator.presentation.components.AgentTypeSelectorDialog
+import com.dag.nexwallet.features.configurator.presentation.components.ChainSelectorDialog
+import com.dag.nexwallet.features.configurator.presentation.components.ConfigErrorScreen
+import com.dag.nexwallet.features.configurator.presentation.components.ConfigLoadingScreen
+import com.dag.nexwallet.features.configurator.presentation.components.ConfigOption
+import com.dag.nexwallet.features.configurator.presentation.components.KnowledgeBaseSelectorDialog
+import com.dag.nexwallet.features.configurator.presentation.components.LLMProviderSelectorDialog
 
 @Composable
 @Preview
@@ -132,7 +137,7 @@ fun ConfiguratorView(
                                 }
                             }
                         )
-                        
+
                         ConfigOption(
                             title = "Knowledge Bases",
                             iconContent = {
@@ -155,7 +160,7 @@ fun ConfiguratorView(
                                 }
                             }
                         )
-                        
+
                         ConfigOption(
                             title = "Language Model",
                             iconContent = {
@@ -178,7 +183,7 @@ fun ConfiguratorView(
                                 }
                             }
                         )
-                        
+
                         ConfigOption(
                             title = "Interaction Type",
                             iconContent = {
@@ -201,7 +206,7 @@ fun ConfiguratorView(
                                 }
                             }
                         )
-                        
+
                         ConfigOption(
                             title = "Voice & Personality",
                             iconContent = {

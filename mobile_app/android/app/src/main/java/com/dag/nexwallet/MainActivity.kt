@@ -9,10 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
@@ -20,7 +18,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,7 +25,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +42,7 @@ import com.dag.nexwallet.domain.DataPreferencesStore
 import com.dag.nexwallet.features.home.presentation.cardBackgroundColor
 import com.dag.nexwallet.ui.theme.NexWalletTheme
 import com.dag.nexwallet.ui.theme.gradientBackground
+import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -59,6 +56,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var alertDialogManager: AlertDialogManager
+
+    @Inject
+    lateinit var firebaseAnalytics: FirebaseAnalytics
 
     @Inject
     lateinit var defaultNavigator: DefaultNavigator
@@ -75,7 +75,6 @@ class MainActivity : ComponentActivity() {
         activityHolder.setActivity(this)
         val showAlert = mutableStateOf(false)
         val alertDialogModel = mutableStateOf<AlertDialogModel?>(null)
-        
         // Initialize the lifecycle scope coroutine only after alertDialogManager is available
         if (::alertDialogManager.isInitialized && lifecycleScope.isActive) {
             lifecycleScope.launch {
