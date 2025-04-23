@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dag.nexwallet.base.extensions.ObserveAsEvents
 import com.dag.nexwallet.features.login.presentation.LoginView
 import com.dag.nexwallet.features.splash.SplashView
-import com.dag.nexwallet.features.configurator.ConfiguratorView
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorView
 import com.dag.nexwallet.features.home.presentation.HomeView
 import com.dag.nexwallet.features.voice.add.AddVoiceView
 

@@ -2,6 +2,8 @@ import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
+import { PluginManager } from './plugins/PluginManager';
+import { ElizaPlugin } from './plugins/PluginInterface';
 
 export interface ElizaConfig {
   runtime: {
@@ -47,6 +49,9 @@ export class ElizaService {
   private baseUrl: string;
   private characters: Map<string, CharacterConfig> = new Map();
   private isRunning: boolean = false;
+  private pluginManager: PluginManager;
+  // OpenAI API key from environment variable
+  private openaiApiKey: string | undefined = process.env.OPENAI_API_KEY;
 
   constructor() {
     // Load config
@@ -54,8 +59,17 @@ export class ElizaService {
     this.config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     this.baseUrl = `http://${this.config.runtime.host}:${this.config.runtime.port}`;
     
+    // Initialize plugin manager
+    this.pluginManager = new PluginManager(this);
+    
     // Load characters
     this.loadCharacters();
+  }
+
+  private async loadPlugins() {
+    if (this.config.plugins && Array.isArray(this.config.plugins)) {
+      await this.pluginManager.loadPlugins(this.config.plugins);
+    }
   }
 
   private loadCharacters() {
@@ -91,7 +105,11 @@ export class ElizaService {
           
           if (output.includes('Server running at')) {
             this.isRunning = true;
-            resolve(true);
+            
+            // Load plugins after Eliza is started
+            this.loadPlugins().then(() => {
+              resolve(true);
+            });
           }
         });
 
@@ -119,6 +137,14 @@ export class ElizaService {
   }
 
   public async stopEliza(): Promise<void> {
+    // Unload plugins
+    const plugins = this.pluginManager.getPlugins();
+    for (const plugin of plugins) {
+      if (plugin.cleanup) {
+        await plugin.cleanup();
+      }
+    }
+
     if (this.elizaProcess) {
       this.elizaProcess.kill();
       this.elizaProcess = null;
@@ -131,10 +157,6 @@ export class ElizaService {
   }
 
   public async sendMessage(message: string, character: string): Promise<string> {
-    if (!this.isRunning) {
-      await this.startEliza();
-    }
-
     try {
       // Convert character name to lowercase for case-insensitive matching
       const characterLower = character.toLowerCase();
@@ -144,25 +166,39 @@ export class ElizaService {
         throw new Error(`Character '${character}' not found`);
       }
 
-      // Send message to Eliza API
-      const response = await axios.post(`${this.baseUrl}/api/message`, {
-        message,
-        character: characterLower
-      });
+      // Process message through plugins
+      const processedMessage = await this.pluginManager.preProcessMessage(message, characterLower);
 
-      return response.data.response;
+      try {
+        // Try to use the Eliza API if it's running
+        if (this.isRunning) {
+          const response = await axios.post(`${this.baseUrl}/api/message`, {
+            message: processedMessage,
+            character: characterLower
+          });
+
+          // Process response through plugins
+          const processedResponse = await this.pluginManager.postProcessResponse(
+            response.data.response, 
+            characterLower
+          );
+
+          return processedResponse;
+        } else {
+          // Fallback to direct OpenAI call
+          return await this.directModelCall(processedMessage, characterLower);
+        }
+      } catch (error) {
+        console.error('Error using Eliza API, falling back to direct API call:', error);
+        return await this.directModelCall(processedMessage, characterLower);
+      }
     } catch (error) {
       console.error('Error sending message to Eliza:', error);
       throw error;
     }
   }
 
-  // Helper method to rephrase text in the style of a character
   public async rephraseWithCharacter(text: string, character: string): Promise<string> {
-    if (!this.isRunning) {
-      await this.startEliza();
-    }
-
     try {
       // Convert character name to lowercase for case-insensitive matching
       const characterLower = character.toLowerCase();
@@ -171,6 +207,9 @@ export class ElizaService {
       if (!this.characters.has(characterLower)) {
         throw new Error(`Character '${character}' not found`);
       }
+
+      // Process text through plugins
+      const processedText = await this.pluginManager.preProcessMessage(text, characterLower);
 
       // Get the character's system prompt
       const characterConfig = this.characters.get(characterLower);
@@ -179,18 +218,69 @@ export class ElizaService {
       }
 
       // Create a custom prompt for the rephrasing
-      const prompt = `${characterConfig.system_prompt}\n\nPlease rephrase the following text in your style:\n${text}`;
+      const prompt = `Please rephrase the following text in your unique style. Maintain the same meaning but express it as if you were speaking:\n\n"${processedText}"`;
 
-      // Send the prompt to Eliza API
-      const response = await axios.post(`${this.baseUrl}/api/message`, {
-        message: prompt,
-        character: characterLower
-      });
+      try {
+        // Try to use the direct model call
+        const response = await this.directModelCall(prompt, characterLower);
+        
+        // Process response through plugins
+        const processedResponse = await this.pluginManager.postProcessResponse(
+          response, 
+          characterLower
+        );
 
-      return response.data.response;
+        return processedResponse;
+      } catch (error) {
+        console.error('Error rephrasing with direct API call:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('Error rephrasing with Eliza character:', error);
       throw error;
+    }
+  }
+
+  // Helper method to get plugin manager
+  public getPluginManager(): PluginManager {
+    return this.pluginManager;
+  }
+
+  // Direct model call using OpenAI API
+  private async directModelCall(message: string, character: string): Promise<string> {
+    if (!this.openaiApiKey) {
+      throw new Error('OpenAI API key is not configured. Set the OPENAI_API_KEY environment variable.');
+    }
+
+    const characterConfig = this.characters.get(character);
+    if (!characterConfig) {
+      throw new Error(`Character '${character}' configuration not found`);
+    }
+
+    try {
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: characterConfig.configuration.modelName || 'gpt-4',
+          messages: [
+            { role: 'system', content: characterConfig.system_prompt },
+            { role: 'user', content: message }
+          ],
+          temperature: characterConfig.configuration.temperature || 0.7,
+          max_tokens: characterConfig.configuration.max_tokens || 800
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.openaiApiKey}`
+          }
+        }
+      );
+
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error('Error calling OpenAI API:', error);
+      throw new Error(`Failed to generate response: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 } 

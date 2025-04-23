@@ -19,52 +19,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get list of character files directly - fix path to the correct location
+    // Get the list of character files
     const charactersDir = path.join(process.cwd(), 'eliza', 'characters');
+    const characterFiles = fs.readdirSync(charactersDir);
     
-    // Log the path for debugging
-    console.log('Characters directory path:', charactersDir);
-    
-    // Check if directory exists
-    if (!fs.existsSync(charactersDir)) {
-      console.error('Characters directory not found:', charactersDir);
-      return res.status(500).json({ 
-        error: 'Characters directory not found',
-        path: charactersDir
-      });
-    }
-    
-    const files = fs.readdirSync(charactersDir);
-    console.log('Character files found:', files);
-    
-    // Extract character names from filenames
-    const characters = files
+    // Filter to only include .character.json files and extract character names
+    const characters = characterFiles
       .filter(file => file.endsWith('.character.json'))
       .map(file => {
-        // Read the character file to get the name
-        const characterPath = path.join(charactersDir, file);
+        // Remove the .character.json extension to get the character name
+        const characterName = file.replace('.character.json', '');
+        
+        // Try to read the character file to get more details
         try {
-          const characterContent = fs.readFileSync(characterPath, 'utf8');
-          const characterData = JSON.parse(characterContent);
-          console.log(`Character data for ${file}:`, characterData.name);
-          return characterData.name;
-        } catch (err) {
-          console.error(`Error reading character file ${file}:`, err);
-          // Return the file name without extension as fallback
-          const fallbackName = file.replace('.character.json', '');
-          console.log(`Using fallback name for ${file}:`, fallbackName);
-          return fallbackName;
+          const characterPath = path.join(charactersDir, file);
+          const characterData = JSON.parse(fs.readFileSync(characterPath, 'utf8'));
+          return {
+            id: characterName,
+            name: characterData.name || characterName,
+            description: characterData.description || ''
+          };
+        } catch (error) {
+          // If can't read file, just return the name
+          return {
+            id: characterName,
+            name: characterName,
+            description: ''
+          };
         }
       });
-
-    console.log('Returning character list:', characters);
     
-    // Return the list of characters
-    return res.status(200).json({ characters });
+    // Return the list of character names
+    return res.status(200).json({ characters: characters.map(char => char.id) });
   } catch (error: any) {
-    console.error('Error in character list API:', error);
+    console.error('Error fetching character list:', error);
     return res.status(500).json({ 
-      error: 'An error occurred while retrieving the character list',
+      error: 'An error occurred while fetching the character list',
       message: error.message 
     });
   }

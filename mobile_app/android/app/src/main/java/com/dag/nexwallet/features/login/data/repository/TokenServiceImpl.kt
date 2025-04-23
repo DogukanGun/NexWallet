@@ -6,7 +6,7 @@ import com.dag.nexwallet.features.login.domain.model.TokenRequest
 import com.dag.nexwallet.features.login.domain.model.TokenResponse
 
 class TokenServiceImpl(val tokenService: TokenService): ITokenService {
-    override suspend fun requestToken(body: TokenRequest): TokenResponse {
+    override suspend fun requestToken(body: TokenRequest): TokenResponse? {
         return tokenService.requestToken(body)
     }
 }

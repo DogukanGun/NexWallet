@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.configurator
+package com.dag.nexwallet.features.configurator.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.dag.nexwallet.features.configurator.presentation.AgentType
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVM
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVS
 
 @Composable
 fun AgentTypeSelectorDialog(

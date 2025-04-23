@@ -1,10 +1,8 @@
 package com.dag.nexwallet.data.model
 
-import android.content.Context
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-import androidx.security.crypto.MasterKeys
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class User(
     val id: String,
     val name: String,

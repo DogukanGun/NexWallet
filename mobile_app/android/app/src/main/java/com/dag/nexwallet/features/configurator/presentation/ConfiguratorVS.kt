@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.configurator
+package com.dag.nexwallet.features.configurator.presentation
 
 import com.dag.nexwallet.base.BaseVS
 

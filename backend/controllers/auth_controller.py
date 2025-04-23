@@ -7,9 +7,9 @@ import random
 import string
 from controllers.request_models.auth_models import AdminRequest, RegisterUserRequest, GenerateTokenRequest, \
     CheckTokenRequest, CreateWalletRequest, CheckSpecialCodeRequest, \
-    DeleteSpecialCodeByAdminRequest, UseSpecialCodeByAdminRequest, VerifySpecialCodeByAdminRequest
+    DeleteSpecialCodeByAdminRequest, UseSpecialCodeByAdminRequest, VerifySpecialCodeByAdminRequest, LazorRequest
 from models.auth import AuthPayload
-from models import RegisteredUser, SpecialUserCode, Admin, UserWallet
+from models import RegisteredUser, SpecialUserCode, Admin, UserWallet, TwitterUsers
 from models.chain import Transaction
 from pydantic import BaseModel
 from utils.database import get_db
@@ -218,3 +218,21 @@ async def verify_code(request: VerifySpecialCodeByAdminRequest, db: Session = De
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/save/lazor")
+async def save_lazor(request:LazorRequest, db: Session = Depends(get_db)):
+    user_id = random.Random().randint(100,100000)
+    user= db.query(TwitterUsers).filter(TwitterUsers.user_id == request.user_id).first()
+    if not user:
+        twitter_user = TwitterUsers(id=user_id,user_id=request.user_id,username=request.username)
+        db.add(twitter_user)
+        db.commit()
+        return {"success": True, "user":{
+            "id": twitter_user.id,
+            "username": twitter_user.username,
+            "user_id": twitter_user.user_id,
+        }}
+    return {"success": True,"user": {
+        "id": user["id"],
+        "username": user["username"],
+        "user_id": user["id"],
+    }}

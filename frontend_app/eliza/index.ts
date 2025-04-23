@@ -1,7 +1,5 @@
 // This file should not import ElizaService directly on the client side
 
-import axios from 'axios';
-
 // Interface for character configuration
 export interface CharacterConfig {
   name: string;
@@ -24,26 +22,42 @@ export interface CharacterConfig {
 // Client-side service for interacting with Eliza API
 class ElizaClient {
   private baseUrl: string;
+  private isServer: boolean;
 
   constructor() {
-    // Make sure we use the correct URL format for the browser environment
-    this.baseUrl = '/api/eliza';
+    // Determine if we're running on server or client side
+    this.isServer = typeof window === 'undefined';
+    
+    // Set baseUrl based on environment
+    if (this.isServer) {
+      // On the server side, we need an absolute URL
+      this.baseUrl = 'http://localhost:3000';
+    } else {
+      // On the client side, we can use a relative URL
+      this.baseUrl = '';
+    }
   }
 
   // Get list of available characters
   async getCharacters(): Promise<string[]> {
     try {
-      // Use a relative URL that will work in the browser
-      const response = await axios.get('/api/character/list');
+      // Use a URL that will work in both browser and server
+      const response = await fetch(`${this.baseUrl}/api/character/list`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch characters: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
       
       // Log the response for debugging
-      console.log('Character list API response:', response.data);
+      console.log('Character list API response:', data);
       
       // Ensure we have an array of characters
-      if (response.data && Array.isArray(response.data.characters)) {
-        return response.data.characters;
+      if (data && Array.isArray(data.characters)) {
+        return data.characters;
       } else {
-        console.error('Invalid character list format:', response.data);
+        console.error('Invalid character list format:', data);
         throw new Error('Invalid character list format received from API');
       }
     } catch (error) {
@@ -56,11 +70,23 @@ class ElizaClient {
   // Send a message to a character
   async sendMessage(message: string, character: string): Promise<string> {
     try {
-      const response = await axios.post('/api/character/message', {
-        message,
-        character
+      const response = await fetch(`${this.baseUrl}/api/character/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          character
+        })
       });
-      return response.data.response;
+      
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.response;
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
@@ -70,11 +96,23 @@ class ElizaClient {
   // Rephrase text in the style of a character
   async rephraseWithCharacter(text: string, character: string): Promise<string> {
     try {
-      const response = await axios.post('/api/character/rephrase', {
-        text,
-        character
+      const response = await fetch(`${this.baseUrl}/api/character/rephrase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          character
+        })
       });
-      return response.data.text;
+      
+      if (!response.ok) {
+        throw new Error(`Failed to rephrase text: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.text;
     } catch (error) {
       console.error('Error rephrasing text:', error);
       throw error;

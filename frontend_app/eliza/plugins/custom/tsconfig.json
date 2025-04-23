@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "rootDir": "./src",
+        "typeRoots": ["./node_modules/@types", "./src/types"],
+        "declaration": true,
+        "strictNullChecks": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "module": "esnext",
+        "target": "esnext",
+        "allowJs": true,
+        "resolveJsonModule": true
+    },
+    "include": ["src"]
+}
