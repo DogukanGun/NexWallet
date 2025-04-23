@@ -9,7 +9,7 @@ export * from './types';
 export * from './environment';
 export * from './actions/getBalanceTestnet';
 
-import type { Plugin } from '@elizaos/core';
+import type { Plugin, IAgentRuntime } from '@elizaos/core';
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import ora from 'ora';
@@ -21,8 +21,9 @@ import { bridgeAction } from './actions/bridge';
 import { stakeAction } from './actions/stake';
 import { faucetAction } from './actions/faucet';
 import { deployAction } from './actions/deploy';
-import { getConfig } from './environment';
+import { getConfig, setRuntime } from './environment';
 import { greenfieldAction } from './actions/gnfd';
+import { BNBWalletProvider } from './providers/wallet';
 
 // Start the loader
 const spinner = ora({
@@ -153,7 +154,7 @@ export const bnbPlugin: Plugin = {
     name: 'bnb',
     description:
         'BNB Smart Chain (BSC) and opBNB integration plugin supporting transfers, swaps, staking, bridging, and token deployments',
-    providers: [bnbWalletProvider],
+    providers: [new BNBWalletProvider()],
     services: [],
     actions: actions,
     evaluators: [],

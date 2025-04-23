@@ -9,6 +9,7 @@ import { apiService, SaveAgentApiServiceResponse, SavedVoice } from "../services
 import { getElizaService } from '@/eliza';
 import SavedAgentsModal from "./components/SavedAgentsModal";
 import { useTheme } from '@/store/ThemeContext';
+import ElizaAutoSelectModal from './components/ElizaAutoSelectModal';
 
 // CSS Classes
 const cardContainerClass = "flex flex-col gap-4 w-full max-w-4xl mx-auto p-4";
@@ -29,6 +30,7 @@ const selectedButtonClass = (theme: string) => `w-full px-4 py-3 rounded-lg ${
 interface AppChain {
   id: ChainId;
   name: string;
+  elizaMandatory: boolean;
   isEmbedded: boolean;
   disabled: boolean;
   icon: string;
@@ -96,13 +98,31 @@ const chains: AppChain[] = [
     name: "Solana",
     isEmbedded: false,
     disabled: false,
+    elizaMandatory: false,
     icon: "/icons/solana.svg",
+  },
+  {
+    id: ChainId.BNB,
+    name: "BNB Chain",
+    disabled: false,
+    isEmbedded: false,
+    elizaMandatory: true,
+    icon: "/icons/bnbchain.svg",
+  },
+  {
+    id: ChainId.STARKNET,
+    name: "StarkNet",
+    disabled: false,
+    isEmbedded: false,
+    elizaMandatory: true,
+    icon: "/icons/starknet.svg",
   },
   {
     id: ChainId.BASE,
     name: "Base",
     disabled: true,
     isEmbedded: true,
+    elizaMandatory: true,
     icon: "/icons/base.svg",
     maintenanceMode: true
   },
@@ -111,6 +131,7 @@ const chains: AppChain[] = [
     name: "Arbitrum",
     disabled: true,
     isEmbedded: true,
+    elizaMandatory: true,
     icon: "/icons/arbitrum.svg",
     maintenanceMode: true
   },
@@ -119,6 +140,7 @@ const chains: AppChain[] = [
     name: "Optimism",
     disabled: true,
     isEmbedded: true,
+    elizaMandatory: true,
     icon: "/icons/optimism.svg",
     maintenanceMode: true
   },
@@ -127,22 +149,9 @@ const chains: AppChain[] = [
     name: "Polygon",
     disabled: true,
     isEmbedded: true,
+    elizaMandatory: true,
     icon: "/icons/polygon.svg",
   },
-  {
-    id: ChainId.BNB,
-    name: "BNB Chain",
-    disabled: true,
-    isEmbedded: true,
-    icon: "/icons/bnb.svg",
-  },
-  {
-    id: ChainId.STARKNET,
-    name: "StarkNet",
-    disabled: true,
-    isEmbedded: true,
-    icon: "/icons/starknet.svg",
-  }
 ];
 
 const knowledgeBases: KnowledgeBase[] = [
@@ -212,7 +221,7 @@ export default function Configurator() {
   const [selectedAgentType, setSelectedAgentType] = useState("");
   const [selectedProvider, setSelectedProvider] = useState('');
   const [selectedVoice, setSelectedVoice] = useState('');
-  const [selectedCharacter, setSelectedCharacter] = useState('Pirate');
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [selectedConnectionType, setSelectedConnectionType] = useState("apiKeys");
 
   // UI State
@@ -237,6 +246,7 @@ export default function Configurator() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showSavedAgentsModal, setShowSavedAgentsModal] = useState(false);
+  const [showElizaAutoSelectModal, setShowElizaAutoSelectModal] = useState(false);
 
   // Animation States
   const [showGermanyAnimation, setShowGermanyAnimation] = useState(false);
@@ -252,6 +262,15 @@ export default function Configurator() {
           ? prev.filter(chain => chain.id !== chainId) 
           : [...prev, selectedChain]
       );
+
+      // Check if the selected chain requires Eliza and auto-select it
+      if (selectedChain.elizaMandatory) {
+        const elizaKnowledgeBase = knowledgeBases.find(kb => kb.id === "eliza");
+        if (elizaKnowledgeBase && !selectedKnowledgeBases.some(kb => kb.id === "eliza")) {
+          setSelectedKnowledgeBases(prev => [...prev, elizaKnowledgeBase]);
+          setShowElizaAutoSelectModal(true);
+        }
+      }
     }
   };
 
@@ -340,13 +359,13 @@ export default function Configurator() {
   const handleCharacterSelection = (character: string) => {
     setSelectedCharacter(character);
     
-    if (character === "FriedrichMerz") {
+    if (character === "friedrichmerz") {
       setShowGermanyAnimation(true);
       setTimeout(() => setShowGermanyAnimation(false), 5000); // Auto close after 5 seconds
-    } else if (character === "DonaldTrump") {
+    } else if (character === "donaldtrump") {
       setShowUSAAnimation(true);
       setTimeout(() => setShowUSAAnimation(false), 5000); // Auto close after 5 seconds
-    } else if (character === "MustafaKemalAtaturk") {
+    } else if (character === "mustafakemalataturk") {
       setShowAtaturkAnimation(true);
       setTimeout(() => setShowAtaturkAnimation(false), 5000); // Auto close after 5 seconds
     }
@@ -406,11 +425,11 @@ export default function Configurator() {
             "Pirate": "Talks like a swashbuckling pirate",
             "Shakespeare": "Speaks in Shakespearean style",
             "CryptoWizard": "Mystical crypto advisor",
-            "FriedrichMerz": "German politician's perspective",
+            "FriedrichMerz": "German politician's perspective and only speaks in German",
             "DonaldTrump": "Mimics Trump's speaking style",
             "ElonMusk": "Tech visionary and entrepreneur",
             "KevinHart": "Comedian's energetic style",
-            "MustafaKemalAtaturk": "Modern Turkey's founding father"
+            "MustafaKemalAtaturk": "Modern Turkey's founding father and only speaks in Turkish"
           };
           
           setCharacters(characterNames.map(name => ({
@@ -860,6 +879,19 @@ export default function Configurator() {
               />
             )}
             {showSavedAgentsModal && <SavedAgentsModal onClose={() => setShowSavedAgentsModal(false)} />}
+            {showElizaAutoSelectModal && (
+              <div className={`fixed inset-0 flex items-center justify-center z-50 ${
+                theme === 'dark' ? 'bg-black/50' : 'bg-gray-500/50'
+              }`}>
+                <div className={`max-w-md w-full mx-4 p-6 rounded-2xl ${
+                  theme === 'dark'
+                    ? 'bg-gray-900 border-gray-800'
+                    : 'bg-white border-gray-200'
+                } border`}>
+                  <ElizaAutoSelectModal onClose={() => setShowElizaAutoSelectModal(false)} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -98,7 +98,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const [showPaymentModal, setShowPaymentModal] = React.useState(false);
   const [selectedLLM, setSelectedLLM] = React.useState<string>("");
   const [showWarningModal, setShowWarningModal] = React.useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>('Pirate');
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
 
   // Enhanced animation variants
   const pageVariants = {
@@ -165,7 +165,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     }
   };
 
-  const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>, chatRequestOptions?: ChatRequestOptions) => {
+  const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     try {
@@ -187,32 +187,30 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
         messages, 
         stores.chains, 
         stores.knowledgeBase,
-        stores.llmProvider  // Pass the llmProvider from the config store
+        stores.llmProvider
       );
       console.log("text", text);
       console.log("op", op);
       console.log("transaction", transaction);
       
-      // Check if character rephrasing should be used
-      const useCharacter = chatRequestOptions?.data?.useCharacter ?? !!selectedCharacter;
-      const characterName = chatRequestOptions?.data?.characterName ?? selectedCharacter;
       
-      if (useCharacter && characterName && text) {
-        // Use the Eliza character tool to rephrase the response
+      if (stores.character) {
+        console.log('Using character rephrasing with:', stores.character); // Debug log
         try {
-          // Call API to rephrase with character
-          const characterResponse = await apiService.postCharacterRephrase(text, characterName);
-          // Add the rephrased response
+          const characterResponse = await apiService.postCharacterRephrase(text, stores.character);
           addMessage({ role: "assistant", content: characterResponse.text, id: chatId });
         } catch (error) {
           console.error("Error using character tool:", error);
           // Fallback to original response
           addMessage({ role: "assistant", content: text, id: chatId });
         }
-      } else if (op === ChainId.SOLANA && transaction) {
-        handleSolAi(transaction);
       } else {
-        addMessage({ role: "assistant", content: text, id: chatId });
+        console.log('Not using character rephrasing'); // Debug log
+        if (op === ChainId.SOLANA && transaction) {
+          handleSolAi(transaction);
+        } else {
+          addMessage({ role: "assistant", content: text, id: chatId });
+        }
       }
       
       setMessages([...messages]);

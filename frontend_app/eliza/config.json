@@ -19,6 +19,6 @@
     "./eliza/plugins/SentimentPlugin.ts",
     "./eliza/plugins/TranslationPlugin.ts",
     "./eliza/plugins/SonicSVMPlugin.ts",
-    "./eliza/plugins/BNBChainPlugin.ts"
+    "./eliza/plugins/custom/src/index.ts"
   ]
 } 

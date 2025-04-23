@@ -15,6 +15,7 @@ export interface Config {
   isPointSystemJoined: boolean;
   selectedVoice?: string;
   modelName: string;
+  character: string | null;
   isOnchain: boolean;
 }
 
@@ -30,6 +31,7 @@ interface ConfigState {
   isAuthenticated: boolean
   userData: UserData | null;
   selectedVoice: string;
+  character: string | null;
   setConfig: (config: Config) => void
   clearConfig: () => void
   setPremiumVerified: (verified: boolean) => void
@@ -52,6 +54,7 @@ export const useConfigStore = create<ConfigState>()(
       isAuthenticated: false,
       userData: null,
       selectedVoice: 'voice1',
+      character: null,
       setConfig: (config) => 
         set((state) => ({ 
           ...state,
