@@ -27,17 +27,6 @@ export default function Home() {
     { name: "StarkNet", icon: "/icons/starknet.svg", comingSoon: true },
   ];
 
-  const knowledgeBases = [
-    { name: "Cookie.dao", icon: "/icons/cookiefun.png", active: true },
-    { name: "ChainLink", icon: "/icons/chainlink.svg", comingSoon: true },
-  ];
-
-  const walletIntegrations = [
-    { name: "Reown Wallet", icon: "/icons/reown.svg", active: true },
-    { name: "MetaMask", icon: "/icons/metamask.svg", active: true },
-    { name: "Phantom", icon: "/icons/phantom.svg", active: true, comingSoon: false},
-  ];
-
   const features = [
     {
       title: "Voice-Enabled Wallet Management",
@@ -61,21 +50,42 @@ export default function Home() {
     },
   ];
 
+  const businessSolutions = [
+    {
+      title: "HR Assistant Pro",
+      description: "Coming Soon: AI-powered recruitment, onboarding, and performance management.",
+      icon: "👥",
+      comingSoon: true
+    },
+    {
+      title: "Legal Document Analyzer",
+      description: "Coming Soon: Intelligent contract review and legal document processing.",
+      icon: "⚖️",
+      comingSoon: true
+    },
+    {
+      title: "Compliance Guardian",
+      description: "Coming Soon: Automated regulatory compliance and risk management.",
+      icon: "🛡️",
+      comingSoon: true
+    },
+  ];
+
   const useCases = [
     {
-      title: "Crypto Newcomers",
-      description: "Simplifies the complex world of blockchain with natural language interaction.",
-      icon: "👨‍💻",
+      title: "Crypto & DeFi",
+      description: "Simplify blockchain interactions with voice commands and AI assistance.",
+      icon: "🌐",
     },
     {
-      title: "DeFi Enthusiasts",
-      description: "Provides quick access to multiple protocols without navigating complex interfaces.",
-      icon: "📈",
+      title: "Enterprise Solutions",
+      description: "Coming Soon: Streamline business operations with AI-powered tools.",
+      icon: "🏢",
     },
     {
-      title: "NFT Collectors",
-      description: "Easily manage and track your digital art collection across platforms.",
-      icon: "🖼️",
+      title: "Legal & Compliance",
+      description: "Coming Soon: Automate legal processes and ensure regulatory compliance.",
+      icon: "📜",
     },
   ];
 
@@ -101,13 +111,13 @@ export default function Home() {
             className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-7xl font-extrabold mb-6 text-gradient-primary">
-              NexAI
+              NexAI Marketplace
             </h1>
             <h2 className="text-3xl font-bold mb-6 text-base-content">
-              Your AI-Powered Crypto Assistant
+              AI-Powered Solutions for Blockchain & Business
             </h2>
             <p className="text-xl mb-8 text-base-content/80 max-w-2xl mx-auto">
-              Interact with your crypto wallets through natural conversation. NexAI simplifies blockchain management with voice commands and AI intelligence.
+              From crypto management to enterprise solutions, NexAI brings intelligent automation to every industry. Experience the future of AI-powered tools.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-6 items-center">
@@ -118,10 +128,10 @@ export default function Home() {
                 Watch Demo
               </button>
               <a
-                href="#features"
+                href="#solutions"
                 className="btn btn-neutral rounded-full text-white"
               >
-                Learn More
+                Explore Solutions
               </a>
             </div>
           </motion.div>
@@ -157,34 +167,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Section */}
-      <LandingSection id="features" gradient="primary">
-        <h2 className="text-4xl font-bold mb-12 text-center text-gradient-primary">
-          Key Features
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {features.map((feature, index) => (
-            <FeatureCard key={index} {...feature} />
-          ))}
-        </div>
-      </LandingSection>
-
-      {/* Chains Section */}
-      <LandingSection gradient="secondary">
-        <h2 className="text-4xl font-bold mb-12 text-center text-gradient-secondary">
-          Supported Chains
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {chains.map((chain, index) => (
-            <ChainCard key={index} {...chain} />
-          ))}
-        </div>
-      </LandingSection>
-
       {/* Use Cases Section */}
-      <LandingSection gradient="neutral">
+      <LandingSection id="solutions" gradient="primary">
         <h2 className="text-4xl font-bold mb-12 text-center text-gradient-primary">
-          Perfect For
+          Comprehensive AI Solutions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {useCases.map((useCase, index) => (
@@ -197,6 +183,57 @@ export default function Home() {
               <h3 className="text-xl font-semibold mb-2">{useCase.title}</h3>
               <p className="text-base-content/80">{useCase.description}</p>
             </motion.div>
+          ))}
+        </div>
+      </LandingSection>
+
+      {/* Blockchain Features Section */}
+      <LandingSection gradient="secondary">
+        <h2 className="text-4xl font-bold mb-12 text-center text-gradient-secondary">
+          Blockchain Solutions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((feature, index) => (
+            <FeatureCard key={index} {...feature} />
+          ))}
+        </div>
+      </LandingSection>
+
+      {/* Business Solutions Section */}
+      <LandingSection gradient="neutral">
+        <h2 className="text-4xl font-bold mb-12 text-center text-gradient-primary">
+          Enterprise Solutions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {businessSolutions.map((solution, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.02 }}
+              className="card-styled p-6 text-center relative overflow-hidden"
+            >
+              <div className="text-4xl mb-4">{solution.icon}</div>
+              <h3 className="text-xl font-semibold mb-2">{solution.title}</h3>
+              <p className="text-base-content/80">{solution.description}</p>
+              {solution.comingSoon && (
+                <div className="absolute top-2 right-2">
+                  <span className="px-2 py-1 text-xs rounded-full bg-yellow-500 text-black">
+                    Coming Soon
+                  </span>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </LandingSection>
+
+      {/* Chains Section */}
+      <LandingSection gradient="secondary">
+        <h2 className="text-4xl font-bold mb-12 text-center text-gradient-secondary">
+          Supported Chains
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {chains.map((chain, index) => (
+            <ChainCard key={index} {...chain} />
           ))}
         </div>
       </LandingSection>

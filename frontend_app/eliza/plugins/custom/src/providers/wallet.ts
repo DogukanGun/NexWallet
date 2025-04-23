@@ -1,5 +1,10 @@
-import type { IAgentRuntime, Provider, Memory, State } from '@elizaos/core';
-import { EVM, createConfig, getToken } from '@lifi/sdk';
+import type {
+    IAgentRuntime,
+    Provider,
+    Memory,
+    State,
+} from "@elizaos/core";
+import { EVM, createConfig, getToken } from "@lifi/sdk";
 import type {
     Address,
     WalletClient,
@@ -9,16 +14,179 @@ import type {
     Account,
     PrivateKeyAccount,
     Hex,
-} from 'viem';
-import { createPublicClient, createWalletClient, formatUnits, http, erc20Abi } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import * as viemChains from 'viem/chains';
-import { createWeb3Name } from '@web3-name-sdk/core';
-import { elizaLogger } from '@elizaos/core';
+} from "viem";
+import {
+    createPublicClient,
+    createWalletClient,
+    formatUnits,
+    http,
+    erc20Abi,
+    custom,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import * as viemChains from "viem/chains";
+import { createWeb3Name } from "@web3-name-sdk/core";
+import { elizaLogger } from "@elizaos/core";
+import { getConfig, setRuntime } from '../environment';
+import { getErrorMessage } from '../utils/error';
 
-import type { SupportedChain } from '../types';
+import type { SupportedChain } from "../types";
 
-export class WalletProvider {
+export interface WalletInfo {
+    address: string;
+    connected: boolean;
+    chainId: number | null;
+}
+
+export interface IWalletProvider {
+    connect(): Promise<string>;
+    disconnect(): Promise<void>;
+    getAddress(): Promise<string>;
+    getPk(): string;
+    getAccount(): PrivateKeyAccount;
+    getChain(chainName: string): Chain;
+    signMessage(message: string): Promise<string>;
+    signTransaction(transaction: any): Promise<string>;
+    get(runtime: IAgentRuntime, message: Memory, state: State): Promise<WalletInfo>;
+}
+
+export class BNBWalletProvider implements IWalletProvider {
+    private privateKey: string | null = null;
+    private publicKey: string | null = null;
+    private account: PrivateKeyAccount | null = null;
+    private chains: Record<string, Chain> = {};
+    private connected: boolean = false;
+
+    constructor() {
+        this.initializeChains();
+    }
+
+    private initializeChains() {
+        const config = getConfig();
+        const chains: Record<string, Chain> = {};
+        
+        // Initialize BSC chain
+        const bscChain: Chain = {
+            ...viemChains.bsc,
+            rpcUrls: {
+                ...viemChains.bsc.rpcUrls,
+                default: { http: [config.BSC_PROVIDER_URL] }
+            }
+        };
+        chains.bsc = bscChain;
+
+        // Initialize BSC Testnet chain
+        const bscTestnetChain: Chain = {
+            ...viemChains.bscTestnet,
+            rpcUrls: {
+                ...viemChains.bscTestnet.rpcUrls,
+                default: { http: [config.BSC_TESTNET_PROVIDER_URL] }
+            }
+        };
+        chains.bscTestnet = bscTestnetChain;
+
+        this.chains = chains;
+    }
+
+    async connect(): Promise<string> {
+        if (!this.privateKey && !this.publicKey) {
+            throw new Error('No wallet credentials provided');
+        }
+
+        this.connected = true;
+        return this.publicKey!;
+    }
+
+    async disconnect(): Promise<void> {
+        this.connected = false;
+    }
+
+    async getAddress(): Promise<string> {
+        if (!this.connected) {
+            throw new Error('Wallet not connected');
+        }
+        return this.publicKey!;
+    }
+
+    getPk(): string {
+        if (!this.privateKey) {
+            throw new Error('No private key available');
+        }
+        return this.privateKey;
+    }
+
+    getAccount(): PrivateKeyAccount {
+        if (!this.account) {
+            throw new Error('No account available');
+        }
+        return this.account;
+    }
+
+    getChain(chainName: string): Chain {
+        const chain = this.chains[chainName];
+        if (!chain) {
+            throw new Error(`Chain ${chainName} not configured`);
+        }
+        return chain;
+    }
+
+    async signMessage(message: string): Promise<string> {
+        if (!this.account) {
+            throw new Error('No account available for signing');
+        }
+
+        try {
+            const client = createWalletClient({
+                account: this.account,
+                transport: http()
+            });
+
+            return await client.signMessage({ message });
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(error);
+            elizaLogger.error(`Error signing message: ${errorMessage}`);
+            throw new Error(`Failed to sign message: ${errorMessage}`);
+        }
+    }
+
+    async signTransaction(transaction: any): Promise<string> {
+        if (!this.account) {
+            throw new Error('No account available for signing');
+        }
+
+        try {
+            const client = createWalletClient({
+                account: this.account,
+                transport: http()
+            });
+
+            return await client.signTransaction(transaction);
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(error);
+            elizaLogger.error(`Error signing transaction: ${errorMessage}`);
+            throw new Error(`Failed to sign transaction: ${errorMessage}`);
+        }
+    }
+
+    async get(runtime: IAgentRuntime, message: Memory, state: State): Promise<WalletInfo> {
+        try {
+            const address = await this.getAddress();
+            return {
+                address,
+                connected: this.connected,
+                chainId: typeof state?.chainId === 'number' ? state.chainId : null
+            };
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(error);
+            elizaLogger.error(`Error getting wallet info: ${errorMessage}`);
+            throw new Error(`Failed to get wallet info: ${errorMessage}`);
+        }
+    }
+}
+
+export const bnbProvider = new BNBWalletProvider();
+
+export class CustomWalletProvider {
     private currentChain: SupportedChain = 'bsc';
     chains: Record<string, Chain> = { bsc: viemChains.bsc };
     onChainSignature:
@@ -493,7 +661,7 @@ export class WalletProvider {
 
     switchChain(chainName: SupportedChain, customRpcUrl?: string) {
         if (!this.chains[chainName]) {
-            const chain = WalletProvider.genChainFromName(chainName, customRpcUrl);
+            const chain = CustomWalletProvider.genChainFromName(chainName, customRpcUrl);
             this.addChain({ [chainName]: chain });
         }
         this.setCurrentChain(chainName);
@@ -557,26 +725,26 @@ const genChainsFromRuntime = (runtime: IAgentRuntime): Record<string, Chain> => 
     const chains: Record<string, Chain> = {};
 
     for (const chainName of chainNames) {
-        const chain = WalletProvider.genChainFromName(chainName);
-        chains[chainName] = chain;
+        const generatedChain = CustomWalletProvider.genChainFromName(chainName);
+        chains[chainName] = generatedChain;
     }
 
     const mainnet_rpcurl = runtime.getSetting('BSC_PROVIDER_URL');
     if (mainnet_rpcurl) {
-        const chain = WalletProvider.genChainFromName('bsc', mainnet_rpcurl);
-        chains.bsc = chain;
+        const bscChain = CustomWalletProvider.genChainFromName('bsc', mainnet_rpcurl);
+        chains.bsc = bscChain;
     }
 
     const testnet_rpcurl = runtime.getSetting('BSC_TESTNET_PROVIDER_URL');
     if (testnet_rpcurl) {
-        const chain = WalletProvider.genChainFromName('bscTestnet', testnet_rpcurl);
-        chains.bscTestnet = chain;
+        const bscTestnetChain = CustomWalletProvider.genChainFromName('bscTestnet', testnet_rpcurl);
+        chains.bscTestnet = bscTestnetChain;
     }
 
     const opbnb_rpcurl = runtime.getSetting('OPBNB_PROVIDER_URL');
     if (opbnb_rpcurl) {
-        const chain = WalletProvider.genChainFromName('opBNB', opbnb_rpcurl);
-        chains.opBNB = chain;
+        const opBNBChain = CustomWalletProvider.genChainFromName('opBNB', opbnb_rpcurl);
+        chains.opBNB = opBNBChain;
     }
 
     return chains;
@@ -590,7 +758,7 @@ export const initWalletProvider = (runtime: IAgentRuntime) => {
 
     const chains = genChainsFromRuntime(runtime);
 
-    return new WalletProvider(privateKey as `0x${string}`, chains);
+    return new CustomWalletProvider(privateKey as `0x${string}`, chains);
 };
 
 export const bnbWalletProvider: Provider = {

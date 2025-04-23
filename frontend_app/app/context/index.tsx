@@ -4,9 +4,6 @@ import React, { type ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import { projectId } from "../config";
 
-if (!projectId) {
-  throw new Error("Project ID is not defined");
-}
 
 // Set up metadata
 export const appKitMetadata = {

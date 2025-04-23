@@ -26,22 +26,27 @@ export default function ChatBottombar({
       e.preventDefault();
       handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>, {
         data: { 
-          useCharacter: characterMode, 
-          characterName: selectedCharacter 
+          useCharacter: characterMode && selectedCharacter !== null, 
+          characterName: characterMode ? selectedCharacter : null 
         }
       });
     }
   };
 
   const toggleCharacterMode = () => {
-    setCharacterMode(!characterMode);
-    if (characterMode && !selectedCharacter) {
-      setSelectedCharacter("Pirate"); // Default character
+    setCharacterMode(prev => !prev);
+    if (!characterMode && !selectedCharacter) {
+      // Only set default character when enabling character mode
+      setSelectedCharacter("Pirate");
     }
   };
 
   const selectCharacter = (name: string) => {
     setSelectedCharacter(name);
+    // Ensure character mode is enabled when selecting a character
+    if (!characterMode) {
+      setCharacterMode(true);
+    }
   };
 
   useEffect(() => {
@@ -49,6 +54,13 @@ export default function ChatBottombar({
       inputRef.current.focus();
     }
   }, []);
+
+  // Reset character mode when disabled
+  useEffect(() => {
+    if (!characterMode) {
+      setSelectedCharacter(null);
+    }
+  }, [characterMode]);
 
   return (
     <div className="p-4 pb-7 flex justify-between w-full items-center gap-2">
@@ -70,8 +82,8 @@ export default function ChatBottombar({
           <form 
             onSubmit={(e) => handleSubmit(e, {
               data: { 
-                useCharacter: characterMode, 
-                characterName: selectedCharacter 
+                useCharacter: characterMode && selectedCharacter !== null, 
+                characterName: characterMode ? selectedCharacter : null 
               }
             })} 
             className="w-full items-center flex relative gap-2"

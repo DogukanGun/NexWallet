@@ -58,7 +58,6 @@ export function createKnowledgeReactAgentV2(
     // Add other blockchain tools
     tools.push(new AskSolanaSdkAgent(wallet))
     tools.push(new GetUniswapTool())
-    tools.push(new AskCdpAgents(supportedChains))
     tools.push(new VoiceComponentTool())
     
     return createAgent(agentName, tools, messageModifier, isOnchain);

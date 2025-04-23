@@ -1,7 +1,32 @@
-import type { Address, Hash } from 'viem';
+import type { Address, Chain } from 'viem';
 
 export type SupportedChain = 'bsc' | 'bscTestnet' | 'opBNB' | 'opBNBTestnet';
 export type StakeAction = 'deposit' | 'withdraw' | 'claim';
+
+export interface WalletProvider {
+    currentChain: SupportedChain;
+    chains: Record<string, Chain>;
+    getAccount(): any;
+    getAddress(): any;
+    getCurrentChain(): Chain;
+    getPublicClient(chainName: SupportedChain): any;
+    getWalletClient(chainName: SupportedChain): any;
+    getChainConfigs(chainName: SupportedChain): Chain;
+    configureLiFiSdk(chainName: SupportedChain): void;
+    formatAddress(address: string | null | undefined): Promise<any>;
+    resolveWeb3Name(name: string | null | undefined): Promise<string | null>;
+    checkERC20Allowance(chain: SupportedChain, token: any, owner: any, spender: any): Promise<bigint>;
+    confirmTransaction(txDetails: any): Promise<boolean>;
+    transfer(chain: SupportedChain, toAddress: any, amount: bigint, options?: any): Promise<any>;
+    transferERC20(chain: SupportedChain, tokenAddress: any, toAddress: any, amount: bigint, options?: any): Promise<any>;
+    approveERC20(chain: SupportedChain, token: any, spender: any, amount: bigint): Promise<any>;
+    getBalance(): Promise<string>;
+    getTokenAddress(chainName: SupportedChain, tokenSymbol: string): Promise<string>;
+    getTestnetTokenAddress(tokenSymbol: string): string | null;
+    addChain(chain: Record<string, Chain>): void;
+    switchChain(chainName: SupportedChain, customRpcUrl?: string): void;
+    getPk(): string;
+}
 
 // Action parameters
 export interface GetBalanceParams {
@@ -55,7 +80,7 @@ export interface GetBalanceResponse {
 
 export interface TransferResponse {
     chain: SupportedChain;
-    txHash: Hash;
+    txHash: Address;
     recipient: Address;
     amount: string;
     token: string;
@@ -64,7 +89,7 @@ export interface TransferResponse {
 
 export interface SwapResponse {
     chain: SupportedChain;
-    txHash: Hash;
+    txHash: Address;
     fromToken: string;
     toToken: string;
     amount: string;
@@ -73,7 +98,7 @@ export interface SwapResponse {
 export interface BridgeResponse {
     fromChain: SupportedChain;
     toChain: SupportedChain;
-    txHash: Hash;
+    txHash: Address;
     recipient: Address;
     fromToken: string;
     toToken: string;
@@ -87,7 +112,7 @@ export interface StakeResponse {
 export interface FaucetResponse {
     token: string;
     recipient: Address;
-    txHash: Hash;
+    txHash: Address;
 }
 
 export interface IDeployERC20Params {

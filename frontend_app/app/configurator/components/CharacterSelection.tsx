@@ -5,7 +5,7 @@ type Character = {
 
 type CharacterSelectionProps = {
   characters: Character[];
-  selectedCharacter: string;
+  selectedCharacter: string | null;
   onCharacterSelect: (character: string) => void;
   loadingCharacters: boolean;
 };

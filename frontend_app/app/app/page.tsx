@@ -1,21 +1,21 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useConfigStore } from '../store/configStore'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { ChainId } from '../configurator/data'
 import AuthProvider from '../providers/AuthProvider'
 import useAuthModal from '../hooks/useAuthModal'
 import { AuthProvider as AuthContextProvider } from '../context/AuthContext'
 import { apiService, SaveAgentApiServiceResponse, SavedAgent } from '../services/ApiService'
-import { Agent, UpcomingFeature } from './data'
+import { Agent } from './data'
 import Header from './components/Header'
 import SocialMediaBanner from './components/SocialMediaBanner'
 import QuickActions from './components/QuickActions'
 import UpcomingFeatures from './components/UpcomingFeatures'
 import PredefinedAgents from './components/PredefinedAgents'
 import SavedAgents from './components/SavedAgents'
+import BusinessTools from './components/BusinessTools'
 import { useTheme } from '@/store/ThemeContext'
 
 export default function Home() {
@@ -84,6 +84,57 @@ export default function Home() {
 
   const [savedAgents, setSavedAgents] = useState<SaveAgentApiServiceResponse[]>([]);
 
+  const [businessTools, setBusinessTools] = useState([
+    {
+      id: 'hr1',
+      name: 'HR Assistant Pro',
+      description: 'Coming Soon. AI-powered HR assistant for recruitment, employee onboarding, and performance management.',
+      poweredBy: 'NexAI HR',
+      category: 'HR',
+      isComingSoon: true
+    },
+    {
+      id: 'legal1',
+      name: 'Legal Document Analyzer',
+      description: 'Coming Soon. AI-powered legal document analysis and contract review assistant.',
+      poweredBy: 'NexAI Legal',
+      category: 'Legal',
+      isComingSoon: true
+    },
+    {
+      id: 'compliance1',
+      name: 'Compliance Guardian',
+      description: 'Coming Soon. Automated compliance checking and regulatory adherence tool.',
+      poweredBy: 'NexAI Compliance',
+      category: 'Legal',
+      isComingSoon: true
+    },
+    {
+      id: 'recruit1',
+      name: 'Smart Recruiter',
+      description: 'Coming Soon. AI-powered candidate screening and interview scheduling assistant.',
+      poweredBy: 'NexAI HR',
+      category: 'HR',
+      isComingSoon: true
+    },
+    {
+      id: 'doc1',
+      name: 'Document AI',
+      description: 'Coming Soon. Intelligent document processing and management system.',
+      poweredBy: 'NexAI Business',
+      category: 'Business',
+      isComingSoon: true
+    },
+    {
+      id: 'market1',
+      name: 'Market Analyzer',
+      description: 'Coming Soon. AI-driven market analysis and trend prediction tool.',
+      poweredBy: 'NexAI Business',
+      category: 'Business',
+      isComingSoon: true
+    }
+  ]);
+
   useEffect(() => {
     const fetchSavedAgents = async () => {
       try {
@@ -114,6 +165,7 @@ export default function Home() {
                 agent.id === '6' ? [{ id: ChainId.OPTIMISM, name: 'Optimism', isEmbedded: false, disabled: false, icon: '' }] : [],
       llmProvider: llmProvider,
       agentType: agent.name,
+      character: null,
       isPointSystemJoined: false,
       modelName: llmProvider, // Set modelName to match llmProvider
       isOnchain: isOnchain // Add isOnchain property
@@ -147,6 +199,9 @@ export default function Home() {
 
             {/* Predefined Agents */}
             <PredefinedAgents agents={predefinedAgents} onAgentSelect={handleAgentSelect} />
+
+            {/* Business Tools Section */}
+            <BusinessTools tools={businessTools} />
 
             {/* Saved Agents Section */}
             <SavedAgents agents={savedAgents} />
