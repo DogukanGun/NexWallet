@@ -1,18 +1,28 @@
 import { ElizaService } from '../../eliza/ElizaService';
+<<<<<<< HEAD
 import { SonicSVMPlugin } from '../../eliza/plugins/SonicSVMPlugin';
 import { bnbPlugin } from '../../eliza/plugins/custom/src/index';
 import { SupportedChain } from '../../eliza/plugins/custom/src/types';
 import { BNBWalletProvider } from '../../eliza/plugins/custom/src/providers/wallet';
+=======
+import { BNBChainPlugin } from '../../eliza/plugins/BNBChainPlugin';
+import { SonicSVMPlugin } from '../../eliza/plugins/SonicSVMPlugin';
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 /**
  * Blockchain tools for the frontend agent that interface with Eliza's blockchain plugins
  */
 export class BlockchainTools {
   private elizaService: ElizaService;
+<<<<<<< HEAD
   private bnbPlugin: typeof bnbPlugin | null = null;
   private sonicPlugin: SonicSVMPlugin | null = null;
   private walletAddress: string = '';
   private bnbWalletProvider: BNBWalletProvider | null = null;
+=======
+  private bnbPlugin: BNBChainPlugin | null = null;
+  private sonicPlugin: SonicSVMPlugin | null = null;
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
   
   constructor(elizaService: ElizaService) {
     this.elizaService = elizaService;
@@ -27,16 +37,24 @@ export class BlockchainTools {
       // Get plugin manager from Eliza service
       const pluginManager = this.elizaService.getPluginManager();
       
+<<<<<<< HEAD
       // Initialize our wallet provider
       this.bnbWalletProvider = new BNBWalletProvider();
       
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
       // Find and store references to the blockchain plugins
       if (pluginManager) {
         const plugins = pluginManager.getPlugins();
         
         for (const plugin of plugins) {
+<<<<<<< HEAD
           if (plugin.name === 'bnb') {
             this.bnbPlugin = plugin as typeof bnbPlugin;
+=======
+          if (plugin.id === 'bnb-chain-plugin') {
+            this.bnbPlugin = plugin as BNBChainPlugin;
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
           } else if (plugin.id === 'sonic-svm-plugin') {
             this.sonicPlugin = plugin as SonicSVMPlugin;
           }
@@ -52,6 +70,7 @@ export class BlockchainTools {
    * @param address The BNB wallet address
    */
   setBNBWallet(address: string): void {
+<<<<<<< HEAD
     if (this.bnbPlugin && this.bnbWalletProvider) {
       // Store the wallet address for use in transactions
       this.walletAddress = address;
@@ -63,6 +82,10 @@ export class BlockchainTools {
       
       // Set the wallet provider public key
       (this.bnbWalletProvider as any).publicKey = address;
+=======
+    if (this.bnbPlugin) {
+      this.bnbPlugin.setExternalWallet(address);
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     } else {
       console.error('BNB Chain plugin not initialized');
     }
@@ -85,11 +108,16 @@ export class BlockchainTools {
    * @param address The wallet address (optional - uses connected wallet if not provided)
    */
   async getBNBBalance(address?: string): Promise<string> {
+<<<<<<< HEAD
     if (!this.bnbPlugin || !this.bnbWalletProvider) {
+=======
+    if (!this.bnbPlugin) {
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
       throw new Error('BNB Chain plugin not initialized');
     }
     
     try {
+<<<<<<< HEAD
       // Use the getBalance action from the custom plugin
       const getBalanceAction = this.bnbPlugin?.actions?.find(a => a.name === 'getBalance');
       if (!getBalanceAction) {
@@ -122,6 +150,9 @@ export class BlockchainTools {
       );
       
       return result?.toString() || '0';
+=======
+      return await this.bnbPlugin.getBalance(address || '');
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     } catch (error) {
       console.error('Error getting BNB balance:', error);
       throw error;
@@ -133,11 +164,16 @@ export class BlockchainTools {
    * @param tokenAddress The token contract address
    */
   async getBNBTokenInfo(tokenAddress: string): Promise<Record<string, any>> {
+<<<<<<< HEAD
     if (!this.bnbPlugin || !this.bnbWalletProvider) {
+=======
+    if (!this.bnbPlugin) {
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
       throw new Error('BNB Chain plugin not initialized');
     }
     
     try {
+<<<<<<< HEAD
       // Use the token info action from the custom plugin
       const tokenInfoAction = this.bnbPlugin?.actions?.find(a => a.name === 'getTokenInfo');
       if (!tokenInfoAction) {
@@ -161,6 +197,9 @@ export class BlockchainTools {
       );
       
       return result || {};
+=======
+      return await this.bnbPlugin.getTokenInfo(tokenAddress);
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     } catch (error) {
       console.error('Error getting token info:', error);
       throw error;
@@ -191,11 +230,16 @@ export class BlockchainTools {
    * @param data Optional data for the transaction
    */
   async sendBNBTransaction(to: string, amount: number, data?: string): Promise<string> {
+<<<<<<< HEAD
     if (!this.bnbPlugin || !this.bnbWalletProvider) {
+=======
+    if (!this.bnbPlugin) {
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
       throw new Error('BNB Chain plugin not initialized');
     }
     
     try {
+<<<<<<< HEAD
       // Use the transfer action from the custom plugin
       const transferAction = this.bnbPlugin?.actions?.find(a => a.name === 'transfer');
       if (!transferAction) {
@@ -242,6 +286,13 @@ export class BlockchainTools {
       }
       
       return '';
+=======
+      return await this.bnbPlugin.sendTransaction({
+        to,
+        value: (amount * 1e18).toString(), // Convert BNB to wei
+        data
+      });
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     } catch (error) {
       console.error('Error sending BNB transaction:', error);
       throw error;

@@ -1,4 +1,5 @@
 // This file is run by the npm script to start the Eliza process
+<<<<<<< HEAD
 const { ElizaService } = require('./ElizaService');
 const path = require('path');
 const fs = require('fs');
@@ -41,3 +42,7 @@ if (require.main === module) {
 }
 
 module.exports = { ensureElizaRunning }; 
+=======
+console.log('Eliza service is not needed anymore. The app now uses direct API calls to OpenAI.');
+console.log('The environment is now properly configured for NextJS.'); 
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f

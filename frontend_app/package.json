@@ -12,8 +12,12 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "prettier:fix": "prettier --write \"app/**/*.{ts,tsx}\" --config .prettierrc",
     "prettier:check": "prettier --check \"app/**/*.{ts,tsx}\" --config .prettierrc",
+<<<<<<< HEAD
     "eliza:build": "tsc eliza/**/*.ts --outDir eliza/dist",
     "eliza:start": "tsx eliza/startEliza.ts",
+=======
+    "eliza:start": "node eliza/startEliza.js",
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     "dev:with-eliza": "concurrently \"npm run dev\" \"npm run eliza:start\"",
     "start:with-eliza": "concurrently \"npm run start\" \"npm run eliza:start\""
   },
@@ -133,7 +137,10 @@
     "openai": "^4.78.1",
     "pdfkit": "^0.14.0",
     "pdfkit-browserify": "^0.8.3-R2",
+<<<<<<< HEAD
     "pino": "^9.6.0",
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     "react": "^19.0.0",
     "react-code-blocks": "^0.1.6",
     "react-dom": "^19.0.0",

@@ -11,7 +11,15 @@ import { VoiceComponentTool } from './tools/voice/voiceComponents';
 import { MessariAPI } from './tools/messari';
 import { MessariPDFTool } from './tools/messari/pdfGenerator';
 import { createMessariPDFContextModifier } from './messariMiddleware';
+<<<<<<< HEAD
 import { SwapIntentDetector } from './tools/detectors/swapIntentDetector';
+=======
+import { ElizaCharacterTool } from './tools/eliza/elizaCharacterTool';
+import { getElizaService } from '../eliza';
+import BlockchainTools from './tools/blockchainTools';
+
+export type agent = 'cookie' | 'messari' | 'eliza';
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 export type agent = 'cookie' | 'messari' | 'onchain';
 
@@ -53,6 +61,7 @@ export async function createKnowledgeReactAgentV2(
         })
     }
     
+<<<<<<< HEAD
     // Add on-chain tools using Coinbase's AgentKit
     if (agents.includes('onchain')) {
         try {
@@ -76,11 +85,24 @@ export async function createKnowledgeReactAgentV2(
     if (agentType === "voice") {
         tools.push(new VoiceComponentTool())
     }
+=======
+    // Add Eliza character tool if enabled
+    if (agents.includes('eliza')) {
+        // Add the Eliza character tool which now calls the API directly
+        tools.push(new ElizaCharacterTool());
+    }
+    
+    // Add other blockchain tools
+    tools.push(new AskSolanaSdkAgent(wallet))
+    tools.push(new GetUniswapTool())
+    tools.push(new VoiceComponentTool())
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     
     return createAgent(agentName, tools, messageModifier, isOnchain);
 }
 
 export default class FrontendAgent {
+<<<<<<< HEAD
   private blockchainTools: any;
   private apiKey: string;
   
@@ -93,6 +115,17 @@ export default class FrontendAgent {
     const BTModule = requireModule('./tools/blockchainTools');
     const BTClass = BTModule.default || BTModule;
     this.blockchainTools = new BTClass();
+=======
+  private elizaService: any;
+  private blockchainTools: BlockchainTools;
+  
+  constructor() {
+    // Initialize Eliza service
+    this.elizaService = getElizaService();
+    
+    // Initialize blockchain tools
+    this.blockchainTools = new BlockchainTools(this.elizaService);
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
   }
   
   /**

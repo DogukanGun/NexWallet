@@ -23,7 +23,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AppChain } from "@/app/configurator/data";
 import { handleMessariCommand } from '../commands/MessariCommands';
 import ElizaStatus from "@/app/components/ElizaStatus";
+<<<<<<< HEAD
 import { AgentSwapHandler } from '@/components/AgentSwapHandler';
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 interface LLMProvider {
   id: string;
@@ -42,12 +45,15 @@ interface ChatRequestOptions {
   };
 }
 
+<<<<<<< HEAD
 interface BnbTransactionParams {
   to: string;
   amount: number;
   data?: string;
 }
 
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 // Enhanced security theme with more vivid colors and clearer distinction
 const securityColors = {
   basic: {
@@ -106,8 +112,11 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const [selectedLLM, setSelectedLLM] = React.useState<string>("");
   const [showWarningModal, setShowWarningModal] = React.useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+<<<<<<< HEAD
   const [showTransactionConfirmation, setShowTransactionConfirmation] = useState(false);
   const [pendingBnbTransaction, setPendingBnbTransaction] = useState<BnbTransactionParams | null>(null);
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
   // Enhanced animation variants
   const pageVariants = {
@@ -312,7 +321,10 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       console.log("text", text);
       console.log("op", op);
       console.log("transaction", transaction);
+<<<<<<< HEAD
       console.log("params", params);
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
       
       
       if (stores.character) {
@@ -329,6 +341,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
         console.log('Not using character rephrasing'); // Debug log
         if (op === ChainId.SOLANA && transaction) {
           handleSolAi(transaction);
+<<<<<<< HEAD
         } else if (op === ChainId.BNB && params?.action === 'send_transaction') {
           // Extract transaction parameters
           const to = params.known_values.to as string;
@@ -337,6 +350,8 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
           
           // Handle BNB transaction
           handleBnbTransaction(to, amount, data);
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
         } else {
           addMessage({ role: "assistant", content: text, id: chatId });
         }
@@ -681,7 +696,10 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       <WalletModal />
       <SecurityTransition />
       <ElizaStatus />
+<<<<<<< HEAD
       <TransactionConfirmationModal />
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
       <RequireConfig>
         <SubscriptionWrapper>

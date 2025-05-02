@@ -1,10 +1,18 @@
 {
   "runtime": {
+<<<<<<< HEAD
     "port": 3030,
     "host": "localhost",
     "character_directory": "characters",
     "debug": true,
     "keep_alive": true,
+=======
+    "port": 3100,
+    "host": "localhost",
+    "character_directory": "./eliza/characters",
+    "debug": false,
+    "keep_alive": false,
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     "api": {
       "enabled": true,
       "cors": true,
@@ -15,5 +23,14 @@
     "level": "info",
     "file": false
   },
+<<<<<<< HEAD
   "plugins": []
+=======
+  "plugins": [
+    "./eliza/plugins/SentimentPlugin.ts",
+    "./eliza/plugins/TranslationPlugin.ts",
+    "./eliza/plugins/SonicSVMPlugin.ts",
+    "./eliza/plugins/custom/src/index.ts"
+  ]
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 } 

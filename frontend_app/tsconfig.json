@@ -23,6 +23,10 @@
       "@/*": ["./*"]
     }
   },
+<<<<<<< HEAD
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/components/Auth.jsx", "next.config.js"],
+=======
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/components/Auth.jsx"],
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
   "exclude": ["node_modules"]
 }

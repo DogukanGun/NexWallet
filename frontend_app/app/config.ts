@@ -10,6 +10,7 @@ import * as pino from 'pino'
 export const projectId = process.env.REOWN_KEY || "b56e18d47c72ab683b10814fe9495694"; // this is a public projectId only to use on localhost
 
 export const networks = [solana, solanaTestnet, solanaDevnet, mainnet, arbitrum, optimism, base, polygon, avalanche, opBNB]
+<<<<<<< HEAD
 
 // Configure pino logger with browser-specific settings
 const logger = pino.default({
@@ -22,6 +23,8 @@ const logger = pino.default({
   },
   level: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
 })
+=======
+>>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 // Setup solana adapter
 const solanaAdapter = new SolanaAdapter({
