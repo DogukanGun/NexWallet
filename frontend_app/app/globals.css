@@ -1,0 +1,276 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .nav-button {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 text-base-content;
+  }
+
+  .mobile-nav-button {
+    @apply w-full px-4 py-2 rounded-lg font-medium transition-all duration-200 text-base-content;
+  }
+
+  .btn-gradient-primary {
+    @apply bg-gradient-to-r from-orange-400 to-pink-500 text-white hover:opacity-90 transition-opacity;
+  }
+
+  .btn-gradient-secondary {
+    @apply bg-gradient-to-r from-purple-400 to-pink-500 text-white hover:opacity-90 transition-opacity;
+  }
+
+  .btn-gradient-neutral {
+    @apply bg-gradient-to-r from-base-300 to-base-200 border border-base-300 hover:border-primary/50 transition-colors;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-b from-base-200 to-base-100 border border-base-300;
+  }
+
+  .glass-panel {
+    @apply bg-base-200/30 backdrop-blur-md;
+  }
+
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-secondary {
+    @apply bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent;
+  }
+
+  /* Form elements */
+  .input-styled {
+    @apply bg-base-200 border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:border-primary/50 transition-colors;
+  }
+
+  .select-styled {
+    @apply bg-base-200 border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:border-primary/50 transition-colors;
+  }
+
+  /* Layout components */
+  .container-styled {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-styled {
+    @apply py-12 sm:py-16;
+  }
+
+  /* Card components */
+  .card-styled {
+    @apply card-gradient rounded-xl p-6 shadow-lg;
+  }
+
+  /* Modal components */
+  .modal-styled {
+    @apply glass-panel rounded-xl p-6 shadow-xl border border-base-300;
+  }
+
+  /* Table components */
+  .table-styled {
+    @apply w-full text-left border-collapse;
+  }
+
+  .table-header {
+    @apply bg-base-200 text-base-content font-medium;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 border-b border-base-300;
+  }
+
+  /* Navigation components */
+  .nav-link {
+    @apply text-base-content hover:text-primary transition-colors;
+  }
+
+  /* Alert components */
+  .alert-styled {
+    @apply rounded-lg p-4 border;
+  }
+
+  .alert-success {
+    @apply bg-success/10 border-success text-success;
+  }
+
+  .alert-error {
+    @apply bg-error/10 border-error text-error;
+  }
+
+  .alert-warning {
+    @apply bg-warning/10 border-warning text-warning;
+  }
+
+  .alert-info {
+    @apply bg-info/10 border-info text-info;
+  }
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --background-gradient: linear-gradient(to bottom right, #ffffff, #f5f7fa);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #e9ebf0;
+    --foreground: #ffffff;
+  }
+}
+
+body {
+  background: black;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom utility classes */
+.page-with-navbar {
+  padding-top: 5rem;
+}
+
+/* Configurator specific styles */
+.card-container {
+  @apply grid grid-cols-2 gap-2 min-h-[160px];
+}
+
+.card {
+  @apply h-[40px] flex items-center justify-center w-full relative;
+}
+
+.button-content {
+  @apply absolute left-1/2 -translate-x-1/2 flex items-center justify-center w-[120px];
+}
+
+.icon {
+  @apply w-4 h-4 mr-2;
+}
+
+.button-text {
+  @apply text-xs;
+}
+
+/* Animation keyframes */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background: linear-gradient(-45deg, #3b82f6, #2563eb, #1d4ed8, #1e40af);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animation styles for character selection */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes particleAnimation {
+  0% { opacity: 0; transform: translate(0, 0) scale(0); }
+  30% { opacity: 0.8; transform: translate(var(--random-x, 30px), var(--random-y, -30px)) scale(1); }
+  80% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--random-x2, 60px), var(--random-y2, -60px)) scale(0); }
+}
+
+@keyframes floatStar {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(var(--random-x, 50px), var(--random-y, -50px)) rotate(360deg); }
+}
+
+@keyframes floatSymbol {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(var(--random-x, 50px), var(--random-y, -50px)) rotate(360deg); }
+}
+
+/* Character animation containers */
+.german-bg {
+  animation: fadeIn 0.5s forwards;
+}
+
+.german-flag-container {
+  width: 300px;
+  height: 180px;
+  margin: 0 auto;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transform: translateY(-50px) scale(0);
+  animation: zoomIn 1s forwards 0.2s;
+}
+
+.flag-stripe {
+  height: 60px;
+  width: 100%;
+  transform: translateX(-100%);
+}
+
+.turkish-flag-container,
+.usa-flag-container {
+  width: 300px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transform: scale(0);
+  animation: zoomIn 1s forwards 0.2s;
+}
+
+.particles-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleAnimation 3s infinite;
+}
+
+.usa-star {
+  position: absolute;
+  opacity: 0;
+  animation: floatStar 8s infinite;
+}
+
+.turkey-symbol {
+  position: absolute;
+  font-size: 24px;
+  opacity: 0;
+  animation: floatSymbol 8s infinite;
+}

@@ -1,0 +1,19 @@
+{
+  "runtime": {
+    "port": 3030,
+    "host": "localhost",
+    "character_directory": "characters",
+    "debug": true,
+    "keep_alive": true,
+    "api": {
+      "enabled": true,
+      "cors": true,
+      "auth": false
+    }
+  },
+  "logs": {
+    "level": "info",
+    "file": false
+  },
+  "plugins": []
+} 
