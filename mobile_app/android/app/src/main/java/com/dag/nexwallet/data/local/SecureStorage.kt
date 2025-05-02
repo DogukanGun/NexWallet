@@ -56,6 +56,14 @@ class SecureStorage @Inject constructor(
         return securePreferences.getLong(key, defaultValue)
     }
 
+    fun saveStringList(key: String, value: List<String>){
+        securePreferences.edit { putStringSet(key,value.toSet()) }
+    }
+
+    fun getStringSet(key: String): Set<String>? {
+        return securePreferences.getStringSet(key,emptySet<String>())
+    }
+
     fun clear() {
         securePreferences.edit { clear() }
     }

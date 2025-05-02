@@ -11,6 +11,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import AuthProvider from "./providers/AuthProvider";
 import AppKitProvider from "./providers/AppKitProvider";
 import { ThemeProvider } from '@/store/ThemeContext'
+import '@coinbase/onchainkit/styles.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

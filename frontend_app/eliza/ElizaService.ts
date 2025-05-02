@@ -3,7 +3,6 @@ import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
 import { PluginManager } from './plugins/PluginManager';
-import { ElizaPlugin } from './plugins/PluginInterface';
 
 export interface ElizaConfig {
   runtime: {

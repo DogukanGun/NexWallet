@@ -1,11 +1,21 @@
 package com.dag.nexwallet.features.configurator.presentation
 
+import androidx.lifecycle.viewModelScope
 import com.dag.nexwallet.base.BaseVM
+import com.dag.nexwallet.base.navigation.DefaultNavigator
+import com.dag.nexwallet.base.navigation.Destination
+import com.dag.nexwallet.data.repository.ConfigRepository
+import com.dag.nexwallet.features.configurator.domain.model.AgentConfig
+import com.dag.nexwallet.features.configurator.presentation.ConfiguratorVS.Content
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ConfiguratorVM @Inject constructor() : BaseVM<ConfiguratorVS>(ConfiguratorVS.Content()) {
+class ConfiguratorVM @Inject constructor(
+    private val configRepository: ConfigRepository,
+    private val defaultNavigator: DefaultNavigator
+) : BaseVM<ConfiguratorVS>(ConfiguratorVS.Content()) {
     
     private val chains = listOf(
         Chain(
@@ -181,26 +191,42 @@ class ConfiguratorVM @Inject constructor() : BaseVM<ConfiguratorVS>(Configurator
     }
     
     fun hideLLMProviderSelector() {
-        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        val currentState = (_viewState.value as? Content) ?: return
         updateState(currentState.copy(showLLMProviderSelector = false))
     }
     
     fun showAgentTypeSelector() {
-        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        val currentState = (_viewState.value as? Content) ?: return
         updateState(currentState.copy(showAgentTypeSelector = true))
     }
     
     fun hideAgentTypeSelector() {
-        val currentState = (_viewState.value as? ConfiguratorVS.Content) ?: return
+        val currentState = (_viewState.value as? Content) ?: return
         updateState(currentState.copy(showAgentTypeSelector = false))
     }
     
     fun startAgent() {
-        // TODO: Implement starting the agent with the selected configuration
+        viewModelScope.launch {
+            defaultNavigator.navigate(Destination.ChatScreen)
+        }
     }
     
     fun showSavedAgents() {
         // TODO: Implement navigation to saved agents screen
+    }
+
+    fun saveConfig(){
+        if(_viewState.value is Content){
+            val internalVS = (_viewState.value as Content)
+            val agentConfig = AgentConfig(
+                llmProvider = internalVS.selectedLLMProvider?.name ?: "",
+                chains = internalVS.selectedChains.map { it.name },
+                knowledgeBase = internalVS.selectedKnowledgeBases.map { it.name }
+            )
+            configRepository.saveConfig(agentConfig)
+        }else{
+            _viewState.value = ConfiguratorVS.Error("Error while saving config, please try again.")
+        }
     }
 
     private fun updateState(newState: ConfiguratorVS.Content) {

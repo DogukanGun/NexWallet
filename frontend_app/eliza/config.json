@@ -1,10 +1,10 @@
 {
   "runtime": {
-    "port": 3100,
+    "port": 3030,
     "host": "localhost",
-    "character_directory": "./eliza/characters",
-    "debug": false,
-    "keep_alive": false,
+    "character_directory": "characters",
+    "debug": true,
+    "keep_alive": true,
     "api": {
       "enabled": true,
       "cors": true,
@@ -15,10 +15,5 @@
     "level": "info",
     "file": false
   },
-  "plugins": [
-    "./eliza/plugins/SentimentPlugin.ts",
-    "./eliza/plugins/TranslationPlugin.ts",
-    "./eliza/plugins/SonicSVMPlugin.ts",
-    "./eliza/plugins/custom/src/index.ts"
-  ]
+  "plugins": []
 } 

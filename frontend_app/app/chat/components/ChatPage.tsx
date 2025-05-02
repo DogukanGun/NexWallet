@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AppChain } from "@/app/configurator/data";
 import { handleMessariCommand } from '../commands/MessariCommands';
 import ElizaStatus from "@/app/components/ElizaStatus";
+import { AgentSwapHandler } from '@/components/AgentSwapHandler';
 
 interface LLMProvider {
   id: string;
@@ -39,6 +40,12 @@ interface ChatRequestOptions {
     useCharacter?: boolean;
     characterName?: string | null;
   };
+}
+
+interface BnbTransactionParams {
+  to: string;
+  amount: number;
+  data?: string;
 }
 
 // Enhanced security theme with more vivid colors and clearer distinction
@@ -99,6 +106,8 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
   const [selectedLLM, setSelectedLLM] = React.useState<string>("");
   const [showWarningModal, setShowWarningModal] = React.useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [showTransactionConfirmation, setShowTransactionConfirmation] = useState(false);
+  const [pendingBnbTransaction, setPendingBnbTransaction] = useState<BnbTransactionParams | null>(null);
 
   // Enhanced animation variants
   const pageVariants = {
@@ -165,6 +174,68 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     }
   };
 
+  // Handle BNB transactions
+  const handleBnbTransaction = async (to: string, amount: number, data?: string) => {
+    try {
+      // Set pending transaction for confirmation
+      setPendingBnbTransaction({ to, amount, data });
+      setShowTransactionConfirmation(true);
+    } catch (error) {
+      console.error('Error preparing BNB transaction:', error);
+      addMessage({
+        role: "assistant",
+        content: "Failed to prepare BNB transaction, please try again",
+        id: chatId,
+      });
+      setMessages([...messages]);
+      setLoadingSubmit(false);
+    }
+  };
+
+  // Execute BNB transaction after confirmation
+  const executeBnbTransaction = async () => {
+    if (!pendingBnbTransaction) return;
+    
+    try {
+      setLoadingSubmit(true);
+      const { to, amount, data } = pendingBnbTransaction;
+     
+      
+      // Add success message
+      addMessage({
+        role: "assistant",
+        content: `Transaction sent successfully!`,
+        id: chatId,
+      });
+      
+      // Clear pending transaction
+      setPendingBnbTransaction(null);
+      setShowTransactionConfirmation(false);
+      setLoadingSubmit(false);
+    } catch (error) {
+      console.error('Error executing BNB transaction:', error);
+      addMessage({
+        role: "assistant",
+        content: `Transaction failed: ${error instanceof Error ? error.message : String(error)}`,
+        id: chatId,
+      });
+      setPendingBnbTransaction(null);
+      setShowTransactionConfirmation(false);
+      setLoadingSubmit(false);
+    }
+  };
+
+  // Cancel pending transaction
+  const cancelBnbTransaction = () => {
+    setPendingBnbTransaction(null);
+    setShowTransactionConfirmation(false);
+    addMessage({
+      role: "assistant",
+      content: "Transaction cancelled by user",
+      id: chatId,
+    });
+  };
+
   const handleSubmitProduction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -177,11 +248,60 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
         return;
       }
       
-      // Continue with regular flow if not handled by Messari
-      addMessage({ role: "user", content: input, id: chatId });
-      setInput("");
+      // Check for swap intent
+      const isSwapIntent = input.toLowerCase().includes('swap') || 
+                          input.toLowerCase().includes('exchange') || 
+                          input.toLowerCase().includes('trade') ||
+                          input.toLowerCase().includes('convert');
       
-      const { text, op, transaction } = await apiService.postChat(
+      // Add the user message
+      const userMessage: Message = {
+        role: "user",
+        content: input,
+        id: chatId,
+      };
+      addMessage(userMessage);
+      
+      // Save chat history to localStorage
+      if (chatId) {
+        localStorage.setItem(`chat_${chatId}`, JSON.stringify([...messages, userMessage]));
+      }
+      
+      setInput("");
+      setLoadingSubmit(true);
+      
+      // If swap intent is detected, provide a specialized response
+      if (isSwapIntent) {
+        setTimeout(() => {
+          let response = "I can help you swap tokens. ";
+          
+          if (input.toLowerCase().includes('bnb') || 
+              input.toLowerCase().includes('binance') || 
+              input.toLowerCase().includes('bsc')) {
+            response += "Here's a BNB Chain swap interface for you:";
+          } else {
+            response += "I'll default to BNB Chain swap for now:";
+          }
+          
+          const assistantMessage: Message = {
+            role: "assistant",
+            content: response,
+            id: chatId,
+          };
+          addMessage(assistantMessage);
+          
+          // Save the updated chat history
+          if (chatId) {
+            localStorage.setItem(`chat_${chatId}`, JSON.stringify([...messages, userMessage, assistantMessage]));
+          }
+          
+          setLoadingSubmit(false);
+        }, 1000);
+        return;
+      }
+      
+      // Continue with regular flow if not a swap intent
+      const { text, op, transaction, params } = await apiService.postChat(
         input, 
         address ?? "", 
         messages, 
@@ -192,6 +312,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       console.log("text", text);
       console.log("op", op);
       console.log("transaction", transaction);
+      console.log("params", params);
       
       
       if (stores.character) {
@@ -208,6 +329,14 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
         console.log('Not using character rephrasing'); // Debug log
         if (op === ChainId.SOLANA && transaction) {
           handleSolAi(transaction);
+        } else if (op === ChainId.BNB && params?.action === 'send_transaction') {
+          // Extract transaction parameters
+          const to = params.known_values.to as string;
+          const amount = parseFloat(params.known_values.amount as string);
+          const data = params.known_values.data as string | undefined;
+          
+          // Handle BNB transaction
+          handleBnbTransaction(to, amount, data);
         } else {
           addMessage({ role: "assistant", content: text, id: chatId });
         }
@@ -293,6 +422,80 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
                     border ${securityColors[securityLevel].border}`}
                 >
                   Return Home
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  // Transaction Confirmation Modal
+  const TransactionConfirmationModal = () => (
+    <AnimatePresence>
+      {showTransactionConfirmation && pendingBnbTransaction && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className={`bg-gradient-to-br ${securityColors[securityLevel].background} rounded-2xl 
+              p-8 max-w-md w-full mx-4 border ${securityColors[securityLevel].border} 
+              shadow-2xl shadow-${securityColors[securityLevel].glow}`}
+          >
+            <div className="space-y-7 relative">
+              <div className="text-center space-y-3">
+                <div className="flex justify-center mb-4">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center 
+                    bg-gradient-to-r ${securityColors[securityLevel].primary} p-1 
+                    shadow-lg ${securityColors[securityLevel].glow}`}>
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  Confirm BNB Transaction
+                </h2>
+                <div className={`${securityColors[securityLevel].text} text-sm mt-4 bg-black/20 p-4 rounded-lg text-left`}>
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-medium">To:</span>
+                    <span className="font-mono break-all">{pendingBnbTransaction.to}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-medium">Amount:</span>
+                    <span>{pendingBnbTransaction.amount} BNB</span>
+                  </div>
+                  {pendingBnbTransaction.data && (
+                    <div className="flex justify-between py-2 border-b border-gray-700">
+                      <span className="font-medium">Data:</span>
+                      <span className="font-mono text-xs break-all">{pendingBnbTransaction.data}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={cancelBnbTransaction}
+                  className="w-1/2 px-4 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeBnbTransaction}
+                  className={`w-1/2 bg-gradient-to-r ${securityColors[securityLevel].primary} 
+                    ${securityColors[securityLevel].hover} text-white rounded-lg py-3 font-medium 
+                    transition-all duration-300`}
+                >
+                  Confirm Transaction
                 </button>
               </div>
             </div>
@@ -478,6 +681,7 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
       <WalletModal />
       <SecurityTransition />
       <ElizaStatus />
+      <TransactionConfirmationModal />
 
       <RequireConfig>
         <SubscriptionWrapper>

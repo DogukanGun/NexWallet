@@ -1,13 +1,13 @@
 // This file is run by the npm script to start the Eliza process
-const { ElizaService } = require('./ElizaService');
-const path = require('path');
-const fs = require('fs');
+import { ElizaService } from './ElizaService';
+import path from 'path';
+import fs from 'fs';
 
 // Singleton instance
-let elizaInstance = null;
+let elizaInstance: ElizaService | null = null;
 
 // Function to ensure Eliza is running
-async function ensureElizaRunning() {
+async function ensureElizaRunning(): Promise<ElizaService> {
   if (!elizaInstance) {
     try {
       // Create Eliza service instance
@@ -40,4 +40,4 @@ if (require.main === module) {
   ensureElizaRunning().catch(console.error);
 }
 
-module.exports = { ensureElizaRunning }; 
+export { ensureElizaRunning }; 

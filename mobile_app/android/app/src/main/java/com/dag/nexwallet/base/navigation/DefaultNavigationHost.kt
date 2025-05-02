@@ -6,6 +6,8 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.dag.nexwallet.base.extensions.ObserveAsEvents
+import com.dag.nexwallet.features.chat.ChatScreen
+import com.dag.nexwallet.features.chat.ChatView
 import com.dag.nexwallet.features.login.presentation.LoginView
 import com.dag.nexwallet.features.splash.SplashView
 import com.dag.nexwallet.features.configurator.presentation.ConfiguratorView
@@ -62,6 +64,10 @@ fun DefaultNavigationHost(
 
         composableWithAnimations<Destination.AddVoiceScreen> {
             AddVoiceView()
+        }
+
+        composableWithAnimations<Destination.ChatScreen> {
+            ChatScreen()
         }
     }
 }

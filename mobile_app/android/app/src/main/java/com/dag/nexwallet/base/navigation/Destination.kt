@@ -18,6 +18,9 @@ sealed interface Destination {
     @Serializable
     data object AddVoiceScreen: Destination
 
+    @Serializable
+    data object ChatScreen: Destination
+
     companion object {
         val NAV_WITHOUT_BOTTOM_NAVBAR = listOf(Splash, LoginScreen)
     }

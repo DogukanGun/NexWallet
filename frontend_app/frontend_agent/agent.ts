@@ -11,20 +11,24 @@ import { VoiceComponentTool } from './tools/voice/voiceComponents';
 import { MessariAPI } from './tools/messari';
 import { MessariPDFTool } from './tools/messari/pdfGenerator';
 import { createMessariPDFContextModifier } from './messariMiddleware';
-import { ElizaCharacterTool } from './tools/eliza/elizaCharacterTool';
-import { getElizaService } from '../eliza';
-import BlockchainTools from './tools/blockchainTools';
+import { SwapIntentDetector } from './tools/detectors/swapIntentDetector';
 
-export type agent = 'cookie' | 'messari' | 'eliza';
+export type agent = 'cookie' | 'messari' | 'onchain';
 
-export function createKnowledgeReactAgentV2(
+export async function createKnowledgeReactAgentV2(
     agentName: LLMConfig,
     messageModifier: string,
     agents: agent[],
     isOnchain: boolean,
-    supportedChains: string[] = ["arbitrum", "optimism", "base", "ethereum"],
-    wallet: string
+    supportedChains: string[] = ["arbitrum", "optimism", "base", "ethereum", "bnb"],
+    wallet: string,
+    agentType: string = "text"
 ) {
+    // Ensure we're on the server side
+    if (typeof window !== 'undefined') {
+        throw new Error('This function should only be called on the server side');
+    }
+
     let tools: StructuredToolInterface[] = [];
     
     // Add PDF generation tools first for better prioritization
@@ -49,30 +53,46 @@ export function createKnowledgeReactAgentV2(
         })
     }
     
-    // Add Eliza character tool if enabled
-    if (agents.includes('eliza')) {
-        // Add the Eliza character tool which now calls the API directly
-        tools.push(new ElizaCharacterTool());
+    // Add on-chain tools using Coinbase's AgentKit
+    if (agents.includes('onchain')) {
+        try {
+            // Initialize Coinbase CDP Agent
+            const cdpAgentTool = new AskCdpAgents(supportedChains);
+            tools.push(cdpAgentTool);
+            
+            // Add swap intent detector
+            tools.push(new SwapIntentDetector());
+        } catch (error) {
+            console.error('Error initializing Coinbase on-chain tools:', error);
+            throw new Error('Failed to initialize Coinbase on-chain tools');
+        }
     }
-    
+
     // Add other blockchain tools
     tools.push(new AskSolanaSdkAgent(wallet))
     tools.push(new GetUniswapTool())
-    tools.push(new VoiceComponentTool())
+    
+    // Only add Voice tools if this is a voice agent
+    if (agentType === "voice") {
+        tools.push(new VoiceComponentTool())
+    }
     
     return createAgent(agentName, tools, messageModifier, isOnchain);
 }
 
 export default class FrontendAgent {
-  private elizaService: any;
-  private blockchainTools: BlockchainTools;
+  private blockchainTools: any;
+  private apiKey: string;
   
   constructor() {
-    // Initialize Eliza service
-    this.elizaService = getElizaService();
+    // Store the API key for CDP operations
+    this.apiKey = process.env.COINBASE_API_KEY || '';
     
-    // Initialize blockchain tools
-    this.blockchainTools = new BlockchainTools(this.elizaService);
+    // Dynamically require BlockchainTools to avoid bundling native plugin binaries
+    const requireModule = eval('require');
+    const BTModule = requireModule('./tools/blockchainTools');
+    const BTClass = BTModule.default || BTModule;
+    this.blockchainTools = new BTClass();
   }
   
   /**

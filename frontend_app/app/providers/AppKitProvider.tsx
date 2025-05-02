@@ -1,6 +1,12 @@
 "use client";
 import { modal } from "../config";
 import { createContext, useContext, ReactNode } from "react";
+import logger from '../lib/logger';
+
+// Initialize WalletConnect with the logger
+if (typeof window !== 'undefined') {
+  (window as any).pino = logger;
+}
 
 // Create a context to hold the modal instance
 const AppKitContext = createContext(modal);

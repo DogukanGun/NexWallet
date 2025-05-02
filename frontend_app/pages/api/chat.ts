@@ -5,6 +5,94 @@ import { withAuth } from "@/middleware/withAuth";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
+import path from "path";
+
+// Ensure this file is only executed on the server side
+if (typeof window !== 'undefined') {
+    throw new Error('This file should only be imported on the server side');
+}
+
+// Simple BNB operations handler without requiring the full agent
+class BNBOperationsHandler {
+    private walletAddress: string = '';
+    private elizaService: any = null;
+    
+    async initialize() {
+        try {
+            // Load ElizaService directly to avoid path resolution issues
+            const { ensureElizaRunning } = require(path.join(process.cwd(), 'eliza/startEliza.js'));
+            this.elizaService = await ensureElizaRunning();
+            console.log("BNB handler initialized with Eliza service");
+        } catch (error) {
+            console.error("Failed to initialize Eliza service:", error);
+            throw new Error("Failed to initialize BNB operations: Eliza service unavailable");
+        }
+    }
+    
+    setWalletAddress(address: string) {
+        this.walletAddress = address;
+        
+        // If Eliza is initialized, set the BNB wallet
+        if (this.elizaService) {
+            try {
+                // Get plugin manager
+                const pluginManager = this.elizaService.getPluginManager();
+                // Find the BNB Chain plugin
+                const bnbPlugin = pluginManager.getPlugins().find((p: any) => p.id === 'bnb-chain-plugin');
+                if (bnbPlugin) {
+                    bnbPlugin.setExternalWallet(address);
+                    console.log(`Set BNB wallet address to ${address}`);
+                }
+            } catch (error) {
+                console.error("Error setting wallet address:", error);
+            }
+        }
+    }
+    
+    async getBalance(address?: string) {
+        if (!this.elizaService) await this.initialize();
+        
+        try {
+            // Send command directly to the BNB plugin
+            const result = await this.elizaService.sendMessage(`/bnb balance ${address || this.walletAddress}`, 'assistant');
+            // Extract the balance number from response
+            const match = result.match(/balance is: (\d+(\.\d+)?)/);
+            return match ? match[1] : 'Unknown';
+        } catch (error) {
+            console.error('Error getting BNB balance:', error);
+            return 'Error retrieving balance';
+        }
+    }
+    
+    async getTokenInfo(tokenAddress: string) {
+        if (!this.elizaService) await this.initialize();
+        
+        try {
+            const result = await this.elizaService.sendMessage(`/bnb token ${tokenAddress}`, 'assistant');
+            // Try to extract JSON from response
+            const jsonMatch = result.match(/```json\n([\s\S]*?)\n```/);
+            return jsonMatch ? JSON.parse(jsonMatch[1]) : { error: 'Could not parse token info' };
+        } catch (error) {
+            console.error('Error getting token info:', error);
+            return { error: String(error instanceof Error ? error.message : error) };
+        }
+    }
+    
+    async sendTransaction(to: string, amount: number, data?: string) {
+        if (!this.elizaService) await this.initialize();
+        
+        try {
+            const cmd = `/bnb send ${to},${amount}${data ? ',' + data : ''}`;
+            const result = await this.elizaService.sendMessage(cmd, 'assistant');
+            // Extract transaction hash
+            const hashMatch = result.match(/hash: ([0-9a-zA-Z]+)/);
+            return hashMatch ? hashMatch[1] : 'Transaction sent but hash not found';
+        } catch (error) {
+            console.error('Error sending transaction:', error);
+            throw error;
+        }
+    }
+}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { method } = req;
@@ -12,18 +100,60 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     switch (method) {
         case 'GET':
             // Handle GET request
-
             break;
 
         case 'POST':
             // Handle POST request
             const { caption, chains, wallet, llmId } = req.body;
+            
+            // Early exit for BNB slash-commands
+            if (caption.trim().toLowerCase().startsWith('/bnb')) {
+                try {
+                    console.log('BNB command detected:', caption);
+                    
+                    // Extract BNB wallet address from chains
+                    const bnbWallet = chains.find((chain: any) => chain.chainId === 56)?.address || wallet;
+                    console.log('Using BNB wallet address:', bnbWallet);
+                    
+                    // Initialize BNB operations handler
+                    const bnbHandler = new BNBOperationsHandler();
+                    await bnbHandler.initialize(); // Make sure initialization completes
+                    bnbHandler.setWalletAddress(bnbWallet);
+                    
+                    const [_, cmd, ...args] = caption.trim().split(/\s+/);
+                    console.log('BNB command:', cmd, 'with args:', args);
+                    
+                    let result;
+                    
+                    switch (cmd.toLowerCase()) {
+                        case 'balance':
+                            result = await bnbHandler.getBalance(args[0]);
+                            console.log('BNB balance result:', result);
+                            return res.status(200).json({ text: `BNB balance: ${result}`, op: 'bnb' });
+                        case 'token':
+                            result = await bnbHandler.getTokenInfo(args[0]);
+                            console.log('BNB token info result:', result);
+                            return res.status(200).json({ text: `Token info: ${JSON.stringify(result)}`, op: 'bnb' });
+                        case 'send':
+                            result = await bnbHandler.sendTransaction(args[0], parseFloat(args[1]), args[2]);
+                            console.log('BNB transaction result:', result);
+                            return res.status(200).json({ text: `Transaction hash: ${result}`, op: 'bnb' });
+                        default:
+                            console.log('Unknown BNB command:', cmd);
+                            throw new Error(`Unknown BNB command: ${cmd}`);
+                    }
+                } catch (err: any) {
+                    console.error('Error processing BNB command:', err);
+                    return res.status(400).json({ error: err.message, text: `Error processing BNB command: ${err.message}` });
+                }
+            }
+            
             if (!caption || typeof caption !== "string" || !chains || !Array.isArray(chains)) {
                 return res.status(400).json({ error: "Caption is required and should be a string, and chains must be an array." });
             }
             let response = "";
             try {
-                const agent = createKnowledgeReactAgentV2(
+                const agent = await createKnowledgeReactAgentV2(
                     { modelName: llmId || "gpt-4o-mini", temperature: 0.5 },
                     `You are a helpful agent that can answer questions about the blockchain.
                     If an user asks you a questions about outside of these chains ${chains.join(", ")},
@@ -198,19 +328,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 console.log("response", response);
                 const component = response.split("component:")[1].trim();
                 const params = JSON.parse(response.split("params:")[1].trim());
-                return res.status(200).json({ component: component, params: params });
+
+                return res.status(200).json({
+                    components: JSON.parse(component),
+                    params,
+                    text: "Please provide the required information to complete the transaction."
+                });
             }
-            return res.status(200).json({
-                text: response,
-                audio: "",
-                op: ""
-            });
+
+            return res.status(200).json({ text: response });
+            break;
+
         default:
-            // Handle unsupported methods
             res.setHeader('Allow', ['GET', 'POST']);
             res.status(405).end(`Method ${method} Not Allowed`);
-            break;
     }
-}
+};
+
 export default withAuth(handler);
 

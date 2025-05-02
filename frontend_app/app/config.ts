@@ -5,9 +5,23 @@ import { HuobiWalletAdapter, PhantomWalletAdapter, TrustWalletAdapter } from "@s
 import { mainnet, arbitrum, optimism, base, polygon, avalanche, opBNB } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { cookieStorage, createStorage, http } from '@wagmi/core'
+import * as pino from 'pino'
+
 export const projectId = process.env.REOWN_KEY || "b56e18d47c72ab683b10814fe9495694"; // this is a public projectId only to use on localhost
 
 export const networks = [solana, solanaTestnet, solanaDevnet, mainnet, arbitrum, optimism, base, polygon, avalanche, opBNB]
+
+// Configure pino logger with browser-specific settings
+const logger = pino.default({
+  browser: {
+    asObject: true,
+    write: {
+      info: (...args) => console.log(...args),
+      error: (...args) => console.error(...args)
+    }
+  },
+  level: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
+})
 
 // Setup solana adapter
 const solanaAdapter = new SolanaAdapter({
@@ -19,14 +33,22 @@ const solanaAdapter = new SolanaAdapter({
   ] as any
 })
 
+// Configure WagmiAdapter without SSR so MetaMask is detected on the client
 const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
     storage: cookieStorage
   }),
-  ssr: true,
+  ssr: false, // disable SSR to allow wallet injection detection
   projectId,
   networks
-})
+});
+
+// Workaround for Brave browser: select MetaMask provider if multiple providers exist
+if (typeof window !== 'undefined' && (window.ethereum as any)?.providers) {
+  const providers = (window.ethereum as any).providers;
+  window.ethereum = providers.find((p: any) => p.isMetaMask) || providers[0];
+}
+
 // Create modal
 const modal = createAppKit({
   adapters: [solanaAdapter, wagmiAdapter],
@@ -45,4 +67,4 @@ const modal = createAppKit({
 });
 
 // Export the modal instance
-export { modal };
+export { modal, logger };

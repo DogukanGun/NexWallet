@@ -53,18 +53,6 @@ interface KnowledgeBase {
   disabled: boolean;
 }
 
-interface LLMProvider {
-  id: string;
-  name: string;
-  disabled: boolean;
-}
-
-interface AgentType {
-  id: string;
-  name: string;
-  disabled: boolean;
-}
-
 // Components
 import {
   Header,
@@ -72,7 +60,6 @@ import {
   ChainSelection,
   CharacterSelection,
   VoiceSelection,
-  FooterActions,
   WalletRequiredModal,
   TwitterLoginModal,
   LogoutModal,
@@ -106,7 +93,7 @@ const chains: AppChain[] = [
     name: "BNB Chain",
     disabled: false,
     isEmbedded: false,
-    elizaMandatory: true,
+    elizaMandatory: false,
     icon: "/icons/bnbchain.svg",
   },
   {
@@ -114,17 +101,16 @@ const chains: AppChain[] = [
     name: "StarkNet",
     disabled: false,
     isEmbedded: false,
-    elizaMandatory: true,
+    elizaMandatory: false,
     icon: "/icons/starknet.svg",
   },
   {
     id: ChainId.BASE,
     name: "Base",
-    disabled: true,
+    disabled: false,
     isEmbedded: true,
-    elizaMandatory: true,
+    elizaMandatory: false,
     icon: "/icons/base.svg",
-    maintenanceMode: true
   },
   {
     id: ChainId.ARBITRUM,
