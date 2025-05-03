@@ -10,15 +10,16 @@ import { useConfigStore } from '../store/configStore';
 import { opBNB, base, optimism, polygon, arbitrum, mainnet } from 'wagmi/chains';
 import { ChainId } from '../configurator/data';
 
-interface InnerLayoutProps {
+interface LayoutProps {
   children: React.ReactNode;
 }
 
-const InnerLayout: React.FC<InnerLayoutProps> = ({ children }) => {
+export const InnerLayout: React.FC<LayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const { chains } = useConfigStore();
   
   // Map chain IDs to Wagmi chain objects
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chainMap: Record<string, any> = {
     [ChainId.BNB]: opBNB,
     [ChainId.BASE]: base,
@@ -40,6 +41,10 @@ const InnerLayout: React.FC<InnerLayoutProps> = ({ children }) => {
     
     return evmChain ? chainMap[evmChain.id] || opBNB : opBNB;
   }, [chains]);
+
+  const memoizedValue = useMemo(() => {
+    // Your memo logic
+  }, [chainMap]); // Add chainMap to dependencies
 
   return (
     <div>

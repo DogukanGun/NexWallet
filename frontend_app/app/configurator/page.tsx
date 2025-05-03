@@ -53,21 +53,6 @@ interface KnowledgeBase {
   disabled: boolean;
 }
 
-<<<<<<< HEAD
-=======
-interface LLMProvider {
-  id: string;
-  name: string;
-  disabled: boolean;
-}
-
-interface AgentType {
-  id: string;
-  name: string;
-  disabled: boolean;
-}
-
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 // Components
 import {
   Header,
@@ -75,10 +60,6 @@ import {
   ChainSelection,
   CharacterSelection,
   VoiceSelection,
-<<<<<<< HEAD
-=======
-  FooterActions,
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
   WalletRequiredModal,
   TwitterLoginModal,
   LogoutModal,
@@ -112,11 +93,7 @@ const chains: AppChain[] = [
     name: "BNB Chain",
     disabled: false,
     isEmbedded: false,
-<<<<<<< HEAD
     elizaMandatory: false,
-=======
-    elizaMandatory: true,
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     icon: "/icons/bnbchain.svg",
   },
   {
@@ -124,28 +101,16 @@ const chains: AppChain[] = [
     name: "StarkNet",
     disabled: false,
     isEmbedded: false,
-<<<<<<< HEAD
     elizaMandatory: false,
-=======
-    elizaMandatory: true,
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     icon: "/icons/starknet.svg",
   },
   {
     id: ChainId.BASE,
     name: "Base",
-<<<<<<< HEAD
     disabled: false,
     isEmbedded: true,
     elizaMandatory: false,
     icon: "/icons/base.svg",
-=======
-    disabled: true,
-    isEmbedded: true,
-    elizaMandatory: true,
-    icon: "/icons/base.svg",
-    maintenanceMode: true
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
   },
   {
     id: ChainId.ARBITRUM,

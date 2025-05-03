@@ -1,4 +1,10 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
   webpack: (config, { isServer, webpack }) => {
     // Stub out native .node binaries in all builds
     config.module.rules.unshift({

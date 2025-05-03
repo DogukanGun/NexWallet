@@ -17,11 +17,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import com.dag.nexwallet.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.ImageLoader
 
 // Custom theme colors
 private object ChatTheme {
@@ -149,6 +151,7 @@ fun ChatView(
 
 @Composable
 private fun EmptyChatState() {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -159,6 +162,7 @@ private fun EmptyChatState() {
         AsyncImage(
             model = R.drawable.nexarb,
             contentDescription = "AI",
+            imageLoader = ImageLoader(context),
             modifier = Modifier
                 .size(200.dp)
                 .clip(CircleShape),
@@ -175,6 +179,7 @@ private fun EmptyChatState() {
 
 @Composable
 private fun ChatMessageItem(message: ChatMessage) {
+    val context = LocalContext.current
     val isUser = message.role == "user"
     
     Row(
@@ -193,6 +198,7 @@ private fun ChatMessageItem(message: ChatMessage) {
                 AsyncImage(
                     model = R.drawable.nexarb,
                     contentDescription = "AI Avatar",
+                    imageLoader = ImageLoader(context),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -223,6 +229,7 @@ private fun ChatMessageItem(message: ChatMessage) {
                 AsyncImage(
                     model = R.drawable.baseline_person,
                     contentDescription = "User Avatar",
+                    imageLoader = ImageLoader(context),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )

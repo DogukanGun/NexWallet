@@ -4,27 +4,11 @@ import { AppKitNetwork, solana, solanaDevnet, solanaTestnet } from '@reown/appki
 import { HuobiWalletAdapter, PhantomWalletAdapter, TrustWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { mainnet, arbitrum, optimism, base, polygon, avalanche, opBNB } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { cookieStorage, createStorage, http } from '@wagmi/core'
-import * as pino from 'pino'
+import { cookieStorage, createStorage } from '@wagmi/core'
 
 export const projectId = process.env.REOWN_KEY || "b56e18d47c72ab683b10814fe9495694"; // this is a public projectId only to use on localhost
 
 export const networks = [solana, solanaTestnet, solanaDevnet, mainnet, arbitrum, optimism, base, polygon, avalanche, opBNB]
-<<<<<<< HEAD
-
-// Configure pino logger with browser-specific settings
-const logger = pino.default({
-  browser: {
-    asObject: true,
-    write: {
-      info: (...args) => console.log(...args),
-      error: (...args) => console.error(...args)
-    }
-  },
-  level: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
-})
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 // Setup solana adapter
 const solanaAdapter = new SolanaAdapter({
@@ -47,8 +31,11 @@ const wagmiAdapter = new WagmiAdapter({
 });
 
 // Workaround for Brave browser: select MetaMask provider if multiple providers exist
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if (typeof window !== 'undefined' && (window.ethereum as any)?.providers) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const providers = (window.ethereum as any).providers;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   window.ethereum = providers.find((p: any) => p.isMetaMask) || providers[0];
 }
 
@@ -70,4 +57,4 @@ const modal = createAppKit({
 });
 
 // Export the modal instance
-export { modal, logger };
+export { modal };

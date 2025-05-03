@@ -258,6 +258,7 @@ const ConfigurationComponent: FC<{}> = ({}) => {
     store.setConfig({
       chains: selectedChains,
       llmProvider: store.llmProvider,
+      character: store.character,
       agentType: store.agentType,
       isPointSystemJoined: store.isPointSystemJoined,
       modelName: store.llmProvider,

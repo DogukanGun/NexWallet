@@ -4,8 +4,12 @@ import remarkGfm from 'remark-gfm';
 import CodeDisplayBlock from './code-display-block';
 import PDFViewer from '@/app/components/PDFViewer';
 
-interface MessageRendererProps {
-  content: string;
+interface MessageProps {
+  message: {
+    content: string;
+    role: string;
+    // Add other properties as needed
+  };
 }
 
 /**
@@ -13,6 +17,7 @@ interface MessageRendererProps {
  * @param text - The string to extract JSON from
  * @returns The parsed JSON object or null if no valid JSON found
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractJSON(text: string): any | null {
   // Look for potential JSON objects (between curly braces)
   const jsonRegex = /{[\s\S]*?}/g;
@@ -37,11 +42,11 @@ function extractJSON(text: string): any | null {
   return null;
 }
 
-const MessageRenderer: React.FC<MessageRendererProps> = ({ content }) => {
+export const MessageRenderer: React.FC<MessageProps> = ({ message }) => {
   const [pdfError, setPdfError] = useState<string | null>(null);
 
   // Try to find a valid PDF JSON object in the content
-  let pdfData = extractJSON(content);
+  const pdfData = extractJSON(message.content);
   
   // Handle PDF content
   if (pdfData && pdfData.base64PDF && pdfData.fileName) {
@@ -64,10 +69,10 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ content }) => {
   }
 
   // Handle error messages that come from PDF generation
-  if (content.includes('Error generating PDF report:')) {
+  if (message.content.includes('Error generating PDF report:')) {
     return (
       <div className="text-red-500">
-        {content}
+        {message.content}
         <div className="mt-4">
           <p className="text-white">Please try again with a different token symbol.</p>
         </div>
@@ -78,7 +83,7 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ content }) => {
   // Handle regular text/markdown with code blocks
   return (
     <>
-      {content.split("```").map((part, index) => {
+      {message.content.split("```").map((part, index) => {
         if (index % 2 === 0) {
           return (
             <Markdown key={index} remarkPlugins={[remarkGfm]}>
@@ -95,6 +100,4 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ content }) => {
       })}
     </>
   );
-};
-
-export default MessageRenderer; 
+}; 

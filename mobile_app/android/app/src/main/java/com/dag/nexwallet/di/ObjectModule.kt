@@ -103,11 +103,6 @@ class ObjectModules {
                     LogLevel.NONE
                 }
             }
-            install(HttpTimeout) {
-                requestTimeoutMillis = 10000L
-                connectTimeoutMillis = 10000L
-                socketTimeoutMillis = 10000L
-            }
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true

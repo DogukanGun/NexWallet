@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, ReactNode } from "react";
+import React, { useEffect, useState, ReactNode, useCallback } from "react";
 import { useModal } from "../hooks/useModal";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import {
@@ -18,6 +18,7 @@ import { useRouter, usePathname } from "next/navigation";
 import useCurrentUserId from "../hooks/useCurrentUserId";
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useConfigStore } from '../store/configStore';
+import { modal } from "../config";
 
 type SubscriptionWrapperProps = {
   children: ReactNode;
@@ -28,6 +29,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const [showPopup, setShowPopup] = useState(false);
   const { openModal, closeModal } = useModal();
   const { address, isConnected } = useAppKitAccount();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { open } = useAppKit();
   const [isLoading, setIsLoading] = useState(true);
   const { walletProvider } = useAppKitProvider<Provider>("solana");
@@ -42,7 +44,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
   const isConfigPage = pathname === '/app' || pathname === '/configurator';
   const isUsingFreeLLM = config.llmProvider === 'llama_onchain' || config.llmProvider === 'deepseek_onchain';
 
-  const handleCheckCode = async (accessCode: string) => {
+  const handleCheckCode = useCallback(async (accessCode: string) => {
     try {
       if (!address) {
         console.error("No wallet address found");
@@ -60,9 +62,9 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
     } catch (e) {
       console.error("Failed to verify access code:", e);
     }
-  };
+  }, [address, enqueueSnackbar]);
 
-  const handleSubscribeWithUSDC = async () => {
+  const handleSubscribeWithUSDC = useCallback(async () => {
     const env = process.env.NODE_ENV;
     if (!isConnected || address === undefined) {
       open();
@@ -103,7 +105,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
       console.error("USDC Payment failed:", error);
       enqueueSnackbar("USDC Payment failed. Please try again.", { variant: "error" });
     }
-  };
+  }, [isConnected, address, open, enqueueSnackbar, connection, walletProvider]);
 
   const handlePaymentSuccess = async (signature: string) => {
     const res = await fetch("/api/user/register", {
@@ -174,7 +176,7 @@ const SubscriptionWrapper: React.FC<SubscriptionWrapperProps> = ({ children }) =
         closeModal();
       }
     };
-  }, [showPopup, isConfigPage, isUsingFreeLLM]);
+  }, [showPopup, isConfigPage, isUsingFreeLLM, openModal, closeModal, router]);
 
   return (
     <>

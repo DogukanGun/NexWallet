@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
+import Image from 'next/image';
 
 interface LandingSectionProps {
   id?: string;
@@ -46,7 +47,13 @@ export function FeatureCard({ title, description, icon }: FeatureCardProps) {
     >
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center">
-          <img src={icon} alt={title} className="w-6 h-6" />
+          <Image
+            src={icon}
+            alt={title}
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
         </div>
         <div>
           <h3 className="text-lg font-semibold mb-2">{title}</h3>
@@ -70,7 +77,13 @@ export function ChainCard({ name, icon, active, comingSoon }: ChainCardProps) {
       whileHover={{ scale: 1.05 }}
       className={`card-styled p-4 flex items-center gap-3 ${comingSoon ? 'opacity-50' : ''}`}
     >
-      <img src={icon} alt={name} className="w-8 h-8" />
+      <Image
+        src={icon}
+        alt={name}
+        width={32}
+        height={32}
+        className="w-8 h-8"
+      />
       <div>
         <p className="font-medium">{name}</p>
         {comingSoon && (

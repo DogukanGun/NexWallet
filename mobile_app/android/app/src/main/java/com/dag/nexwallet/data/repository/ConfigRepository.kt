@@ -1,12 +1,9 @@
 package com.dag.nexwallet.data.repository
 
-<<<<<<< HEAD
 import com.dag.nexwallet.base.extensions.safeLet
 import com.dag.nexwallet.data.local.SecureStorage
 import com.dag.nexwallet.features.configurator.domain.model.AgentConfig
-=======
-import com.dag.nexwallet.data.local.SecureStorage
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
+
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,7 +11,6 @@ import javax.inject.Singleton
 class ConfigRepository @Inject constructor(
     private val secureStorage: SecureStorage
 ){
-<<<<<<< HEAD
     fun saveConfig(config:AgentConfig){
         secureStorage.saveStringList(SecureStorage.KEY_CONFIG_CHAINS,config.chains)
         secureStorage.saveString(SecureStorage.KEY_CONFIG_LLM_PROVIDER,config.llmProvider)
@@ -34,7 +30,4 @@ class ConfigRepository @Inject constructor(
         }
         throw Exception("Config cannot be found")
     }
-=======
-
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 }

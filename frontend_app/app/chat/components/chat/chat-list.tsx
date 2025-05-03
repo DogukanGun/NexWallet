@@ -4,7 +4,7 @@ import { cn } from "@/app/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatProps } from "./chat";
 import Image from "next/image";
-import MessageRenderer from "../MessageRenderer";
+import {MessageRenderer} from "../MessageRenderer";
 import { AgentSwapHandler } from "@/components/AgentSwapHandler";
 
 export default function ChatList({ messages, isLoading, loadingSubmit }: ChatProps) {
@@ -101,7 +101,7 @@ export default function ChatList({ messages, isLoading, loadingSubmit }: ChatPro
                       />
                     </Avatar>
                     <span className="bg-black p-3 rounded-md max-w-xs sm:max-w-2xl overflow-x-auto">
-                      <MessageRenderer content={message.content} />
+                      <MessageRenderer message={message} />
                       {isLoading && messages.indexOf(message) === messages.length - 1 && (
                         <span className="animate-pulse bg-black" aria-label="Typing">
                           ...

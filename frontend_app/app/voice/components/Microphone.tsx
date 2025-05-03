@@ -22,17 +22,21 @@ export default function Microphone() {
   const { address } = useAppKitAccount();
   const stores = useConfigStore();
 
-  const readVoice = async (formData: FormData) => {
-    try {
-      const result = await apiService.postTranscribe(formData);
-      console.log("Transcription:", result.text);
-      setCaption(result.text);
-      setMessageHistory((prev) => [...prev, { role: "user", content: result.text }]);
-      generateAudio(result.text);
-    } catch (error) {
-      console.error("Error transcribing audio:", error);
-    }
-  };
+  const handleVoiceInput = useCallback((formData: FormData) => {
+    const readVoice = async () => {
+      try {
+        const result = await apiService.postTranscribe(formData);
+        console.log("Transcription:", result.text);
+        setCaption(result.text);
+        setMessageHistory((prev) => [...prev, { role: "user", content: result.text }]);
+        generateAudio(result.text);
+      } catch (error) {
+        console.error("Error transcribing audio:", error);
+      }
+    };
+    
+    readVoice();
+  }, []);
 
   const toggleMicrophone = useCallback(async () => {
     if (microphone && userMedia) {
@@ -57,7 +61,7 @@ export default function Microphone() {
           console.error("Audio blob is empty. Check the recording process.");
           return;
         }
-        readVoice(formData);
+        handleVoiceInput(formData);
       };
       microphone.ondataavailable = (e) => {
         localAudioChunks.push(e.data);
@@ -65,7 +69,7 @@ export default function Microphone() {
       setUserMedia(userMedia);
       setMicrophone(microphone);
     }
-  }, [microphone, userMedia, readVoice]);
+  }, [microphone, userMedia, handleVoiceInput]);
 
   const handleSolAi = async (text: string) => {
     const res = await apiService.postBotSolana(text, address!);

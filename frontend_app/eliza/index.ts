@@ -1,8 +1,5 @@
 // This file should not import ElizaService directly on the client side
-<<<<<<< HEAD
 import type { ElizaService } from './ElizaService';
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 // Interface for character configuration
 export interface CharacterConfig {
@@ -27,10 +24,7 @@ export interface CharacterConfig {
 class ElizaClient {
   private baseUrl: string;
   private isServer: boolean;
-<<<<<<< HEAD
   private serverService: ElizaService | null = null;
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
   constructor() {
     // Determine if we're running on server or client side
@@ -40,13 +34,10 @@ class ElizaClient {
     if (this.isServer) {
       // On the server side, we need an absolute URL
       this.baseUrl = 'http://localhost:3000';
-<<<<<<< HEAD
       // Dynamically import ElizaService only on server side
       import('./ElizaService').then(({ ElizaService }) => {
         this.serverService = new ElizaService();
       });
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     } else {
       // On the client side, we can use a relative URL
       this.baseUrl = '';
@@ -55,13 +46,10 @@ class ElizaClient {
 
   // Get list of available characters
   async getCharacters(): Promise<string[]> {
-<<<<<<< HEAD
     if (this.isServer && this.serverService) {
       return this.serverService.getCharacters();
     }
 
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     try {
       // Use a URL that will work in both browser and server
       const response = await fetch(`${this.baseUrl}/api/character/list`);
@@ -91,13 +79,10 @@ class ElizaClient {
 
   // Send a message to a character
   async sendMessage(message: string, character: string): Promise<string> {
-<<<<<<< HEAD
     if (this.isServer && this.serverService) {
       return this.serverService.sendMessage(message, character);
     }
 
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     try {
       const response = await fetch(`${this.baseUrl}/api/character/message`, {
         method: 'POST',
@@ -124,13 +109,10 @@ class ElizaClient {
 
   // Rephrase text in the style of a character
   async rephraseWithCharacter(text: string, character: string): Promise<string> {
-<<<<<<< HEAD
     if (this.isServer && this.serverService) {
       return this.serverService.sendMessage(`Rephrase this text in your style: ${text}`, character);
     }
 
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     try {
       const response = await fetch(`${this.baseUrl}/api/character/rephrase`, {
         method: 'POST',
@@ -154,7 +136,6 @@ class ElizaClient {
       throw error;
     }
   }
-<<<<<<< HEAD
 
   // Get the plugin manager (server-side only)
   getPluginManager() {
@@ -163,8 +144,6 @@ class ElizaClient {
     }
     throw new Error('Plugin manager is only available on the server side');
   }
-=======
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 }
 
 // Create a singleton instance of ElizaClient

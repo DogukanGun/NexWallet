@@ -11,15 +11,7 @@ import { VoiceComponentTool } from './tools/voice/voiceComponents';
 import { MessariAPI } from './tools/messari';
 import { MessariPDFTool } from './tools/messari/pdfGenerator';
 import { createMessariPDFContextModifier } from './messariMiddleware';
-<<<<<<< HEAD
 import { SwapIntentDetector } from './tools/detectors/swapIntentDetector';
-=======
-import { ElizaCharacterTool } from './tools/eliza/elizaCharacterTool';
-import { getElizaService } from '../eliza';
-import BlockchainTools from './tools/blockchainTools';
-
-export type agent = 'cookie' | 'messari' | 'eliza';
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
 
 export type agent = 'cookie' | 'messari' | 'onchain';
 
@@ -61,7 +53,6 @@ export async function createKnowledgeReactAgentV2(
         })
     }
     
-<<<<<<< HEAD
     // Add on-chain tools using Coinbase's AgentKit
     if (agents.includes('onchain')) {
         try {
@@ -85,101 +76,6 @@ export async function createKnowledgeReactAgentV2(
     if (agentType === "voice") {
         tools.push(new VoiceComponentTool())
     }
-=======
-    // Add Eliza character tool if enabled
-    if (agents.includes('eliza')) {
-        // Add the Eliza character tool which now calls the API directly
-        tools.push(new ElizaCharacterTool());
-    }
-    
-    // Add other blockchain tools
-    tools.push(new AskSolanaSdkAgent(wallet))
-    tools.push(new GetUniswapTool())
-    tools.push(new VoiceComponentTool())
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
     
     return createAgent(agentName, tools, messageModifier, isOnchain);
 }
-
-export default class FrontendAgent {
-<<<<<<< HEAD
-  private blockchainTools: any;
-  private apiKey: string;
-  
-  constructor() {
-    // Store the API key for CDP operations
-    this.apiKey = process.env.COINBASE_API_KEY || '';
-    
-    // Dynamically require BlockchainTools to avoid bundling native plugin binaries
-    const requireModule = eval('require');
-    const BTModule = requireModule('./tools/blockchainTools');
-    const BTClass = BTModule.default || BTModule;
-    this.blockchainTools = new BTClass();
-=======
-  private elizaService: any;
-  private blockchainTools: BlockchainTools;
-  
-  constructor() {
-    // Initialize Eliza service
-    this.elizaService = getElizaService();
-    
-    // Initialize blockchain tools
-    this.blockchainTools = new BlockchainTools(this.elizaService);
->>>>>>> 285a13c0f83f4ebc09dc9c926b0dd7fe9057d65f
-  }
-  
-  /**
-   * Set wallet connections for blockchain operations
-   * @param chains Array of connected chains with their addresses
-   */
-  setWalletConnections(chains: Array<{ chainId: number; address: string; isEmbedded: boolean }>) {
-    for (const chain of chains) {
-      // BNB Chain (BSC) has chainId 56
-      if (chain.chainId === 56) {
-        this.blockchainTools.setBNBWallet(chain.address);
-      }
-      
-      // Solana has chainId 501
-      if (chain.chainId === 501) {
-        this.blockchainTools.setSolanaWallet(chain.address);
-      }
-    }
-  }
-  
-  /**
-   * Helper method to execute blockchain operations
-   * @param operation The operation to perform
-   * @param params Parameters for the operation
-   */
-  async executeBlockchainOperation(
-    operation: string, 
-    params: Record<string, any>
-  ): Promise<any> {
-    switch (operation) {
-      case 'bnb.getBalance':
-        return await this.blockchainTools.getBNBBalance(params.address);
-        
-      case 'bnb.getTokenInfo':
-        return await this.blockchainTools.getBNBTokenInfo(params.tokenAddress);
-        
-      case 'bnb.sendTransaction':
-        return await this.blockchainTools.sendBNBTransaction(
-          params.to,
-          params.amount,
-          params.data
-        );
-        
-      case 'solana.getAccountInfo':
-        return await this.blockchainTools.getSolanaAccountInfo(params.accountAddress);
-        
-      case 'solana.simulateTransaction':
-        return await this.blockchainTools.simulateSolanaTransaction(params.transaction);
-        
-      case 'solana.sendTransaction':
-        return await this.blockchainTools.sendSolanaTransaction(params.transaction);
-        
-      default:
-        throw new Error(`Unknown blockchain operation: ${operation}`);
-    }
-  }
-} 

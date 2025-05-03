@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useConfigStore } from '../store/configStore';
 import Auth from '../components/Auth';
 import { usePathname } from 'next/navigation';
@@ -18,6 +18,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   } = useAuth();
 
   const [loading, setLoading] = useState(true);
+
+  const handleAuthSuccess = useCallback(() => {
+    setShowAuthModal(false);
+    setLoading(false);
+  }, [setShowAuthModal]);
 
   useEffect(() => {
     // Skip authentication check for the root path
@@ -118,13 +123,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       clearInterval(authCheckInterval);
       window.removeEventListener('message', handleAuthSuccessMessage);
     };
-  }, [setIsAuthenticated, pathname, setShowAuthModal]);
-
-  const handleAuthSuccess = () => {
-    // Close the auth modal after successful authentication
-    setShowAuthModal(false);
-    setLoading(false);
-  };
+  }, [setIsAuthenticated, pathname, setShowAuthModal, handleAuthSuccess]);
 
   if (loading) {
     return (
