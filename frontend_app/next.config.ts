@@ -17,12 +17,16 @@ const nextConfig: NextConfig = {
         path: false,
         net: false,
         tls: false,
+        stream: require.resolve('stream-browserify'),
         buffer: require.resolve('buffer/'),
+        util: require.resolve('util/'),
+        crypto: require.resolve('crypto-browserify'),
       };
 
       config.plugins.push(
         new webpack.ProvidePlugin({
           Buffer: ['buffer', 'Buffer'],
+          process: 'process/browser',
         })
       );
     }
