@@ -12,6 +12,7 @@ import AuthProvider from "./providers/AuthProvider";
 import AppKitProvider from "./providers/AppKitProvider";
 import { ThemeProvider } from '@/store/ThemeContext'
 import '@coinbase/onchainkit/styles.css';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,21 +40,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-base-100 text-base-content`}>
-        <ThemeProvider>
-          <AppKitProvider>
-            <ContextProvider>
-              <ModalProvider>
-                <AuthProvider>
-                  <LoadingProvider>
-                    <div className="min-h-screen flex flex-col bg-gradient-to-b from-base-200 to-base-100">
-                      <InnerLayout>{children}</InnerLayout>
-                    </div>
-                  </LoadingProvider>
-                </AuthProvider>
-              </ModalProvider>
-            </ContextProvider>
-          </AppKitProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <AppKitProvider>
+              <ContextProvider>
+                <ModalProvider>
+                  <AuthProvider>
+                    <LoadingProvider>
+                      <div className="min-h-screen flex flex-col bg-gradient-to-b from-base-200 to-base-100">
+                        <InnerLayout>{children}</InnerLayout>
+                      </div>
+                    </LoadingProvider>
+                  </AuthProvider>
+                </ModalProvider>
+              </ContextProvider>
+            </AppKitProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
