@@ -4,29 +4,32 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   webpack: (config, { isServer, webpack }) => {
     // Handle Node.js built-in modules
     if (!isServer) {
+      // Alias and polyfill Node built-ins for the browser
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        process: require.resolve('process/browser'),
+        buffer: require.resolve('buffer'),
+      };
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         child_process: false,
-        path: false,
+        path: require.resolve('path-browserify'),
         net: false,
         tls: false,
         stream: require.resolve('stream-browserify'),
-        buffer: require.resolve('buffer/'),
+        buffer: require.resolve('buffer'),
         util: require.resolve('util/'),
         crypto: require.resolve('crypto-browserify'),
       };
 
       config.plugins.push(
         new webpack.ProvidePlugin({
-          Buffer: ['buffer', 'Buffer'],
           process: 'process/browser',
+          Buffer: ['buffer', 'Buffer'],
         })
       );
     }
@@ -36,6 +39,10 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  productionBrowserSourceMaps: true,
 };
 
 export default nextConfig;

@@ -8,8 +8,6 @@ import { AskSolanaSdkAgent } from './tools/solona/askSolanaAgent';
 import { AskCdpAgents } from './tools/cdp/askCdpAgents';
 import { GetUniswapTool } from './tools/components/uniswapTool';
 import { VoiceComponentTool } from './tools/voice/voiceComponents';
-import { MessariAPI } from './tools/messari';
-import { MessariPDFTool } from './tools/messari/pdfGenerator';
 import { createMessariPDFContextModifier } from './messariMiddleware';
 import { SwapIntentDetector } from './tools/detectors/swapIntentDetector';
 
@@ -30,16 +28,6 @@ export async function createKnowledgeReactAgentV2(
     }
 
     let tools: StructuredToolInterface[] = [];
-    
-    // Add PDF generation tools first for better prioritization
-    if (agents.includes('messari')) {
-        const messariAPI = new MessariAPI();
-        tools.push(new MessariPDFTool(messariAPI)); // PDF Tool first for better routing
-        tools.push(messariAPI);
-        
-        // Add Messari context to the message modifier
-        messageModifier = messageModifier + '\n' + createMessariPDFContextModifier();
-    }
     
     // Add cookie tools
     if (agents.includes('cookie')) {

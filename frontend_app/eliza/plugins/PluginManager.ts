@@ -19,13 +19,10 @@ export class PluginManager {
     try {
       // Check if the plugin exists
       const resolvedPath = path.resolve(process.cwd(), pluginPath);
-      if (!fs.existsSync(resolvedPath)) {
-        console.error(`Plugin not found: ${pluginPath}`);
-        return false;
-      }
 
-      // Import the plugin dynamically
-      const pluginModule = await import(resolvedPath);
+      // Import the plugin dynamically at runtime
+      // @ts-ignore: leave this import for runtime; do not bundle
+      const pluginModule = await import(/* webpackIgnore: true */ resolvedPath);
       
       // Get the plugin class/object
       let plugin: ElizaPlugin;

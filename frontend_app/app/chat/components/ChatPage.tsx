@@ -21,9 +21,7 @@ import { Tools } from './tools/Tools';
 import { ToolConfig } from '../config/tools';
 import { motion, AnimatePresence } from "framer-motion";
 import { AppChain } from "@/app/configurator/data";
-import { handleMessariCommand } from '../commands/MessariCommands';
 import ElizaStatus from "@/app/components/ElizaStatus";
-import { AgentSwapHandler } from '@/components/AgentSwapHandler';
 
 interface LLMProvider {
   id: string;
@@ -240,14 +238,6 @@ export default function ChatPage({ initialChatId }: ChatPageProps) {
     e.preventDefault();
     
     try {
-      // Try to handle with Messari command handler first
-      const messariHandled = await handleMessariCommand(messages, setMessages, input);
-      if (messariHandled) {
-        setInput("");
-        setLoadingSubmit(false);
-        return;
-      }
-      
       // Check for swap intent
       const isSwapIntent = input.toLowerCase().includes('swap') || 
                           input.toLowerCase().includes('exchange') || 

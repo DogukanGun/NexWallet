@@ -35,9 +35,15 @@ class ElizaClient {
       // On the server side, we need an absolute URL
       this.baseUrl = 'http://localhost:3000';
       // Dynamically import ElizaService only on server side
-      import('./ElizaService').then(({ ElizaService }) => {
+      // Use CommonJS require only on server side to avoid client bundling issues
+      try {
+        // Using require instead of import to avoid webpack bundling
+        // @ts-ignore: using require dynamically
+        const { ElizaService } = require('./ElizaService');
         this.serverService = new ElizaService();
-      });
+      } catch (err) {
+        console.error('Failed to load ElizaService on server:', err);
+      }
     } else {
       // On the client side, we can use a relative URL
       this.baseUrl = '';
