@@ -30,12 +30,6 @@ const Navbar = () => {
     setShowTelegramNotice(true);
   };
 
-  // Add function to handle Roadmap button click
-  const handleRoadmapClick = () => {
-    closeDrawer();
-    setShowRoadmap(true);
-  };
-
   // Add function to handle navigation
   const handleNavigation = (route: string) => {
     closeDrawer();
@@ -97,7 +91,7 @@ const Navbar = () => {
                   )}
                 </button>
               </li>
-              {path === "/" && (
+              {path == "/" && (
                 <li>
                   <Link
                     href="/app"
