@@ -100,7 +100,7 @@
     "@voltr/vault-sdk": "^0.1.1",
     "agent-twitter-client": "^0.0.18",
     "ai": "^4.0.22",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "bs58": "^6.0.0",
     "buffer": "^6.0.3",
     "chai": "^5.1.2",
