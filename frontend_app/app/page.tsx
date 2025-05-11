@@ -4,6 +4,7 @@ import VideoPlayer from "./components/VideoPlayer";
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { LandingSection, FeatureCard, ChainCard, GradientButton } from "./components/LandingSection";
+import Link from "next/link";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -127,12 +128,12 @@ export default function Home() {
               >
                 Watch Demo
               </button>
-              <a
-                href="#solutions"
+              <Link
+                href="/app"
                 className="btn btn-neutral rounded-full text-white"
               >
                 Explore Solutions
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>

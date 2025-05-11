@@ -78,7 +78,7 @@ const Navbar = () => {
               <li>
                 <button
                   onClick={toggleTheme}
-                  className="nav-button bg-gradient-to-r from-base-300 to-base-200 border border-base-300 hover:border-primary/50"
+                  className="px-4 py-2 rounded-lg flex items-center gap-2 bg-base-200 hover:bg-base-300 transition-colors duration-200"
                 >
                   {theme === 'dark' ? (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -95,7 +95,7 @@ const Navbar = () => {
                 <li>
                   <Link
                     href="/app"
-                    className="nav-button bg-gradient-to-r from-orange-400 to-pink-500 text-white"
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-orange-400 to-pink-500 text-white hover:opacity-90 transition-opacity duration-200"
                   >
                     Launch NexWallet
                   </Link>
@@ -104,7 +104,7 @@ const Navbar = () => {
               <li>
                 <button
                   onClick={() => setShowRoadmap(true)}
-                  className="nav-button bg-gradient-to-r from-purple-400 to-pink-500 text-white"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-400 to-pink-500 text-white hover:opacity-90 transition-opacity duration-200"
                 >
                   Roadmap
                 </button>
@@ -118,7 +118,7 @@ const Navbar = () => {
                 <li>
                   <button
                     onClick={() => router.push('/app')}
-                    className={`nav-button ${
+                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
                       theme === 'dark'
                         ? 'bg-gradient-to-r from-base-300 to-base-200 border border-base-300 hover:border-primary/50 text-white'
                         : 'bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 hover:border-blue-300 text-blue-600'
@@ -167,7 +167,7 @@ const Navbar = () => {
           <div className="flex flex-col gap-3">
             <button
               onClick={toggleTheme}
-              className="mobile-nav-button bg-gradient-to-r from-base-300 to-base-200 border border-base-300 hover:border-primary/50 flex items-center gap-2"
+              className="w-full px-4 py-2 rounded-lg flex items-center gap-2 bg-base-200 hover:bg-base-300 transition-colors duration-200"
             >
               {theme === 'dark' ? (
                 <>
@@ -188,14 +188,14 @@ const Navbar = () => {
             {path === "/" && (
               <Link
                 href="/app"
-                className="mobile-nav-button bg-gradient-to-r from-orange-400 to-pink-500 text-white"
+                className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-orange-400 to-pink-500 text-white hover:opacity-90 transition-opacity duration-200"
               >
                 Launch NexWallet
               </Link>
             )}
             <button
               onClick={() => setShowRoadmap(true)}
-              className="mobile-nav-button bg-gradient-to-r from-purple-400 to-pink-500 text-white"
+              className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-purple-400 to-pink-500 text-white hover:opacity-90 transition-opacity duration-200"
             >
               Roadmap
             </button>
@@ -207,7 +207,7 @@ const Navbar = () => {
             {path !== '/' && path !== '/app' && (
               <button
                 onClick={() => handleNavigation('/app')}
-                className={`mobile-nav-button ${
+                className={`w-full px-4 py-2 rounded-lg transition-colors duration-200 ${
                   theme === 'dark'
                     ? 'bg-gradient-to-r from-base-300 to-base-200 border border-base-300 hover:border-primary/50 text-white'
                     : 'bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 hover:border-blue-300 text-blue-600'
