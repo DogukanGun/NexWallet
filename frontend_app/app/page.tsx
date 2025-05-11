@@ -120,7 +120,7 @@ export default function Home() {
               From crypto management to enterprise solutions, NexAI brings intelligent automation to every industry. Experience the future of AI-powered tools.
             </p>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-6 items-center">
+            <div className="flex flex-row sm:flex-row justify-center gap-6 items-center">
               <button
                 onClick={handleOpenModal}
                 className="btn btn-primary rounded-full text-white"

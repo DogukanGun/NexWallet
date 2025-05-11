@@ -43,6 +43,8 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   productionBrowserSourceMaps: true,
+  // Force same rendering in all environments
+  reactStrictMode: true,
 };
 
 export default nextConfig;
