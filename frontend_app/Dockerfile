@@ -32,4 +32,4 @@ ENV NODE_ENV=production
 ENV PORT=9123
 
 # Start the application with node directly
-CMD ["node", "server.js"] 
+CMD ["npm", "run", "start"] 
