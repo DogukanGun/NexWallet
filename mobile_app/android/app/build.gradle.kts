@@ -144,7 +144,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
 
     //Coil
-    implementation(libs.coil.compose)
+    implementation(libs.coil3.coil.compose)
 
     //Ktor
     implementation(libs.ktor.client.core)
@@ -154,6 +154,5 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.serialization.kotlinx.json)
-    implementation("io.ktor:ktor-client-plugins:2.3.8")
 
 }

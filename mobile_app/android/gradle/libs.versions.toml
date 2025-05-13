@@ -1,6 +1,7 @@
 [versions]
 agp = "8.8.0"
 coilCompose = "2.7.0"
+coilComposeVersion = "3.1.0"
 converterGson = "2.9.0"
 datastorePreferences = "1.1.4"
 firebaseBom = "33.12.0"
@@ -31,7 +32,7 @@ securityCrypto = "1.1.0-alpha06"
 web3Solana = "0.2.5"
 workRuntimeKtx = "2.10.0"
 visionInternalVkp = "18.2.3"
-ktor = "2.3.13"
+ktor = "3.1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +45,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose-base", version.ref = "coilCompose" }
+coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilComposeVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }

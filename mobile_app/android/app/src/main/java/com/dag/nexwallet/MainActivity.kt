@@ -41,7 +41,7 @@ import com.dag.nexwallet.data.AlertDialogModel
 import com.dag.nexwallet.domain.DataPreferencesStore
 import com.dag.nexwallet.features.home.presentation.cardBackgroundColor
 import com.dag.nexwallet.ui.theme.NexWalletTheme
-import com.dag.nexwallet.ui.theme.gradientBackground
+import com.dag.nexwallet.ui.theme.mainBackground
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.isActive
@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(gradientBackground)
+                        .background(mainBackground)
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(gradientBackground),
+                                .background(mainBackground),
                         ) {
                             if (mainVM.isBottomNavActive(currentRoute.value)) {
                                 TopAppBar(

@@ -16,25 +16,25 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = GradientBlue2,
-    onPrimary = LightForeground,
-    secondary = GradientBlue3,
-    tertiary = GradientBlue4,
-    background = LightBackground,
-    surface = LightBackground,
-    onBackground = LightForeground,
-    onSurface = LightForeground
+    primary = activeAccentColor,
+    onPrimary = primaryText,
+    secondary = gradientStart,
+    tertiary = gradientEnd,
+    background = mainBackground,
+    surface = cardBackgroundColor,
+    onBackground = primaryText,
+    onSurface = primaryText
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GradientBlue1,
-    onPrimary = DarkForeground,
-    secondary = GradientBlue2,
-    tertiary = GradientBlue3,
-    background = DarkBackground,
-    surface = DarkBackground,
-    onBackground = DarkForeground,
-    onSurface = DarkForeground
+    primary = activeAccentColor,
+    onPrimary = primaryText,
+    secondary = gradientStart,
+    tertiary = gradientEnd,
+    background = mainBackground,
+    surface = cardBackgroundColor,
+    onBackground = primaryText,
+    onSurface = primaryText
 )
 
 @Composable

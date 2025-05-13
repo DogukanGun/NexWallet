@@ -1,5 +1,7 @@
-package com.dag.nexwallet.features.chat
+package com.dag.nexwallet.features.chat.presentation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,18 +14,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.dag.nexwallet.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.ImageLoader
+import com.dag.nexwallet.ui.theme.*
 
 // Custom theme colors
 private object ChatTheme {
@@ -52,9 +54,10 @@ fun ChatScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val messages by viewModel.messages.collectAsStateWithLifecycle()
 
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = ChatTheme.Background
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(mainBackground)
     ) {
         when (uiState) {
             is ChatVS.Error -> {
@@ -82,17 +85,21 @@ private fun ErrorState(message: String) {
     ) {
         Text(
             text = message,
-            color = ChatTheme.TextPrimary,
+            color = primaryText,
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { /* Add retry functionality */ },
             colors = ButtonDefaults.buttonColors(
-                containerColor = ChatTheme.Primary
-            )
+                containerColor = activeAccentColor
+            ),
+            shape = RoundedCornerShape(24.dp)
         ) {
-            Text("Retry")
+            Text(
+                text = "Retry",
+                color = primaryText
+            )
         }
     }
 }
@@ -104,9 +111,10 @@ fun ChatView(
     modifier: Modifier = Modifier,
     onSendMessage: (String) -> Unit
 ) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = ChatTheme.Background
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(mainBackground)
     ) {
         var inputText by remember { mutableStateOf(TextFieldValue()) }
         
@@ -151,37 +159,50 @@ fun ChatView(
 
 @Composable
 private fun EmptyChatState() {
-    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(top = 72.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AsyncImage(
-            model = R.drawable.nexarb,
-            contentDescription = "AI",
-            imageLoader = ImageLoader(context),
+        Box(
             modifier = Modifier
-                .size(200.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Fit
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(brush = iconGradient),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = R.drawable.nexarb,
+                contentDescription = "AI",
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Fit
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
         Text(
             text = "How can I help you today?",
+            style = MaterialTheme.typography.titleLarge,
+            color = primaryText
+        )
+        
+        Text(
+            text = "Ask me anything about crypto trading",
             style = MaterialTheme.typography.bodyLarge,
-            color = ChatTheme.TextSecondary
+            color = secondaryText,
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }
 
 @Composable
 private fun ChatMessageItem(message: ChatMessage) {
-    val context = LocalContext.current
     val isUser = message.role == "user"
-    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -189,48 +210,59 @@ private fun ChatMessageItem(message: ChatMessage) {
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
         if (!isUser) {
-            Card(
+            Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape),
-                colors = CardDefaults.cardColors(containerColor = ChatTheme.Surface)
+                    .clip(CircleShape)
+                    .background(brush = iconGradient),
+                contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
                     model = R.drawable.nexarb,
                     contentDescription = "AI Avatar",
-                    imageLoader = ImageLoader(context),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
         
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = if (isUser) ChatTheme.UserMessageBubble else ChatTheme.AssistantMessageBubble,
+        Card(
+            shape = RoundedCornerShape(
+                topStart = if (isUser) 16.dp else 4.dp,
+                topEnd = if (isUser) 4.dp else 16.dp,
+                bottomStart = 16.dp,
+                bottomEnd = 16.dp
+            ),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isUser) activeAccentColor else cardBackgroundColor
+            ),
             modifier = Modifier.widthIn(max = 280.dp)
         ) {
             Text(
                 text = message.content,
                 modifier = Modifier.padding(12.dp),
-                color = ChatTheme.TextPrimary
+                color = primaryText
             )
         }
         
         if (isUser) {
             Spacer(modifier = Modifier.width(8.dp))
-            Card(
+            Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape),
-                colors = CardDefaults.cardColors(containerColor = ChatTheme.Surface)
+                    .clip(CircleShape)
+                    .background(activeAccentColor),
+                contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
                     model = R.drawable.baseline_person,
                     contentDescription = "User Avatar",
-                    imageLoader = ImageLoader(context),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
             }
@@ -245,14 +277,16 @@ private fun ChatInputBar(
     onSendClick: () -> Unit,
     isLoading: Boolean
 ) {
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        color = ChatTheme.Surface,
-        tonalElevation = 2.dp
+        colors = CardDefaults.cardColors(
+            containerColor = cardBackgroundColor
+        ),
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -265,41 +299,50 @@ private fun ChatInputBar(
                 placeholder = { 
                     Text(
                         "Type a message...",
-                        color = ChatTheme.TextSecondary
+                        color = secondaryText
                     ) 
                 },
                 colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = ChatTheme.Secondary,
-                    focusedContainerColor = ChatTheme.Secondary,
-                    cursorColor = ChatTheme.Primary,
+                    unfocusedContainerColor = Color(0xFF1F2937),
+                    focusedContainerColor = Color(0xFF1F2937),
+                    cursorColor = gradientStart,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = ChatTheme.TextPrimary,
-                    unfocusedTextColor = ChatTheme.TextPrimary
+                    focusedTextColor = primaryText,
+                    unfocusedTextColor = primaryText
                 ),
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 5
             )
             
-            FilledIconButton(
-                onClick = onSendClick,
-                enabled = !isLoading && text.text.isNotBlank(),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = ChatTheme.Primary,
-                    disabledContainerColor = ChatTheme.Secondary
-                ),
-                modifier = Modifier.size(48.dp)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        brush = if (!isLoading && text.text.isNotBlank()) 
+                            iconGradient 
+                        else 
+                            Brush.linearGradient(listOf(inactiveAccentColor, inactiveAccentColor))
+                    )
+                    .clickable(
+                        enabled = !isLoading && text.text.isNotBlank(),
+                        onClick = onSendClick
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = ChatTheme.TextPrimary
+                        color = primaryText,
+                        strokeWidth = 2.dp
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Send,
                         contentDescription = "Send",
-                        tint = ChatTheme.TextPrimary
+                        tint = primaryText,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

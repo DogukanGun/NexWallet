@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.chat
+package com.dag.nexwallet.features.chat.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.dag.nexwallet.base.BaseVM

@@ -31,6 +31,7 @@ import com.dag.nexwallet.features.configurator.presentation.components.ConfigLoa
 import com.dag.nexwallet.features.configurator.presentation.components.ConfigOption
 import com.dag.nexwallet.features.configurator.presentation.components.KnowledgeBaseSelectorDialog
 import com.dag.nexwallet.features.configurator.presentation.components.LLMProviderSelectorDialog
+import com.dag.nexwallet.ui.theme.mainBackground
 
 @Composable
 @Preview
@@ -50,15 +51,6 @@ fun ConfiguratorView(
         )
     }
 
-    // Beautiful gradient background like in SplashView
-    val gradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF00E5B3), // Turquoise/Green
-            Color(0xFF3B82F6), // Blue
-            Color(0xFF8B5CF6)  // Purple
-        )
-    )
-
     // Border gradient
     val borderGradient = Brush.linearGradient(
         colors = listOf(
@@ -77,7 +69,7 @@ fun ConfiguratorView(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = gradientBackground)
+                    .background(mainBackground)
             ) {
                 // Semi-transparent overlay to make content more readable
                 Box(

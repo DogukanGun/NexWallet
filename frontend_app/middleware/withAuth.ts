@@ -13,6 +13,12 @@ export const withAuth =
         async (req: AuthenticatedRequest, res: NextApiResponse) => {
             const authHeader = req.headers.authorization;
 
+            const env = process.env.NODE_ENV;
+
+            if (env === 'development') {
+                return handler(req, res);
+            }
+
             if (!authHeader || !authHeader.startsWith('Bearer ')) {
                 return res.status(401).json({ error: 'Missing or invalid Authorization header' });
             }

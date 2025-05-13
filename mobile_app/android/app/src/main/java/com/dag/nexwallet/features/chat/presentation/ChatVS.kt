@@ -1,4 +1,4 @@
-package com.dag.nexwallet.features.chat
+package com.dag.nexwallet.features.chat.presentation
 
 import com.dag.nexwallet.base.BaseVS
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.dag.nexwallet.R
+import com.dag.nexwallet.ui.theme.iconGradient
 
 @Composable
 fun LoginContent(
@@ -32,25 +33,18 @@ fun LoginContent(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val gradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF5FFBF1),
-            Color(0xFF86A8E7),
-            Color(0xFF8B5CF6)
-        )
-    )
+
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(brush = gradientBackground)
+            .background(brush = iconGradient)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White.copy(alpha = 0.35f))
         )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
