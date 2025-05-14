@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['node-fetch'],
+  experimental: {
+    esmExternals: 'loose',
+  },
   webpack: (config, { isServer, webpack }) => {
     // Handle Node.js built-in modules
     if (!isServer) {
@@ -34,8 +38,37 @@ const nextConfig: NextConfig = {
       );
     }
 
+    // Handle ES Module packages
+    config.module = config.module || {};
+    config.module.rules = config.module.rules || [];
+    
+    // Add rule to transform require('node-fetch') to dynamic import
+    config.module.rules.push({
+      test: /\.js$/,
+      include: [
+        /node_modules\/@3land\/listings-sdk/,
+      ],
+      use: [{
+        loader: 'string-replace-loader',
+        options: {
+          multiple: [
+            {
+              search: 'require\\([\'"]node-fetch[\'"]\\)',
+              replace: 'import("node-fetch")',
+              flags: 'g'
+            }
+          ]
+        }
+      }]
+    });
+
     // Handle externals
-    config.externals = [...(config.externals || []), 'pino-pretty', 'lokijs', 'encoding'];
+    config.externals = [
+      ...(config.externals || []),
+      'pino-pretty',
+      'lokijs',
+      'encoding'
+    ];
 
     return config;
   },
