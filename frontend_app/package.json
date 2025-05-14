@@ -198,9 +198,6 @@
     "util": "^0.12.5"
   },
   "next": {
-    "transpilePackages": [
-      "node-fetch",
-      "@3land/listings-sdk"
-    ]
+    "transpilePackages": ["node-fetch", "@3land/listings-sdk"]
   }
 }
