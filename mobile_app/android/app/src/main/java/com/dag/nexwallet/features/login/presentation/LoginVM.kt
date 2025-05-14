@@ -74,9 +74,9 @@ class LoginVM @Inject constructor(
 
     private fun getToken(userId: String){
         viewModelScope.launch {
-            generateTokenUseCase.execute(TokenRequest(userId)).collect {
+            generateTokenUseCase.execute(TokenRequest(userId)).collect { tokenResponse ->
                 logger.logSuccess(LOGIN_TOKEN,"Token is taken from the db for the user $userId")
-                userRepository.saveToken(userId)
+                userRepository.saveToken(tokenResponse.token)
             }
         }
     }
