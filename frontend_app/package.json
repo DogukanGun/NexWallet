@@ -191,5 +191,8 @@
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5"
+  },
+  "next": {
+    "transpilePackages": ["node-fetch", "@3land/listings-sdk"]
   }
 }

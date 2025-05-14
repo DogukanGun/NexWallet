@@ -43,6 +43,7 @@ import com.dag.nexwallet.features.home.presentation.cardBackgroundColor
 import com.dag.nexwallet.ui.theme.NexWalletTheme
 import com.dag.nexwallet.ui.theme.mainBackground
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
     private val currentRoute = mutableStateOf<String?>(null)
     private val mainVM: MainVM by viewModels()
+    lateinit var sender:ActivityResultSender
 
     @Inject
     lateinit var alertDialogManager: AlertDialogManager
@@ -73,6 +75,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityHolder.setActivity(this)
+        sender = ActivityResultSender(this)
         val showAlert = mutableStateOf(false)
         val alertDialogModel = mutableStateOf<AlertDialogModel?>(null)
         // Initialize the lifecycle scope coroutine only after alertDialogManager is available
@@ -145,6 +148,7 @@ class MainActivity : ComponentActivity() {
                             DefaultNavigationHost(
                                 navigator = defaultNavigator,
                                 modifier = Modifier.weight(1f),
+                                sender = sender
                             ) {
                                 currentRoute.value = it.destination.route
                                     ?.split(".")?.last()

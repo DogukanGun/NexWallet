@@ -237,7 +237,7 @@ fun HomeView(
                     item {
                         AgentCard(
                             title = "Solana AI Bot",
-                            subtitle = "Powered by Senator",
+                            subtitle = "Powered by SENDAI",
                             description = "Interact with Solana blockchain, manage tokens, and get real-time information. Works in text and voice mode.",
                             isActive = true,
                             iconRes = R.drawable.solana,

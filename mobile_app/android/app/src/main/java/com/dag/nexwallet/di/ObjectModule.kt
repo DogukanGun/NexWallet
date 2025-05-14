@@ -159,4 +159,46 @@ class ObjectModules {
         }
     }
 
+    @Provides
+    @Singleton
+    @Named("AuthorizedFrontendKtor")
+    fun provideAuthorizedFrontendKtor(
+        userRepository: UserRepository
+    ): HttpClient {
+        return HttpClient(CIO) {
+            install(Logging) {
+                level = if (BuildConfig.DEBUG) {
+                    LogLevel.ALL
+                } else {
+                    LogLevel.NONE
+                }
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10000L
+                connectTimeoutMillis = 10000L
+                socketTimeoutMillis = 10000L
+            }
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    encodeDefaults = true
+                })
+            }
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        userRepository.getToken()
+                            .getOrNull()
+                            ?.let { token -> BearerTokens(token, token) }
+                    }
+                }
+            }
+            defaultRequest {
+                url(BuildConfig.BASE_FRONTEND_URL)
+                header("Content-Type", "application/json")
+            }
+        }
+    }
+
 }

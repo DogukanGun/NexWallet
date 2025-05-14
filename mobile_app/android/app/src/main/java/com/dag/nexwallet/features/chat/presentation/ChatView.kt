@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -26,18 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dag.nexwallet.ui.theme.*
-
-// Custom theme colors
-private object ChatTheme {
-    val Background = Color(0xFF1A1A1A)
-    val Surface = Color(0xFF2D2D2D)
-    val Primary = Color(0xFFFF6B00) // Orange primary color
-    val Secondary = Color(0xFF4A4A4A)
-    val TextPrimary = Color.White
-    val TextSecondary = Color.White.copy(alpha = 0.7f)
-    val UserMessageBubble = Color(0xFF3D3D3D)
-    val AssistantMessageBubble = Color(0xFF1E1E1E)
-}
+import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
 
 data class ChatMessage(
     val content: String,
@@ -49,27 +39,100 @@ data class ChatMessage(
 @Composable
 fun ChatScreen(
     viewModel: ChatVM = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sender: ActivityResultSender,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val messages by viewModel.messages.collectAsStateWithLifecycle()
+    val isWalletConnected by viewModel.isWalletConnected.collectAsStateWithLifecycle()
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(mainBackground)
     ) {
-        when (uiState) {
-            is ChatVS.Error -> {
+        when {
+            !isWalletConnected -> {
+                ConnectWalletState(
+                    onConnectClick = { viewModel.connectWallet(sender) }
+                )
+            }
+            uiState is ChatVS.Error -> {
                 ErrorState(message = (uiState as ChatVS.Error).message)
             }
             else -> {
                 ChatView(
                     messages = messages,
                     isLoading = uiState is ChatVS.Loading,
-                    onSendMessage = viewModel::sendMessage
+                    onSendMessage = {
+                        viewModel.sendMessage(sender,it)
+                    },
+                    sender = sender
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ConnectWalletState(
+    onConnectClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(brush = iconGradient),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = R.drawable.nexarb,
+                contentDescription = "AI",
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Fit
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Connect Your Wallet",
+            style = MaterialTheme.typography.titleLarge,
+            color = primaryText
+        )
+        
+        Text(
+            text = "Please connect your wallet to start chatting",
+            style = MaterialTheme.typography.bodyLarge,
+            color = secondaryText,
+            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Button(
+            onClick = { onConnectClick() },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = activeAccentColor
+            ),
+            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+        ) {
+            Text(
+                text = "Connect Wallet",
+                color = primaryText,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
     }
 }
@@ -109,6 +172,7 @@ fun ChatView(
     messages: List<ChatMessage> = emptyList(),
     isLoading: Boolean = false,
     modifier: Modifier = Modifier,
+    sender: ActivityResultSender,
     onSendMessage: (String) -> Unit
 ) {
     Box(
@@ -347,13 +411,5 @@ private fun ChatInputBar(
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun ChatViewPreview() {
-    ChatView {
-        // Preview callback
     }
 }
