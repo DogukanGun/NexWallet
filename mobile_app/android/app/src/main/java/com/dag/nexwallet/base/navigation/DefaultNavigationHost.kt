@@ -12,12 +12,15 @@ import com.dag.nexwallet.features.splash.SplashView
 import com.dag.nexwallet.features.configurator.presentation.ConfiguratorView
 import com.dag.nexwallet.features.home.presentation.HomeView
 import com.dag.nexwallet.features.voice.add.AddVoiceView
+import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
+import io.ktor.client.plugins.Sender
 
 @Composable
 fun DefaultNavigationHost(
     modifier: Modifier = Modifier,
     startDestination: Destination = Destination.Splash,
     navigator: DefaultNavigator,
+    sender: ActivityResultSender,
     navBackStackEntryState: (NavBackStackEntry) -> Unit
 ) {
     val navController = rememberNavController()
@@ -68,7 +71,9 @@ fun DefaultNavigationHost(
         }
 
         composableWithAnimations<Destination.ChatScreen> {
-            ChatScreen()
+            ChatScreen(
+                sender = sender
+            )
         }
     }
 }

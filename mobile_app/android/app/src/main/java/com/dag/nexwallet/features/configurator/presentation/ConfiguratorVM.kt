@@ -52,12 +52,12 @@ class ConfiguratorVM @Inject constructor(
         KnowledgeBase(
             id = "cookieDao",
             name = "Cookie Dao",
-            disabled = false
+            disabled = true
         ),
         KnowledgeBase(
             id = "messari",
             name = "Messari",
-            disabled = false
+            disabled = true
         )
     )
 
@@ -70,12 +70,12 @@ class ConfiguratorVM @Inject constructor(
         LLMProvider(
             id = "llama_onchain",
             name = "Llama 3.1 Onchain - Powered by Lilypad",
-            disabled = false
+            disabled = true
         ),
         LLMProvider(
             id = "deepseek_onchain",
             name = "DeepSeek Onchain - Powered by Lilypad",
-            disabled = false
+            disabled = true
         ),
         LLMProvider(
             id = "claude",
@@ -86,14 +86,14 @@ class ConfiguratorVM @Inject constructor(
 
     private val agentTypes = listOf(
         AgentType(
-            id = "voice",
-            name = "Voice Agent",
-            disabled = false
-        ),
-        AgentType(
             id = "text",
             name = "Text Agent",
             disabled = false
+        ),
+        AgentType(
+            id = "voice",
+            name = "Voice Agent",
+            disabled = true
         )
     )
 

@@ -42,6 +42,11 @@ android {
                     "BASE_URL",
                     "\"https://bacai.nexarb.com/\""
                 )
+                buildConfigField(
+                    "String",
+                    "BASE_FRONTEND_URL",
+                    "\"https://ai.nexarb.com/api/\""
+                )
             }
             getByName("localB"){
                 buildConfigField(
