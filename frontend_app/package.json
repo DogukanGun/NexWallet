@@ -172,6 +172,7 @@
     "autoprefixer": "^10.4.21",
     "bn.js": "^5.2.1",
     "concurrently": "^8.2.2",
+    "crypto-browserify": "^3.12.1",
     "daisyui": "^4.12.23",
     "emit-file-loader": "^0.0.2",
     "empty-module": "^0.0.2",
@@ -183,16 +184,23 @@
     "knip": "^5.45.0",
     "lint-staged": "^15.3.0",
     "null-loader": "^4.0.1",
+    "path-browserify": "^1.0.1",
     "pino-pretty": "^13.0.0",
     "postcss": "^8",
     "prettier": "^3.2.5",
     "prisma": "^6.2.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
     "string-replace-loader": "^3.1.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "util": "^0.12.5"
   },
   "next": {
-    "transpilePackages": ["node-fetch", "@3land/listings-sdk"]
+    "transpilePackages": [
+      "node-fetch",
+      "@3land/listings-sdk"
+    ]
   }
 }
