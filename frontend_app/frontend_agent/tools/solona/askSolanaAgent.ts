@@ -1,6 +1,6 @@
 import { HumanMessage } from "@langchain/core/messages";
-import { createSolanaTools } from "@/solana-agent-kit";
-import { SolanaAgentKit } from "@/solana-agent-kit";
+import { createSolanaTools } from "@/solana-agent-kit-custom";
+import { SolanaAgentKit } from "@/solana-agent-kit-custom";
 import { Tool } from "langchain/tools";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";

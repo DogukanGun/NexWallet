@@ -1,5 +1,5 @@
-import { createSolanaTools } from "@/solana-agent-kit";
-import { SolanaAgentKit } from "../../../solana-agent-kit/agent"
+import { createSolanaTools } from "@/solana-agent-kit-custom";
+import { SolanaAgentKit } from "../../../solana-agent-kit-custom/agent"
 import { NextApiRequest, NextApiResponse } from "next";
 import { withAuth } from "@/middleware/withAuth";
 import { createAgent } from "../../../frontend_agent/agentHelpers";

@@ -1,7 +1,7 @@
 import { withAuth } from "@/middleware/withAuth";
 import { NextApiRequest, NextApiResponse } from "next";
-import { createSolanaTools } from "@/solana-agent-kit";
-import { SolanaAgentKit } from "../../solana-agent-kit/agent";
+import { createSolanaTools } from "@/solana-agent-kit-custom";
+import { SolanaAgentKit } from "../../solana-agent-kit-custom/agent";
 import { HumanMessage } from "@langchain/core/messages";
 import { createAgent } from "@/frontend_agent/agentHelpers";
 
