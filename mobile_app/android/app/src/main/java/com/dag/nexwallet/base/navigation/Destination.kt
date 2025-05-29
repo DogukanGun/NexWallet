@@ -12,14 +12,6 @@ sealed interface Destination {
     @Serializable
     data object HomeScreen: Destination
 
-    @Serializable
-    data object ConfigurationScreen: Destination
-
-    @Serializable
-    data object AddVoiceScreen: Destination
-
-    @Serializable
-    data object ChatScreen: Destination
 
     @Serializable
     data object StellarChat: Destination

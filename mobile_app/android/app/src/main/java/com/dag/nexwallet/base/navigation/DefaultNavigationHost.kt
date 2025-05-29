@@ -8,6 +8,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.dag.nexwallet.base.extensions.ObserveAsEvents
+import com.dag.nexwallet.features.bnb.presentation.BnbScreen
 import com.dag.nexwallet.features.chat.presentation.ChatScreen
 import com.dag.nexwallet.features.login.presentation.LoginView
 import com.dag.nexwallet.features.splash.SplashView
@@ -65,28 +66,16 @@ fun DefaultNavigationHost(
                 )
             }
 
-            composableWithAnimations<Destination.ConfigurationScreen> {
-                ConfiguratorView()
-            }
-
-            composableWithAnimations<Destination.AddVoiceScreen> {
-                AddVoiceView(
-                    navController = navController
-                )
-            }
-
-            composableWithAnimations<Destination.ChatScreen> {
-                ChatScreen(
-                    sender = sender
-                )
-            }
-
             composableWithAnimations<Destination.StellarChat> {
                 StellarScreen()
             }
 
             composableWithAnimations<Destination.SolanaChat> {
                 SolanaScreen()
+            }
+
+            composableWithAnimations<Destination.BNBChat> {
+                BnbScreen()
             }
         }
     }

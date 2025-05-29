@@ -207,7 +207,6 @@ class ConfiguratorVM @Inject constructor(
     
     fun startAgent() {
         viewModelScope.launch {
-            defaultNavigator.navigate(Destination.ChatScreen)
         }
     }
     
