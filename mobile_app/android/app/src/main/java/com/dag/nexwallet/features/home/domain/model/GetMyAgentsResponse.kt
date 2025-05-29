@@ -1,7 +1,9 @@
 package com.dag.nexwallet.features.home.domain.model
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class LlmProviderModel(
     @SerializedName("id")
     val id: String,
@@ -9,6 +11,7 @@ data class LlmProviderModel(
     val name: String
 )
 
+@Serializable
 data class ChainModel(
     @SerializedName("id")
     val id: String,
@@ -16,6 +19,7 @@ data class ChainModel(
     val name: String
 )
 
+@Serializable
 data class GetMyAgentsResponse(
     @SerializedName("id")
     val id: String,

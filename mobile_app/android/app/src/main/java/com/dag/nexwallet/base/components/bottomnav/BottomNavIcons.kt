@@ -9,6 +9,6 @@ enum class BottomNavIcon(
     var destination: Destination
 ) {
     Home(R.drawable.baseline_home, Destination.HomeScreen),
-    AddVoice(R.drawable.baseline_mic, Destination.AddVoiceScreen),
-    Configurator(R.drawable.baseline_chat, Destination.ConfigurationScreen)
+    Solana(R.drawable.solana, Destination.SolanaChat),
+    Stellar(R.drawable.stellar_logo, Destination.StellarChat)
 }

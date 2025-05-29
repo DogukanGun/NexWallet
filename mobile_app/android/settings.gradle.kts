@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "NexWallet"
 include(":app")
+include(":solana-ai")

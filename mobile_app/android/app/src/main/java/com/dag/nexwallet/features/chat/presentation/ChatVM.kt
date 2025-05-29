@@ -6,25 +6,22 @@ import com.dag.nexwallet.base.BaseVM
 import com.dag.nexwallet.features.chat.domain.model.ChatRequest
 import com.dag.nexwallet.features.chat.domain.model.ChatResponse
 import com.dag.nexwallet.features.chat.domain.usecase.ChatWithAIUseCase
-import com.google.firebase.Firebase
-import com.google.firebase.vertexai.vertexAI
 import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
-import com.solana.mobilewalletadapter.clientlib.Blockchain
 import com.solana.mobilewalletadapter.clientlib.ConnectionIdentity
 import com.solana.mobilewalletadapter.clientlib.MobileWalletAdapter
-import com.solana.mobilewalletadapter.clientlib.RpcCluster
 import com.solana.mobilewalletadapter.clientlib.Solana
 import com.solana.mobilewalletadapter.clientlib.TransactionResult
+import com.solana.publickey.PublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.client.plugins.Sender
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.util.Base64
+import kotlin.experimental.and
 
 @HiltViewModel
 class ChatVM @Inject constructor(
@@ -46,6 +43,7 @@ class ChatVM @Inject constructor(
     val iconUri = Uri.parse("favicon.ico")
     val identityName = "Solana Kotlin dApp"
     private var walletPublicKey: ByteArray? = null
+    private var walletAddress: String? = null
     private var walletAuthToken: ByteArray? = null
 
     private fun getSolanaMobileAdapter():MobileWalletAdapter{
@@ -56,6 +54,58 @@ class ChatVM @Inject constructor(
         ))
         walletAdapter.blockchain = Solana.Mainnet
         return walletAdapter
+    }
+
+    /**
+     * Base58 encoding implementation for wallet addresses
+     * @param input ByteArray to encode in Base58
+     * @return Base58 encoded string
+     */
+    private fun encodeBase58(input: ByteArray): String {
+        val ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray()
+        val BASE = ALPHABET.size
+        
+        var zeroCount = 0
+        while (zeroCount < input.size && input[zeroCount].toInt() == 0) {
+            zeroCount++
+        }
+        
+        val temp = ByteArray(input.size * 2)
+        var j = temp.size
+        
+        var startAt = zeroCount
+        while (startAt < input.size) {
+            val mod = divmod58(input, startAt)
+            if (input[startAt].toInt() == 0) {
+                startAt++
+            }
+            temp[--j] = ALPHABET[mod.toInt()].toByte()
+        }
+        
+        while (j < temp.size && temp[j].toInt() == ALPHABET[0].toInt()) {
+            j++
+        }
+        
+        while (--zeroCount >= 0) {
+            temp[--j] = ALPHABET[0].toByte()
+        }
+        
+        val output = ByteArray(temp.size - j)
+        System.arraycopy(temp, j, output, 0, output.size)
+        return String(output)
+    }
+    
+    private fun divmod58(number: ByteArray, startAt: Int): Byte {
+        var remainder = 0
+        for (i in startAt until number.size) {
+            val digit256 = number[i].toInt() and 0xFF
+            val temp = remainder * 256 + digit256
+            
+            number[i] = (temp / 58).toByte()
+            remainder = temp % 58
+        }
+        
+        return remainder.toByte()
     }
 
     fun connectWallet(sender: ActivityResultSender) {
@@ -69,6 +119,10 @@ class ChatVM @Inject constructor(
                         // Store wallet information
                         val authRes = result.authResult
                         walletPublicKey = authRes.accounts.first().publicKey
+                        
+                        // Convert public key bytes to Base58 string
+                        walletAddress = encodeBase58(walletPublicKey!!)
+                        
                         walletAuthToken = authRes.authToken.toByteArray()
                         
                         // Update connection state
@@ -117,11 +171,12 @@ class ChatVM @Inject constructor(
             try {
                 _uiState.value = ChatVS.Loading
 
-                val walletAddress = walletPublicKey?.let { String(it) } ?: return@launch
+                // Use the pre-converted wallet address string
+                val address = walletAddress ?: return@launch
                 
                 val chatRequest = ChatRequest(
                     message = content,
-                    wallet = walletAddress
+                    wallet = address
                 )
 
                 chatWithAIUseCase.execute(chatRequest)

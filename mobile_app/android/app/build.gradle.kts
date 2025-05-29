@@ -15,6 +15,42 @@ android {
     compileSdk = 35
     flavorDimensions += "version"
     testBuildType = "debug"
+    
+    // Add packaging configuration to exclude duplicate files
+    packaging {
+        resources {
+            excludes += listOf(
+                // Duplicate file issues
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+                "META-INF/MANIFEST.MF",
+                "META-INF/LICENSE.md", 
+                "META-INF/LICENSE-notice.md",
+                
+                // Signature files that cause security exceptions
+                "META-INF/*.SF",
+                "META-INF/*.DSA",
+                "META-INF/*.RSA",
+                "META-INF/*.EC",
+                "META-INF/*.MF",
+                
+                // Other common conflicts
+                "META-INF/INDEX.LIST",
+                "META-INF/DEPENDENCIES",
+                "META-INF/NOTICE",
+                "META-INF/LICENSE",
+                "META-INF/ASL2.0",
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1",
+                "META-INF/proguard/**"
+            )
+            // Remove pickFirsts as it can cause conflicts with signature verification
+            // pickFirsts += "META-INF/*"
+        }
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+    
     productFlavors {
         create("localB"){
             dimension = "version"
@@ -45,7 +81,7 @@ android {
                 buildConfigField(
                     "String",
                     "BASE_FRONTEND_URL",
-                    "\"https://ai.nexarb.com/api/\""
+                    "\"https://solba.nexarb.com/api/\""
                 )
             }
             getByName("localB"){
@@ -53,6 +89,11 @@ android {
                     "String",
                     "BASE_URL",
                     "\"http://10.0.0.1:8000/\""
+                )
+                buildConfigField(
+                    "String",
+                    "BASE_FRONTEND_URL",
+                    "\"https://solba.nexarb.com/api/\""
                 )
             }
         }
@@ -135,6 +176,7 @@ dependencies {
 
     //Firebase
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.analytics)
@@ -153,11 +195,14 @@ dependencies {
 
     //Ktor
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.core.engine)
+    implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.auth)
     implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.serialization)
+    implementation(libs.ktor.client.json)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.serialization.gson)
 
+    //Stellar
+    implementation(libs.wallet.sdk)
 }

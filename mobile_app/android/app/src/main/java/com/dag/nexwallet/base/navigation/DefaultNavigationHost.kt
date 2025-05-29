@@ -1,5 +1,7 @@
 package com.dag.nexwallet.base.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
@@ -11,6 +13,8 @@ import com.dag.nexwallet.features.login.presentation.LoginView
 import com.dag.nexwallet.features.splash.SplashView
 import com.dag.nexwallet.features.configurator.presentation.ConfiguratorView
 import com.dag.nexwallet.features.home.presentation.HomeView
+import com.dag.nexwallet.features.solana.presentation.SolanaScreen
+import com.dag.nexwallet.features.stellar.presentation.StellarScreen
 import com.dag.nexwallet.features.voice.add.AddVoiceView
 import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
 import io.ktor.client.plugins.Sender
@@ -21,7 +25,7 @@ fun DefaultNavigationHost(
     startDestination: Destination = Destination.Splash,
     navigator: DefaultNavigator,
     sender: ActivityResultSender,
-    navBackStackEntryState: (NavBackStackEntry) -> Unit
+    navBackStackEntryState: (NavBackStackEntry) -> Unit,
 ) {
     val navController = rememberNavController()
     ObserveAsEvents(flow = navigator.navigationActions) { action ->
@@ -37,43 +41,53 @@ fun DefaultNavigationHost(
     ObserveAsEvents(flow = navController.currentBackStackEntryFlow){
         navBackStackEntryState(it)
     }
-    NavHost(
-        navController = navController,
-        modifier = modifier,
-        startDestination = startDestination
-    ) {
-        splashComposable<Destination.Splash> {
-            SplashView(
-                navController = navController
-            )
-        }
+    Box(modifier = modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            modifier = Modifier.fillMaxSize(),
+            startDestination = startDestination
+        ) {
+            splashComposable<Destination.Splash> {
+                SplashView(
+                    navController = navController
+                )
+            }
 
-        composableWithAnimations<Destination.LoginScreen> {
-            LoginView(
-                navController = navController
-            )
-        }
+            composableWithAnimations<Destination.LoginScreen> {
+                LoginView(
+                    navController = navController
+                )
+            }
 
-        composableWithAnimations<Destination.HomeScreen> {
-            HomeView(
-                navController = navController
-            )
-        }
+            composableWithAnimations<Destination.HomeScreen> {
+                HomeView(
+                    navController = navController
+                )
+            }
 
-        composableWithAnimations<Destination.ConfigurationScreen> {
-            ConfiguratorView()
-        }
+            composableWithAnimations<Destination.ConfigurationScreen> {
+                ConfiguratorView()
+            }
 
-        composableWithAnimations<Destination.AddVoiceScreen> {
-            AddVoiceView(
-                navController = navController
-            )
-        }
+            composableWithAnimations<Destination.AddVoiceScreen> {
+                AddVoiceView(
+                    navController = navController
+                )
+            }
 
-        composableWithAnimations<Destination.ChatScreen> {
-            ChatScreen(
-                sender = sender
-            )
+            composableWithAnimations<Destination.ChatScreen> {
+                ChatScreen(
+                    sender = sender
+                )
+            }
+
+            composableWithAnimations<Destination.StellarChat> {
+                StellarScreen()
+            }
+
+            composableWithAnimations<Destination.SolanaChat> {
+                SolanaScreen()
+            }
         }
     }
 }

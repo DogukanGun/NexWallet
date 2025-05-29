@@ -146,6 +146,7 @@
     "socket.io": "^4.8.1",
     "solana-agent-kit": "^1.4.0",
     "sonner": "^1.7.2",
+    "stellar-sdk": "^13.3.0",
     "tailwind-merge": "^2.6.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
