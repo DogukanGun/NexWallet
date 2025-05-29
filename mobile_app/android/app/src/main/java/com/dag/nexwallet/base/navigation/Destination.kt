@@ -27,6 +27,9 @@ sealed interface Destination {
     @Serializable
     data object SolanaChat: Destination
 
+    @Serializable
+    data object BNBChat: Destination
+
     companion object {
         val NAV_WITHOUT_BOTTOM_NAVBAR = listOf(Splash, LoginScreen)
     }

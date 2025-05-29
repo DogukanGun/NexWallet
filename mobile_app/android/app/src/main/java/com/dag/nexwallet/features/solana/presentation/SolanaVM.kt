@@ -37,18 +37,7 @@ class SolanaVM @Inject constructor(
                             isFromAI = true
                         )
                     ),
-                    suggestedActions = listOf(
-                        SolanaVS.SuggestedAction(
-                            title = "Connect Wallet",
-                            description = "Connect your Solana wallet to get started",
-                            type = SolanaVS.ActionType.CONNECT_DAPP
-                        ),
-                        SolanaVS.SuggestedAction(
-                            title = "Swap Tokens",
-                            description = "Swap tokens using Jupiter aggregator",
-                            type = SolanaVS.ActionType.SWAP
-                        )
-                    )
+                    suggestedActions = emptyList()
                 )
             } catch (e: Exception) {
                 _viewState.value = SolanaVS.Error(e.message ?: "Failed to initialize Solana Agent")

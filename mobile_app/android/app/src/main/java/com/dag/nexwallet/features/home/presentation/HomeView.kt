@@ -145,7 +145,7 @@ fun HomeView(
                             isActive = true,
                             iconRes = R.drawable.solana,
                             onClick = { 
-                                navController.navigate(Destination.AddVoiceScreen)
+                                navController.navigate(Destination.SolanaChat)
                             }
                         )
                     }
@@ -160,6 +160,20 @@ fun HomeView(
                             iconRes = R.drawable.stellar_logo,
                             onClick = { 
                                 navController.navigate(Destination.StellarChat)
+                            }
+                        )
+                    }
+
+                    // Stellar Agent card
+                    item {
+                        AgentCard(
+                            title = "BNB AI Bot",
+                            subtitle = "Powered by Nexarb",
+                            description = "Manage your Stellar assets, execute trades, and monitor market activities with AI assistance.",
+                            isActive = true,
+                            iconRes = R.drawable.bnb_logo,
+                            onClick = {
+                                navController.navigate(Destination.BNBChat)
                             }
                         )
                     }

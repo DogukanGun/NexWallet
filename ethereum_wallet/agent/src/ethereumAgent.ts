@@ -27,7 +27,7 @@ const WALLET_ABI = [
   "function swap(address fromToken, address toToken, uint256 amount) external returns (uint256)"
 ];
 
-async function createWalletForUser(userPk: string): Promise<string> {
+export async function createWalletForUser(userPk: string): Promise<string> {
   // Call factory contract to create wallet for userPk
   const tx = await walletFactory.createWallet();
   const receipt = await tx.wait();
@@ -35,19 +35,19 @@ async function createWalletForUser(userPk: string): Promise<string> {
   return event.args.walletAddress;
 }
 
-async function getWalletForUser(userPk: string): Promise<string> {
+export async function getWalletForUser(userPk: string): Promise<string> {
   // Query factory contract for wallet address by userPk
   return await walletFactory.userWallets(userPk);
 }
 
-async function transferToken(walletAddress: string, params: any): Promise<string> {
+export async function transferToken(walletAddress: string, params: any): Promise<string> {
   const walletContract = new ethers.Contract(walletAddress, WALLET_ABI, wallet);
   const tx = await walletContract.transfer(params.token, params.amount, params.to);
   const receipt = await tx.wait();
   return `Transferred ${params.amount} ${params.token} to ${params.to} from wallet ${walletAddress}`;
 }
 
-async function swapToken(walletAddress: string, params: any): Promise<string> {
+export async function swapToken(walletAddress: string, params: any): Promise<string> {
   const walletContract = new ethers.Contract(walletAddress, WALLET_ABI, wallet);
   const tx = await walletContract.swap(params.fromToken, params.toToken, params.amount);
   const receipt = await tx.wait();
