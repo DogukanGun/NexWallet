@@ -1,5 +1,6 @@
 package com.dag.nexwallet.features.solana.presentation
 
+import android.app.Activity
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -20,16 +22,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dag.nexwallet.R
+import com.dag.nexwallet.features.solana.presentation.composable.StakeDialog
+import com.dag.nexwallet.features.solana.presentation.composable.SwapDialog
+import com.dag.nexwallet.features.solana.presentation.composable.WalletConnectionDialog
 import com.dag.nexwallet.features.stellar.presentation.ErrorView
 import com.dag.nexwallet.features.stellar.presentation.LoadingView
 import com.dag.nexwallet.ui.theme.*
+import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
 
 @Composable
 fun SolanaScreen(
-    viewModel: SolanaVM = hiltViewModel()
+    viewModel: SolanaVM = hiltViewModel(),
+    sender: ActivityResultSender
 ) {
     val state by viewModel.viewState.collectAsState()
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -37,12 +44,40 @@ fun SolanaScreen(
     ) {
         when (state) {
             is SolanaVS.Loading -> LoadingView()
-            is SolanaVS.Success -> SolanaAgentView(
-                state = state as SolanaVS.Success,
-                onMessageSend = { viewModel.sendMessage(it) },
-                onActionExecute = { viewModel.executeAction(it) },
-                onHeaderClick = { viewModel.toggleHeader() }
-            )
+            is SolanaVS.Success -> {
+                val successState = state as SolanaVS.Success
+                
+                SolanaAgentView(
+                    state = successState,
+                    onMessageSend = { viewModel.sendMessage(it) },
+                    onActionExecute = { viewModel.executeAction(it) },
+                    onHeaderClick = { viewModel.toggleHeader() }
+                )
+                
+                // Show Wallet Connection Dialog
+                if (successState.showWalletConnectionDialog) {
+                    WalletConnectionDialog(
+                        onDismiss = { viewModel.dismissWalletConnectionDialog() },
+                        onConnect = { viewModel.connectWallet(sender) }
+                    )
+                }
+                
+                // Show Swap Dialog
+                if (successState.showSwapDialog) {
+                    SwapDialog(
+                        onDismiss = { viewModel.dismissSwapDialog() },
+                        onConfirm = { viewModel.executeSwap(it,sender) }
+                    )
+                }
+                
+                // Show Stake Dialog
+                if (successState.showStakeDialog) {
+                    StakeDialog(
+                        onDismiss = { viewModel.dismissStakeDialog() },
+                        onConfirm = { viewModel.executeStake(it, sender) }
+                    )
+                }
+            }
             is SolanaVS.Error -> ErrorView(message = (state as SolanaVS.Error).message)
             null -> TODO()
         }
@@ -155,7 +190,7 @@ private fun AnimatedHeader(
                         .padding(top = 16.dp)
                 ) {
                     Text(
-                        text = "Quick Actions",
+                        text = "Quick Actions with Jupiter",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
                         color = primaryText,
@@ -167,13 +202,13 @@ private fun AnimatedHeader(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         QuickActionButton(
-                            title = "Connect Wallet",
+                            title = "Stake SOL",
                             onClick = {
                                 onActionExecute(
                                     SolanaVS.SuggestedAction(
-                                        title = "Connect Wallet",
-                                        description = "Connect your wallet",
-                                        type = SolanaVS.ActionType.CONNECT_DAPP
+                                        title = "Stake SOL",
+                                        description = "Stake your SOLs",
+                                        type = SolanaVS.ActionType.STAKE
                                     )
                                 )
                             }

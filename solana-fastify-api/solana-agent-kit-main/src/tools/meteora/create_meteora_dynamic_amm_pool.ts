@@ -38,9 +38,13 @@ export async function createMeteoraDynamicAMMPool(
       tokenBAmount,
       customizableParams,
     );
+    if (agent.isUiMode) {
+      agent.onSignTransaction?.(initPoolTx.serialize().toString());
+      return "";
+    }
 
   const initPoolTxHash = await sendTx(agent, initPoolTx.instructions, [
-    agent.wallet,
+    agent.wallet!,
   ]);
 
   return initPoolTxHash;

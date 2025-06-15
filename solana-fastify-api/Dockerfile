@@ -18,7 +18,7 @@ COPY tsconfig.json ./
 # This requires pnpm-lock.yaml to be present.
 # If you still encounter issues that --force solved with npm, you can try adding --force here too,
 # e.g., RUN pnpm install --force --frozen-lockfile
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Copy source code
 COPY . .
@@ -27,4 +27,4 @@ COPY . .
 EXPOSE 8004
 
 # Start the application using pnpm
-CMD ["pnpm", "start"] 
+CMD ["pnpm", "start"]

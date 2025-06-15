@@ -47,11 +47,15 @@ export async function registerDomain(
     transaction.feePayer = agent.wallet_address;
 
     // Sign and send transaction
-    const signature = await agent.connection.sendTransaction(transaction, [
-      agent.wallet,
-    ]);
-
-    return signature;
+    if (agent.isUiMode) {
+      agent.onSignTransaction?.(transaction.serialize().toString());
+      return "";
+    } else {
+      const signature = await agent.connection.sendTransaction(transaction, [
+        agent.wallet!,
+      ]);
+      return signature;
+    }
   } catch (error: any) {
     throw new Error(`Domain registration failed: ${error.message}`);
   }

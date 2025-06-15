@@ -18,6 +18,14 @@ export async function raydiumCreateAmmV4(
   quoteAmount: BN,
   startTime: BN,
 ): Promise<string> {
+  if (agent.isUiMode) {
+    throw new Error("Raydium AMMv4 creation is not supported in UI mode");
+  }
+
+  if (!agent.wallet) {
+    throw new Error("Wallet is required for Raydium AMMv4 creation");
+  }
+
   const raydium = await Raydium.load({
     owner: agent.wallet,
     connection: agent.connection,

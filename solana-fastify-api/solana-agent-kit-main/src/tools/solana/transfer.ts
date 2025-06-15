@@ -25,7 +25,6 @@ export async function transfer(
 ): Promise<string> {
   try {
     let tx: string;
-
     if (!mint) {
       // Transfer native SOL
       const transaction = new Transaction().add(
@@ -36,7 +35,12 @@ export async function transfer(
         }),
       );
 
-      tx = await agent.connection.sendTransaction(transaction, [agent.wallet]);
+      if (agent.isUiMode) {
+        agent.onSignTransaction?.(transaction.serialize().toString());
+        return "";
+      } else {
+        tx = await agent.connection.sendTransaction(transaction, [agent.wallet!]);
+      }
     } else {
       const transaction = new Transaction();
       // Transfer SPL token
@@ -73,7 +77,12 @@ export async function transfer(
         ),
       );
 
-      tx = await agent.connection.sendTransaction(transaction, [agent.wallet]);
+      if (agent.isUiMode) {
+        agent.onSignTransaction?.(transaction.serialize().toString());
+        return "";
+      } else {
+        tx = await agent.connection.sendTransaction(transaction, [agent.wallet!]);
+      }
     }
 
     return tx;

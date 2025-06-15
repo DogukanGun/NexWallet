@@ -71,7 +71,9 @@ fun DefaultNavigationHost(
             }
 
             composableWithAnimations<Destination.SolanaChat> {
-                SolanaScreen()
+                SolanaScreen(
+                    sender = sender
+                )
             }
 
             composableWithAnimations<Destination.BNBChat> {

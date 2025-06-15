@@ -202,7 +202,10 @@ dependencies {
     implementation(libs.ktor.client.json)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.serialization.gson)
-
+    implementation("io.ktor:ktor-client-okhttp:3.1.3")
     //Stellar
     implementation(libs.wallet.sdk)
+
+    //Chucker
+    debugImplementation("com.github.chuckerteam.chucker:library:4.1.0")
 }

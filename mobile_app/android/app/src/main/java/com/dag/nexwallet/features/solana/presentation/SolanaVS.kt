@@ -11,7 +11,11 @@ sealed class SolanaVS: BaseVS {
         val chatMessages: List<ChatMessage> = emptyList(),
         val suggestedActions: List<SuggestedAction> = emptyList(),
         val pendingTransaction: PendingTransaction? = null,
-        val isHeaderExpanded: Boolean = false
+        val isHeaderExpanded: Boolean = false,
+        val showSwapDialog: Boolean = false,
+        val showStakeDialog: Boolean = false,
+        val showWalletConnectionDialog: Boolean = false,
+        val isWalletConnected: Boolean = false
     ) : SolanaVS()
     
     data class Error(val message: String) : SolanaVS()
@@ -49,7 +53,7 @@ sealed class SolanaVS: BaseVS {
     enum class ActionType {
         SWAP,
         SEND,
-        CONNECT_DAPP,
+        STAKE,
         VIEW_TOKEN
     }
     

@@ -12,7 +12,10 @@ export async function voltrGetPositionValues(
   agent: SolanaAgentKit,
   vault: PublicKey,
 ): Promise<string> {
-  const vc = new VoltrClient(agent.connection, agent.wallet);
+  if (agent.isUiMode) {
+    throw new Error("Voltr get position values is not supported in UI mode");
+  }
+  const vc = new VoltrClient(agent.connection, agent.wallet!);
   const positionAndTotalValues =
     await vc.getPositionAndTotalValuesForVault(vault);
 

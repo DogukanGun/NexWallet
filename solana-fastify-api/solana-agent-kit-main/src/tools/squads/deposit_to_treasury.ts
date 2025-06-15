@@ -28,7 +28,10 @@ export async function multisig_deposit_to_treasury(
     if (!vaultIndex) {
       vaultIndex = 0;
     }
-    const createKey = agent.wallet;
+    if (agent.isUiMode) {
+      throw new Error("Multisig deposit to treasury is not supported in UI mode");
+    }
+    const createKey = agent.wallet!;
     const [multisigPda] = multisig.getMultisigPda({
       createKey: createKey.publicKey,
     });
@@ -47,7 +50,7 @@ export async function multisig_deposit_to_treasury(
         }),
       );
 
-      tx = await agent.connection.sendTransaction(transaction, [agent.wallet]);
+      tx = await agent.connection.sendTransaction(transaction, [agent.wallet!]);
     } else {
       // Transfer SPL token
       const fromAta = await getAssociatedTokenAddress(
@@ -81,7 +84,7 @@ export async function multisig_deposit_to_treasury(
         ),
       );
 
-      tx = await agent.connection.sendTransaction(transaction, [agent.wallet]);
+      tx = await agent.connection.sendTransaction(transaction, [agent.wallet!]);
     }
 
     return tx;

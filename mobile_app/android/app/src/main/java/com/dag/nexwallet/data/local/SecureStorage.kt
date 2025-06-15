@@ -88,5 +88,8 @@ class SecureStorage @Inject constructor(
         const val KEY_CONFIG_LLM_PROVIDER = "config_llm_provider"
         const val KEY_CONFIG_KNOWLEDGE_BASE = "config_knowledge_base"
         const val KEY_CONFIG_CHAINS = "config_chains"
+
+        //WALLET KEYS
+        const val KEY_WALLET = "key_wallet"
     }
 } 

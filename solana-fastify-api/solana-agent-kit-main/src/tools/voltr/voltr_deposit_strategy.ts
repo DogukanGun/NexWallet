@@ -22,7 +22,10 @@ export async function voltrDepositStrategy(
   vault: PublicKey,
   strategy: PublicKey,
 ): Promise<string> {
-  const vc = new VoltrClient(agent.connection, agent.wallet);
+  if (agent.isUiMode) {
+    throw new Error("Voltr deposit strategy is not supported in UI mode");
+  }
+  const vc = new VoltrClient(agent.connection, agent.wallet!);
   const vaultAccount = await vc.fetchVaultAccount(vault);
   const vaultAssetMint = new PublicKey(vaultAccount.asset.mint);
   const assetTokenProgram = await agent.connection
@@ -95,8 +98,13 @@ export async function voltrDepositStrategy(
   const transaction = new Transaction();
   transaction.add(depositIx);
 
-  const txSig = await sendAndConfirmTransaction(agent.connection, transaction, [
-    agent.wallet,
-  ]);
-  return txSig;
+  if (agent.isUiMode) {
+    agent.onSignTransaction?.(transaction.serialize().toString());
+    return "";
+  } else {
+    const txSig = await sendAndConfirmTransaction(agent.connection, transaction, [
+      agent.wallet!,
+    ]);
+    return txSig;
+  }
 }

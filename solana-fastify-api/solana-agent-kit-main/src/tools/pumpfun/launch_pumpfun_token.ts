@@ -114,7 +114,12 @@ async function signAndSendTransaction(
     tx.message.recentBlockhash = blockhash;
 
     // Sign the transaction
-    tx.sign([mintKeypair, kit.wallet]);
+    if (kit.isUiMode) {
+      kit.onSignTransaction?.(tx.serialize().toString());
+      return "";
+    } else {
+      tx.sign([mintKeypair, kit.wallet!]);
+    }
 
     // Send and confirm transaction with options
     const signature = await kit.connection.sendTransaction(tx, {
@@ -183,7 +188,11 @@ export async function launchPumpFunToken(
     );
     if(agent.isUiMode){
       agent.onSignTransaction?.(tx.serialize().toString());
-      return
+      return {
+        signature: "",
+        mint: mintKeypair.publicKey.toBase58(),
+        metadataUri: metadataResponse.metadataUri,
+      };
     }
     
     const signature = await signAndSendTransaction(agent, tx, mintKeypair);

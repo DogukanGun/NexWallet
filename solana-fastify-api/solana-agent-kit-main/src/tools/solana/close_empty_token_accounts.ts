@@ -46,11 +46,15 @@ export async function closeEmptyTokenAccounts(
       };
     }
 
-    const signature = await agent.connection.sendTransaction(transaction, [
-      agent.wallet,
-    ]);
-
-    return { signature, size };
+    if (agent.isUiMode) {
+      agent.onSignTransaction?.(transaction.serialize().toString());
+      return { signature: "", size: 0 };
+    } else {
+      const signature = await agent.connection.sendTransaction(transaction, [
+        agent.wallet!,
+      ]);
+      return { signature, size };
+    }
   } catch (error) {
     throw new Error(`Error closing empty token accounts: ${error}`);
   }

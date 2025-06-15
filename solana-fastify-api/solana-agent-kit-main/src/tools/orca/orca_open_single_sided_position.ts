@@ -61,7 +61,10 @@ export async function orcaOpenSingleSidedPosition(
   inputAmount: Decimal,
 ): Promise<string> {
   try {
-    const wallet = new Wallet(agent.wallet);
+    if (agent.isUiMode) {
+      throw new Error("Orca open single sided position is not supported in UI mode");
+    }
+    const wallet = new Wallet(agent.wallet!);
     const ctx = WhirlpoolContext.from(
       agent.connection,
       wallet,

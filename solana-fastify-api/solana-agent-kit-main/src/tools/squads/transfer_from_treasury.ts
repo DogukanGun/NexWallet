@@ -33,7 +33,10 @@ export async function multisig_transfer_from_treasury(
   try {
     let transferInstruction: TransactionInstruction;
 
-    const createKey = agent.wallet;
+    const createKey = agent.wallet!;
+    if (agent.isUiMode) {
+      throw new Error("Multisig transfer from treasury is not supported in UI mode");
+    }
     const [multisigPda] = multisig.getMultisigPda({
       createKey: createKey.publicKey,
     });
@@ -88,9 +91,9 @@ export async function multisig_transfer_from_treasury(
     });
     if(agent.isUiMode){
       agent.onSignTransaction?.(multisigTx.serialize().toString());
-      return
+      return "";
     } 
-    multisigTx.sign([agent.wallet]);
+    multisigTx.sign([agent.wallet!]);
     const tx = await agent.connection.sendRawTransaction(
       multisigTx.serialize(),
     );

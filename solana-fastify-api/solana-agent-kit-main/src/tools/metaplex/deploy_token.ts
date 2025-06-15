@@ -45,9 +45,12 @@ export async function deploy_token(
   initialSupply?: number,
 ): Promise<{ mint: PublicKey }> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Metaplex deploy token is not supported in UI mode");
+    }
     // Create UMI instance from agent
     const umi = createUmi(agent.connection.rpcEndpoint).use(mplToolbox());
-    umi.use(keypairIdentity(fromWeb3JsKeypair(agent.wallet)));
+    umi.use(keypairIdentity(fromWeb3JsKeypair(agent.wallet!)));
 
     // Create new token mint
     const mint = generateSigner(umi);
@@ -121,7 +124,7 @@ export async function deploy_token(
       );
     }
 
-    if (defaultAuthority.freezeAuthority !== agent.wallet.publicKey) {
+    if (defaultAuthority.freezeAuthority !== agent.wallet_address) {
       builder = builder.add(
         setAuthority(umi, {
           owned: mint.publicKey,
@@ -134,14 +137,14 @@ export async function deploy_token(
       );
     }
 
-    if (defaultAuthority.updateAuthority !== agent.wallet.publicKey) {
+    if (defaultAuthority.updateAuthority !== agent.wallet_address) {
       builder = builder.add(
         updateV1(umi, {
           isMutable: authority.isMutable === false ? false : true,
           mint: mint.publicKey,
           authority: createSignerFromKeypair(
             umi,
-            fromWeb3JsKeypair(agent.wallet),
+            fromWeb3JsKeypair(agent.wallet!),
           ),
           newUpdateAuthority: defaultAuthority.updateAuthority
             ? fromWeb3JsPublicKey(defaultAuthority.updateAuthority)
@@ -155,7 +158,7 @@ export async function deploy_token(
           mint: mint.publicKey,
           authority: createSignerFromKeypair(
             umi,
-            fromWeb3JsKeypair(agent.wallet),
+            fromWeb3JsKeypair(agent.wallet!),
           ),
         }),
       );
