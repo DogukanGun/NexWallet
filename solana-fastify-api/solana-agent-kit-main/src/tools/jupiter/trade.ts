@@ -1,4 +1,4 @@
-import { VersionedTransaction, PublicKey } from "@solana/web3.js";
+import { VersionedTransaction, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
 import { SolanaAgentKit } from "../../index";
 import {
   TOKENS,
@@ -92,11 +92,20 @@ export async function trade(
     const swapTransactionBuf = Buffer.from(swapTransaction, "base64");
 
     const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
+    
     // Sign and send transaction
-    transaction.sign([agent.wallet]);
-    const signature = await agent.connection.sendTransaction(transaction);
-
-    return signature;
+    if (agent.isUiMode) {
+      agent.onSignTransaction?.(transaction.serialize().toString());
+      return "";
+    } else {
+      transaction.sign([agent.wallet!]);
+      const txSig = await agent.connection.sendTransaction(transaction, {
+        skipPreflight: false,
+        maxRetries: 3,
+      });
+      await agent.connection.confirmTransaction(txSig);
+      return txSig;
+    }
   } catch (error: any) {
     throw new Error(`Swap failed: ${error.message}`);
   }

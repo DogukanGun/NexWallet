@@ -21,7 +21,7 @@ export async function manifestCreateMarket(
   const marketKeypair: Keypair = Keypair.generate();
   const FIXED_MANIFEST_HEADER_SIZE: number = 256;
   const createAccountIx: TransactionInstruction = SystemProgram.createAccount({
-    fromPubkey: agent.wallet.publicKey,
+    fromPubkey: agent.wallet_address,
     newAccountPubkey: marketKeypair.publicKey,
     space: FIXED_MANIFEST_HEADER_SIZE,
     lamports: await agent.connection.getMinimumBalanceForRentExemption(
@@ -30,7 +30,7 @@ export async function manifestCreateMarket(
     programId: new PublicKey("MNFSTqtC93rEfYHB6hF82sKdZpUDFWkViLByLd1k1Ms"),
   });
   const createMarketIx = ManifestClient["createMarketIx"](
-    agent.wallet.publicKey,
+    agent.wallet_address,
     baseMint,
     quoteMint,
     marketKeypair.publicKey,
@@ -40,7 +40,7 @@ export async function manifestCreateMarket(
   tx.add(createAccountIx);
   tx.add(createMarketIx);
   const signature = await sendAndConfirmTransaction(agent.connection, tx, [
-    agent.wallet,
+    agent.wallet!,
     marketKeypair,
   ]);
   return [signature, marketKeypair.publicKey.toBase58()];
@@ -63,10 +63,16 @@ export async function limitOrder(
   price: number,
 ): Promise<string> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Manifest cancel all orders is not supported in UI mode");
+    }
+    if (agent.isUiMode) {
+      throw new Error("Manifest limit order is not supported in UI mode");
+    }
     const mfxClient = await ManifestClient.getClientForMarket(
       agent.connection,
       marketId,
-      agent.wallet,
+      agent.wallet!,
     );
 
     const orderParams: WrapperPlaceOrderParamsExternal = {
@@ -80,13 +86,13 @@ export async function limitOrder(
 
     const depositPlaceOrderIx: TransactionInstruction[] =
       await mfxClient.placeOrderWithRequiredDepositIx(
-        agent.wallet.publicKey,
+        agent.wallet_address,
         orderParams,
       );
     const signature = await sendAndConfirmTransaction(
       agent.connection,
       new Transaction().add(...depositPlaceOrderIx),
-      [agent.wallet],
+      [agent.wallet!],
     );
 
     return signature;
@@ -106,17 +112,23 @@ export async function cancelAllOrders(
   marketId: PublicKey,
 ): Promise<string> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Manifest withdraw all is not supported in UI mode");
+    }
+    if (agent.isUiMode) {
+      throw new Error("Manifest batch order is not supported in UI mode");
+    }
     const mfxClient = await ManifestClient.getClientForMarket(
       agent.connection,
       marketId,
-      agent.wallet,
+      agent.wallet!,
     );
 
     const cancelAllOrdersIx = await mfxClient.cancelAllIx();
     const signature = await sendAndConfirmTransaction(
       agent.connection,
       new Transaction().add(cancelAllOrdersIx),
-      [agent.wallet],
+      [agent.wallet!],
     );
 
     return signature;
@@ -136,17 +148,20 @@ export async function withdrawAll(
   marketId: PublicKey,
 ): Promise<string> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Manifest withdraw all is not supported in UI mode");
+    }
     const mfxClient = await ManifestClient.getClientForMarket(
       agent.connection,
       marketId,
-      agent.wallet,
+      agent.wallet!,
     );
 
     const withdrawAllIx = await mfxClient.withdrawAllIx();
     const signature = await sendAndConfirmTransaction(
       agent.connection,
       new Transaction().add(...withdrawAllIx),
-      [agent.wallet],
+      [agent.wallet!],
     );
 
     return signature;
@@ -257,12 +272,15 @@ export async function batchOrder(
   orders: OrderParams[],
 ): Promise<string> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Manifest batch order is not supported in UI mode");
+    }
     validateNoCrossedOrders(orders);
 
     const mfxClient = await ManifestClient.getClientForMarket(
       agent.connection,
       marketId,
-      agent.wallet,
+      agent.wallet!,
     );
 
     const placeParams: WrapperPlaceOrderParamsExternal[] = orders.map(
@@ -285,7 +303,7 @@ export async function batchOrder(
     const signature = await sendAndConfirmTransaction(
       agent.connection,
       new Transaction().add(batchOrderIx),
-      [agent.wallet],
+      [agent.wallet!],
     );
 
     return signature;

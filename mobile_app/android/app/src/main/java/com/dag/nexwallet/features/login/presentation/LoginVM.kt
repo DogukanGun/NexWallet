@@ -2,6 +2,8 @@ package com.dag.nexwallet.features.login.presentation
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import coil3.Extras
+import com.dag.nexwallet.BuildConfig
 import com.dag.nexwallet.base.ActivityHolder
 import com.dag.nexwallet.base.BaseVM
 import com.dag.nexwallet.base.Logger
@@ -35,6 +37,23 @@ class LoginVM @Inject constructor(
 
     fun loginWithX() {
         _viewState.value = LoginVS.Loading
+        if (BuildConfig.DEBUG){
+            _viewState.value = LoginVS.NavigateToHome(User(
+                "dummy",
+                "dummy",
+                "dummy",
+                "https://x.com/Dogukan_Gndgn/photo",
+                bannerImageUrl = null,
+                description = null,
+                location = null,
+                websiteUrl = null,
+                followersCount = 0,
+                followingCount = 0,
+                isVerified = true,
+                createdAt = "",
+            ))
+            return
+        }
         val provider = OAuthProvider.newBuilder("twitter.com")
         provider.addCustomParameter("lang", "en")
         

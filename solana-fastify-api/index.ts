@@ -35,6 +35,11 @@ fastify.register(cors, {
   origin: true,
 });
 
+// Add health check endpoint
+fastify.get('/health', async (request, reply) => {
+  return reply.send({ status: 'ok' });
+});
+
 // Create a helper function similar to createAgent
 const createAgent = async (
   llmOptions: { modelName: string; temperature: number },

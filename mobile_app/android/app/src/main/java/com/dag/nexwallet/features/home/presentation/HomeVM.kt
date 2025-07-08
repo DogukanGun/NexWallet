@@ -1,5 +1,8 @@
 package com.dag.nexwallet.features.home.presentation
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.dag.nexwallet.base.BaseVM
 import com.dag.nexwallet.base.Logger
@@ -8,6 +11,7 @@ import com.dag.nexwallet.features.home.domain.usecase.GetMyAgentsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @HiltViewModel
 class HomeVM @Inject constructor(
@@ -23,6 +27,29 @@ class HomeVM @Inject constructor(
     init {
         getUser()
         getMyAgents()
+    }
+
+    fun navigateToX(
+        packageManager: PackageManager,
+        startActivity:(intent:Intent)-> Unit
+    ){
+        val twitterUsername = "NexArb_"
+        val uri = "twitter://user?screen_name=$twitterUsername".toUri()
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+
+        val packageManager = packageManager
+        val launchIntent = packageManager.getLaunchIntentForPackage("com.twitter.android")
+
+        if (launchIntent != null) {
+            // Twitter app is installed
+            intent.setPackage("com.twitter.android")
+            startActivity(intent)
+        } else {
+            // Fallback to browser
+            val browserIntent = Intent(Intent.ACTION_VIEW,
+                "https://twitter.com/$twitterUsername".toUri())
+            startActivity(browserIntent)
+        }
     }
 
     private fun getUser() {

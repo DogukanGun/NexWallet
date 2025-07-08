@@ -69,7 +69,10 @@ export async function orcaOpenCenteredPositionWithLiquidity(
   inputAmount: Decimal,
 ): Promise<string> {
   try {
-    const wallet = new Wallet(agent.wallet);
+    if (agent.isUiMode) {
+      throw new Error("Orca open centered position with liquidity is not supported in UI mode");
+    }
+    const wallet = new Wallet(agent.wallet!);
     const ctx = WhirlpoolContext.from(
       agent.connection,
       wallet,

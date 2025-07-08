@@ -33,15 +33,18 @@ export async function closeAccounts(
   mints: string[],
 ): Promise<string[]> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("SolutioFi close accounts is not supported in UI mode");
+    }
     const client = await initClient(agent);
     const signatures: string[] = [];
     const versionedTxns = await client.close(
-      agent.wallet.publicKey.toString(),
+      agent.wallet_address.toString(),
       mints,
     );
     for (const transaction of versionedTxns) {
       try {
-        transaction.sign([agent.wallet]);
+        transaction.sign([agent.wallet!]);
 
         const signature = await agent.connection.sendRawTransaction(
           transaction.serialize(),
@@ -73,16 +76,19 @@ export async function burnTokens(
   mints: string[],
 ): Promise<string[]> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("SolutioFi burn tokens is not supported in UI mode");
+    }
     const client = await initClient(agent);
     const signatures: string[] = [];
 
     const versionedTxns = await client.burn(
-      agent.wallet.publicKey.toString(),
+      agent.wallet_address.toString(),
       mints,
     );
     for (const transaction of versionedTxns) {
       try {
-        transaction.sign([agent.wallet]);
+        transaction.sign([agent.wallet!]);
 
         const signature = await agent.connection.sendRawTransaction(
           transaction.serialize(),
@@ -117,10 +123,13 @@ export async function mergeTokens(
   priorityFee: PriorityFee,
 ): Promise<string[]> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("SolutioFi merge tokens is not supported in UI mode");
+    }
     const client = await initClient(agent);
     const signatures: string[] = [];
     const swapData = await client.merge(
-      agent.wallet.publicKey.toString(),
+      agent.wallet!.publicKey.toString(),
       inputAssets,
       outputMint,
       priorityFee,
@@ -129,7 +138,7 @@ export async function mergeTokens(
     for (const txn of swapData.transactions) {
       try {
         const transaction = txn.transaction;
-        transaction.sign([agent.wallet]);
+        transaction.sign([agent.wallet!]);
 
         const signature = await agent.connection.sendRawTransaction(
           transaction.serialize(),
@@ -164,10 +173,13 @@ export async function spreadToken(
   priorityFee: PriorityFee,
 ): Promise<string[]> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("SolutioFi spread token is not supported in UI mode");
+    }
     const client = await initClient(agent);
     const signatures: string[] = [];
     const swapData = await client.spread(
-      agent.wallet.publicKey.toString(),
+      agent.wallet_address.toString(),
       inputAsset,
       targetTokens,
       priorityFee,
@@ -176,7 +188,7 @@ export async function spreadToken(
     for (const txn of swapData.transactions) {
       try {
         const transaction = txn.transaction;
-        transaction.sign([agent.wallet]);
+        transaction.sign([agent.wallet!]);
 
         const signature = await agent.connection.sendRawTransaction(
           transaction.serialize(),

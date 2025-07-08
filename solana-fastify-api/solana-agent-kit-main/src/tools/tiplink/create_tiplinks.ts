@@ -35,10 +35,18 @@ export async function create_TipLink(
         }),
       );
 
+      if (agent.isUiMode) {
+        agent.onSignTransaction?.(transaction.serialize().toString());
+        return {
+          url: tiplink.url.toString(),
+          signature: "",
+        };
+      }
+        
       const signature = await sendAndConfirmTransaction(
         agent.connection,
         transaction,
-        [agent.wallet],
+        [agent.wallet!],
         { commitment: "confirmed" },
       );
 
@@ -93,10 +101,17 @@ export async function create_TipLink(
         ),
       );
 
+      if (agent.isUiMode) {
+        agent.onSignTransaction?.(transaction.serialize().toString());
+        return {
+          url: tiplink.url.toString(),
+          signature: "",
+        };
+      }
       const signature = await sendAndConfirmTransaction(
         agent.connection,
         transaction,
-        [agent.wallet],
+        [agent.wallet!],
         { commitment: "confirmed" },
       );
 

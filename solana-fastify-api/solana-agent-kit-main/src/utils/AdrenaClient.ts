@@ -36,10 +36,13 @@ export default class AdrenaClient {
   );
 
   public static async load(agent: SolanaAgentKit): Promise<AdrenaClient> {
+    if (agent.isUiMode) {
+      throw new Error("AdrenaClient is not supported in UI mode");
+    }
     const program = new Program<Adrena>(
       ADRENA_IDL,
       AdrenaClient.programId,
-      new AnchorProvider(agent.connection, new NodeWallet(agent.wallet), {
+      new AnchorProvider(agent.connection, new NodeWallet(agent.wallet!), {
         commitment: "processed",
         skipPreflight: true,
       }),

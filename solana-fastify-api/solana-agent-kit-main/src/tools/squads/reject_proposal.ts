@@ -15,7 +15,10 @@ export async function multisig_reject_proposal(
   transactionIndex?: number | bigint,
 ): Promise<string> {
   try {
-    const createKey = agent.wallet;
+    if (agent.isUiMode) {
+      throw new Error("Multisig reject proposal is not supported in UI mode");
+    }
+    const createKey = agent.wallet!;
     const [multisigPda] = multisig.getMultisigPda({
       createKey: createKey.publicKey,
     });
@@ -35,16 +38,16 @@ export async function multisig_reject_proposal(
     // });
     const multisigTx = multisig.transactions.proposalReject({
       blockhash: (await agent.connection.getLatestBlockhash()).blockhash,
-      feePayer: agent.wallet.publicKey,
+      feePayer: agent.wallet!.publicKey,
       multisigPda,
       transactionIndex: transactionIndex,
-      member: agent.wallet.publicKey,
+      member: agent.wallet!.publicKey,
     });
     if(agent.isUiMode){
       agent.onSignTransaction?.(multisigTx.serialize().toString());
-      return
+      return "";
     } 
-    multisigTx.sign([agent.wallet]);
+    multisigTx.sign([agent.wallet!]);
     const tx = await agent.connection.sendRawTransaction(
       multisigTx.serialize(),
     );

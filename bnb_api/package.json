@@ -1,0 +1,46 @@
+{
+  "name": "autopayer-api",
+  "version": "1.0.0",
+  "description": "AutoPayer Escrow API with AI verification",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "keywords": ["fastify", "mongodb", "escrow", "ai", "crypto"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "@fastify/cors": "^8.4.0",
+    "@fastify/multipart": "^8.0.0",
+    "@fastify/swagger": "^8.12.0",
+    "@fastify/swagger-ui": "^2.1.0",
+    "mongoose": "^8.0.3",
+    "ethers": "^6.8.1",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "joi": "^17.11.0",
+    "multer": "^1.4.5-lts.1",
+    "ipfs-http-client": "^60.0.1",
+    "openai": "^4.20.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.11",
+    "typescript": "^5.2.2",
+    "tsx": "^4.6.0",
+    "eslint": "^8.54.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  }
+}

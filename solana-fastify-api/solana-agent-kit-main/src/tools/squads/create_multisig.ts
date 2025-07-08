@@ -16,7 +16,10 @@ export async function create_squads_multisig(
   creator: PublicKey,
 ): Promise<string> {
   const connection = agent.connection;
-  const createKey = agent.wallet; // can be any keypair, using the agent wallet as only one multisig is required
+  if (agent.isUiMode) {
+    throw new Error("Multisig create multisig is not supported in UI mode");
+  }
+  const createKey = agent.wallet!; // can be any keypair, using the agent wallet as only one multisig is required
 
   const [multisigPda] = multisig.getMultisigPda({
     createKey: createKey.publicKey,
@@ -35,7 +38,7 @@ export async function create_squads_multisig(
     blockhash: (await connection.getLatestBlockhash()).blockhash,
     treasury: configTreasury,
     createKey: createKey.publicKey,
-    creator: agent.wallet.publicKey,
+    creator: agent.wallet!.publicKey,
     multisigPda,
     configAuthority: null,
     timeLock: 0,
@@ -43,7 +46,7 @@ export async function create_squads_multisig(
     rentCollector: null,
     members: [
       {
-        key: agent.wallet.publicKey,
+        key: agent.wallet!.publicKey,
         permissions: multisig.types.Permissions.all(),
       },
       {
@@ -52,11 +55,11 @@ export async function create_squads_multisig(
       },
     ],
   });
-  if(agent.isUiMode){
+  if (agent.isUiMode) {
     agent.onSignTransaction?.(tx.serialize().toString());
-    return
+    return "";
   } else {
-    tx.sign([agent.wallet, createKey]);
+    tx.sign([agent.wallet!, createKey]);
   }
 
   const txId = connection.sendRawTransaction(tx.serialize());

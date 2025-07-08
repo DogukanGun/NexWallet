@@ -1,5 +1,6 @@
 package com.dag.nexwallet.features.chat.data.datasource
 
+import com.dag.nexwallet.BuildConfig
 import com.dag.nexwallet.base.Logger
 import com.dag.nexwallet.base.extensions.getResponseData
 import com.dag.nexwallet.features.chat.domain.model.ChatRequest
@@ -21,7 +22,8 @@ class ChatService @Inject constructor(
     private val logger: Logger
 ) {
     suspend fun chat(body: ChatRequest): ChatResponse? {
-        val res = ktor.post("/mobile-solana") {
+        val fullUrl = "${BuildConfig.BASE_FRONTEND_URL}mobile-solana"
+        val res = ktor.post(fullUrl) {
             contentType(ContentType.Application.Json)
             setBody(body)
         }

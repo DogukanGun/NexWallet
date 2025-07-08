@@ -25,6 +25,7 @@ export async function fetchPythPriceFeedID(
         id: string;
         attributes: {
           base: string;
+          asset_type: string;
         };
       }>;
     };
@@ -46,7 +47,7 @@ export async function fetchPythPriceFeedID(
       return filteredData[0].id;
     }
 
-    return data[0].id;
+    return data.priceFeeds[0].id;
   } catch (error: any) {
     throw new Error(
       `Fetching price feed ID from Pyth failed: ${error.message}`,

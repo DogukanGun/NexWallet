@@ -21,12 +21,12 @@ services:
       - ./frontend_app/.env
     restart: always 
 
-  solana-fastify-api:
+  ethereum-fastify-api:
     build:
-      context: ./solana-fastify-api
+      context: ./ethereum_wallet/
       dockerfile: Dockerfile
     ports:
-      - "8004:8004"
+      - "8005:8005"
     env_file:
-      - ./solana-fastify-api/.env
+      - ./ethereum_wallet/api/.env
     restart: always 

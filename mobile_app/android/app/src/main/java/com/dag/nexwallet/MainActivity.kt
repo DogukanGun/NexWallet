@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Notifications
@@ -22,7 +24,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
@@ -34,9 +42,12 @@ import androidx.lifecycle.lifecycleScope
 import com.dag.nexwallet.base.ActivityHolder
 import com.dag.nexwallet.base.AlertDialogManager
 import com.dag.nexwallet.base.components.CustomAlertDialog
+import com.dag.nexwallet.base.components.bottomnav.BottomNavMessageManager
 import com.dag.nexwallet.base.components.bottomnav.BottomNavigationBar
 import com.dag.nexwallet.base.navigation.DefaultNavigationHost
 import com.dag.nexwallet.base.navigation.DefaultNavigator
+import com.dag.nexwallet.base.scroll.LocalScrollStateManager
+import com.dag.nexwallet.base.scroll.ScrollStateManager
 import com.dag.nexwallet.data.AlertDialogModel
 import com.dag.nexwallet.domain.DataPreferencesStore
 import com.dag.nexwallet.features.home.presentation.cardBackgroundColor
@@ -45,6 +56,7 @@ import com.dag.nexwallet.ui.theme.mainBackground
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.solana.mobilewalletadapter.clientlib.ActivityResultSender
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -58,6 +70,12 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var alertDialogManager: AlertDialogManager
+
+    @Inject
+    lateinit var bottomNavMessageManager: BottomNavMessageManager
+    
+    @Inject
+    lateinit var scrollStateManager: ScrollStateManager
 
     @Inject
     lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -88,96 +106,111 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            NexWalletTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(mainBackground)
-                ) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = Color.Transparent,
+            val scrollState = scrollStateManager.scrollState.collectAsState()
+            
+            CompositionLocalProvider(
+                LocalScrollStateManager provides scrollStateManager
+            ) {
+                NexWalletTheme {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(mainBackground)
                     ) {
-                        Column(
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(mainBackground),
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = Color.Transparent,
                         ) {
-                            if (mainVM.isBottomNavActive(currentRoute.value)) {
-                                TopAppBar(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    colors = TopAppBarDefaults.topAppBarColors(
-                                        containerColor = cardBackgroundColor
-                                    ),
-                                    title = {
-                                        Text(
-                                            text = "NexWallet",
-                                            fontSize = 22.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                    },
-                                    actions = {
-                                        // Notification icon
-                                        IconButton(
-                                            onClick = { /* Handle notifications */ }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Notifications,
-                                                contentDescription = "Notifications",
-                                                tint = Color.White,
-                                                modifier = Modifier.size(24.dp)
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = { mainVM.signOut() }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.ExitToApp,
-                                                contentDescription = "Sign Out",
-                                                tint = Color.White,
-                                                modifier = Modifier.size(24.dp)
-                                            )
-                                        }
-
-                                    }
-                                )
-                            }
-                            DefaultNavigationHost(
-                                navigator = defaultNavigator,
-                                modifier = Modifier.weight(1f),
-                                sender = sender
+                            Column(
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(mainBackground),
                             ) {
-                                currentRoute.value = it.destination.route
-                                    ?.split(".")?.last()
-                            }
-                            if (mainVM.isBottomNavActive(currentRoute.value)) {
-                                BottomNavigationBar {
-                                    lifecycleScope.launch {
-                                        defaultNavigator.navigate(it) {
-                                            launchSingleTop = true
-                                            popUpTo(0) { inclusive = true }
+                                if (mainVM.isBottomNavActive(currentRoute.value)) {
+                                    TopAppBar(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        colors = TopAppBarDefaults.topAppBarColors(
+                                            containerColor = cardBackgroundColor
+                                        ),
+                                        title = {
+                                            Text(
+                                                text = "NexWallet",
+                                                fontSize = 22.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        },
+                                        actions = {
+                                            // Notification icon
+                                            IconButton(
+                                                onClick = { /* Handle notifications */ }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Notifications,
+                                                    contentDescription = "Notifications",
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { mainVM.signOut() }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ExitToApp,
+                                                    contentDescription = "Sign Out",
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
                                         }
-                                    }
+                                    )
+                                }
+                                
+                                DefaultNavigationHost(
+                                    navigator = defaultNavigator,
+                                    modifier = Modifier.weight(1f),
+                                    sender = sender
+                                ) {
+                                    currentRoute.value = it.destination.route
+                                        ?.split(".")?.last()
+                                }
+                                
+                                if (mainVM.isBottomNavActive(currentRoute.value)) {
+                                    BottomNavigationBar(
+                                        currentRoute = currentRoute.value,
+                                        isScrolled = scrollState.value.isScrolling,
+                                        messageManager = bottomNavMessageManager,
+                                        onItemSelected = {
+                                            lifecycleScope.launch {
+                                                defaultNavigator.navigate(it) {
+                                                    launchSingleTop = true
+                                                    popUpTo(0) { inclusive = true }
+                                                }
+                                            }
+                                        },
+                                        onExpandClick = {
+                                            scrollStateManager.toggle()
+                                        }
+                                    )
                                 }
                             }
                         }
-                    }
-                    AnimatedVisibility(showAlert.value && alertDialogModel.value != null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.5f))
-                                .blur(16.dp)
-                                .zIndex(10f)
-                        ) {
-                            CustomAlertDialog(
-                                alertDialogModel = alertDialogModel.value!!,
-                                showAlert = showAlert,
-                                defaultNavigator = defaultNavigator
-                            )
+                        AnimatedVisibility(showAlert.value && alertDialogModel.value != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .blur(16.dp)
+                                    .zIndex(10f)
+                            ) {
+                                CustomAlertDialog(
+                                    alertDialogModel = alertDialogModel.value!!,
+                                    showAlert = showAlert,
+                                    defaultNavigator = defaultNavigator
+                                )
+                            }
                         }
                     }
                 }

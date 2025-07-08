@@ -48,7 +48,10 @@ export async function swap(
   dstAddr: string,
   slippageBps: "auto" | number = "auto",
 ): Promise<string> {
-  if (fromToken.length < 32) {
+  if (agent.isUiMode) {
+    throw new Error("Mayan swap is not supported in UI mode");
+  }
+    if (fromToken.length < 32) {
     fromToken = await findTokenContract(fromToken, fromChain);
   }
   if (toToken.length < 32) {
@@ -102,9 +105,9 @@ async function swapSolana(
     ): Promise<T[]> => {
       for (let i = 0; i < trxs.length; i++) {
         if ("version" in trxs[i]) {
-          (trxs[i] as VersionedTransaction).sign([agent.wallet]);
+          (trxs[i] as VersionedTransaction).sign([agent.wallet!]);
         } else {
-          (trxs[i] as Transaction).partialSign(agent.wallet);
+          (trxs[i] as Transaction).partialSign(agent.wallet!);
         }
       }
       return trxs;
@@ -115,16 +118,16 @@ async function swapSolana(
     trx: T,
   ): Promise<T> => {
     if ("version" in trx) {
-      (trx as VersionedTransaction).sign([agent.wallet]);
+      (trx as VersionedTransaction).sign([agent.wallet!]);
     } else {
-      (trx as Transaction).partialSign(agent.wallet);
+      (trx as Transaction).partialSign(agent.wallet!);
     }
     return trx;
   };
 
   const swapRes = await swapFromSolana(
     quote,
-    agent.wallet.publicKey.toString(),
+    agent.wallet_address.toString(),
     dstAddr,
     null,
     signer,

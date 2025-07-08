@@ -1,0 +1,245 @@
+kotlin version: 2.0.0
+error message: org.jetbrains.kotlin.backend.common.CompilationException: Back-end: Please report this problem https://kotl.in/issue
+/Users/dogukangundogan/Desktop/Dev/NexWallet/mobile_app/android/app/src/main/java/com/dag/nexwallet/features/solana/domain/model/SwapRequest.kt:13:1
+Problem with `@Serializable
+@StabilityInferred(parameters = 0)
+data class SwapBody {
+  constructor(quoteResponse: Map<String, *>, userPublicKey: String, wrapAndUnwrapSol: Boolean = true, dynamicComputeUnitLimit: Boolean = true, dynamicSlippage: Boolean = true, prioritizationFeeLamports: PrioritizationFeeLamports, feeAccount: String? = null) /* primary */ {
+    super/*Any*/()
+    /* <init>() */
+
+  }
+
+  val quoteResponse: Map<String, *>
+    field = quoteResponse
+    get
+
+  val userPublicKey: String
+    field = userPublicKey
+    get
+
+  val wrapAndUnwrapSol: Boolean
+    field = wrapAndUnwrapSol
+    get
+
+  val dynamicComputeUnitLimit: Boolean
+    field = dynamicComputeUnitLimit
+    get
+
+  val dynamicSlippage: Boolean
+    field = dynamicSlippage
+    get
+
+  val prioritizationFeeLamports: PrioritizationFeeLamports
+    field = prioritizationFeeLamports
+    get
+
+  val feeAccount: String?
+    field = feeAccount
+    get
+
+  companion object Companion {
+    private constructor() /* primary */ {
+      super/*Any*/()
+      /* <init>() */
+
+    }
+
+    fun serializer(): KSerializer<SwapBody>
+
+    /* fake */ override operator fun equals(other: Any?): Boolean
+
+    /* fake */ override fun hashCode(): Int
+
+    /* fake */ override fun toString(): String
+
+  }
+
+  @Deprecated(message = "This synthesized declaration should not be used directly", level = DeprecationLevel.HIDDEN)
+  @StabilityInferred(parameters = 0)
+  object $serializer : GeneratedSerializer<SwapBody> {
+    private constructor() /* primary */ {
+      super/*Any*/()
+      /* <init>() */
+
+    }
+
+    override fun serialize(encoder: Encoder, value: SwapBody)
+
+    override fun deserialize(decoder: Decoder): SwapBody
+
+    override val descriptor: SerialDescriptor
+      override get
+
+    override fun childSerializers(): Array<KSerializer<*>>
+
+    /* fake */ override fun typeParametersSerializers(): Array<KSerializer<*>>
+
+    /* fake */ override operator fun equals(other: Any?): Boolean
+
+    /* fake */ override fun hashCode(): Int
+
+    /* fake */ override fun toString(): String
+
+    /* static final field */ val $stable: Int = 8
+  }
+
+  operator fun component1(): Map<String, *> {
+    return <this>.#quoteResponse
+  }
+
+  operator fun component2(): String {
+    return <this>.#userPublicKey
+  }
+
+  operator fun component3(): Boolean {
+    return <this>.#wrapAndUnwrapSol
+  }
+
+  operator fun component4(): Boolean {
+    return <this>.#dynamicComputeUnitLimit
+  }
+
+  operator fun component5(): Boolean {
+    return <this>.#dynamicSlippage
+  }
+
+  operator fun component6(): PrioritizationFeeLamports {
+    return <this>.#prioritizationFeeLamports
+  }
+
+  operator fun component7(): String? {
+    return <this>.#feeAccount
+  }
+
+  fun copy(quoteResponse: Map<String, *> = <this>.#quoteResponse, userPublicKey: String = <this>.#userPublicKey, wrapAndUnwrapSol: Boolean = <this>.#wrapAndUnwrapSol, dynamicComputeUnitLimit: Boolean = <this>.#dynamicComputeUnitLimit, dynamicSlippage: Boolean = <this>.#dynamicSlippage, prioritizationFeeLamports: PrioritizationFeeLamports = <this>.#prioritizationFeeLamports, feeAccount: String? = <this>.#feeAccount): SwapBody {
+    return SwapBody(quoteResponse = quoteResponse, userPublicKey = userPublicKey, wrapAndUnwrapSol = wrapAndUnwrapSol, dynamicComputeUnitLimit = dynamicComputeUnitLimit, dynamicSlippage = dynamicSlippage, prioritizationFeeLamports = prioritizationFeeLamports, feeAccount = feeAccount)
+  }
+
+  override fun toString(): String {
+    return "SwapBody(" + "quoteResponse=" + <this>.#quoteResponse + ", " + "userPublicKey=" + <this>.#userPublicKey + ", " + "wrapAndUnwrapSol=" + <this>.#wrapAndUnwrapSol + ", " + "dynamicComputeUnitLimit=" + <this>.#dynamicComputeUnitLimit + ", " + "dynamicSlippage=" + <this>.#dynamicSlippage + ", " + "prioritizationFeeLamports=" + <this>.#prioritizationFeeLamports + ", " + "feeAccount=" + <this>.#feeAccount + ")"
+  }
+
+  override fun hashCode(): Int {
+    var result: Int = <this>.#quoteResponse.hashCode()
+    result = result.times(other = 31).plus(other = <this>.#userPublicKey.hashCode())
+    result = result.times(other = 31).plus(other = <this>.#wrapAndUnwrapSol.hashCode())
+    result = result.times(other = 31).plus(other = <this>.#dynamicComputeUnitLimit.hashCode())
+    result = result.times(other = 31).plus(other = <this>.#dynamicSlippage.hashCode())
+    result = result.times(other = 31).plus(other = <this>.#prioritizationFeeLamports.hashCode())
+    result = result.times(other = 31).plus(other = when {
+      EQEQ(arg0 = <this>.#feeAccount, arg1 = null) -> 0
+      else -> <this>.#feeAccount.hashCode()
+    })
+    return result
+  }
+
+  override operator fun equals(other: Any?): Boolean {
+    when {
+      EQEQEQ(arg0 = <this>, arg1 = other) -> return true
+    }
+    when {
+      other !is SwapBody -> return false
+    }
+    val tmp0_other_with_cast: SwapBody = other as SwapBody
+    when {
+      EQEQ(arg0 = <this>.#quoteResponse, arg1 = tmp0_other_with_cast.#quoteResponse).not() -> return false
+    }
+    when {
+      EQEQ(arg0 = <this>.#userPublicKey, arg1 = tmp0_other_with_cast.#userPublicKey).not() -> return false
+    }
+    when {
+      EQEQ(arg0 = <this>.#wrapAndUnwrapSol, arg1 = tmp0_other_with_cast.#wrapAndUnwrapSol).not() -> return false
+    }
+    when {
+      EQEQ(arg0 = <this>.#dynamicComputeUnitLimit, arg1 = tmp0_other_with_cast.#dynamicComputeUnitLimit).not() -> return false
+    }
+    when {
+      EQEQ(arg0 = <this>.#dynamicSlippage, arg1 = tmp0_other_with_cast.#dynamicSlippage).not() -> return false
+    }
+    when {
+      EQEQ(arg0 = <this>.#prioritizationFeeLamports, arg1 = tmp0_other_with_cast.#prioritizationFeeLamports).not() -> return false
+    }
+    when {
+      EQEQ(arg0 = <this>.#feeAccount, arg1 = tmp0_other_with_cast.#feeAccount).not() -> return false
+    }
+    return true
+  }
+
+  /* static final field */ val $stable: Int = 8
+  @JvmStatic
+  internal fun write$Self(self: SwapBody, output: CompositeEncoder, serialDesc: SerialDescriptor)
+
+  internal constructor(seen0: Int, quoteResponse: Map<String, *>?, userPublicKey: String?, wrapAndUnwrapSol: Boolean, dynamicComputeUnitLimit: Boolean, dynamicSlippage: Boolean, prioritizationFeeLamports: PrioritizationFeeLamports?, feeAccount: String?, serializationConstructorMarker: SerializationConstructorMarker?)
+
+}
+
+`
+Details: kotlinx.serialization compiler plugin internal error: unable to transform declaration, see cause
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializerClassLowering.lower(SerializationLoweringExtension.kt:228)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitClass(SerializationLoweringExtension.kt:46)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid$DefaultImpls.visitClass(IrElementVisitorVoid.kt:44)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitClass(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitClass(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlin.ir.declarations.IrClass.accept(IrClass.kt:72)
+	at org.jetbrains.kotlin.ir.declarations.IrFile.acceptChildren(IrFile.kt:34)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorsKt.acceptChildrenVoid(IrVisitors.kt:15)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitElement(SerializationLoweringExtension.kt:42)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid$DefaultImpls.visitPackageFragment(IrElementVisitorVoid.kt:168)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitPackageFragment(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid$DefaultImpls.visitFile(IrElementVisitorVoid.kt:184)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitFile(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid$DefaultImpls.visitFile(IrElementVisitorVoid.kt:180)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitFile(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt$runOnFileInOrder$1.visitFile(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlin.ir.declarations.IrFile.accept(IrFile.kt:28)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitorsKt.acceptVoid(IrVisitors.kt:11)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtensionKt.runOnFileInOrder(SerializationLoweringExtension.kt:40)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializationLoweringExtension.generate(SerializationLoweringExtension.kt:193)
+	at org.jetbrains.kotlin.fir.pipeline.ConvertToIrKt.applyIrGenerationExtensions(convertToIr.kt:260)
+	at org.jetbrains.kotlin.fir.pipeline.ConvertToIrKt.convertToIrAndActualize(convertToIr.kt:139)
+	at org.jetbrains.kotlin.fir.pipeline.ConvertToIrKt.convertToIrAndActualize$default(convertToIr.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.convertToIrAndActualizeForJvm(jvmCompilerPipeline.kt:193)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.convertAnalyzedFirToIr(jvmCompilerPipeline.kt:167)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.compileModulesUsingFrontendIrAndLightTree(jvmCompilerPipeline.kt:138)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecute(K2JVMCompiler.kt:155)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecute(K2JVMCompiler.kt:50)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:104)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:48)
+	at org.jetbrains.kotlin.cli.common.CLITool.exec(CLITool.kt:101)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunner.runCompiler(IncrementalJvmCompilerRunner.kt:453)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunner.runCompiler(IncrementalJvmCompilerRunner.kt:62)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:506)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:423)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.tryCompileIncrementally$lambda$9$compile(IncrementalCompilerRunner.kt:249)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.tryCompileIncrementally(IncrementalCompilerRunner.kt:267)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:120)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:676)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:92)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1661)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.IllegalStateException: Serializer for element of type kotlin.Any? has not been found
+	at org.jetbrains.kotlinx.serialization.compiler.backend.ir.SerializerSearchUtilKt.findTypeSerializerOrContext(SerializerSearchUtil.kt:84)
+	at org.jetbrains.kotlinx.serialization.compiler.backend.ir.BaseIrGenerator.serializerInstance(BaseIrGenerator.kt:713)
+	at org.jetbrains.kotlinx.serialization.compiler.backend.ir.BaseIrGenerator.cacheableChildSerializerInstance(BaseIrGenerator.kt:489)
+	at org.jetbrains.kotlinx.serialization.compiler.backend.ir.BaseIrGenerator.createCachedChildSerializers(BaseIrGenerator.kt:467)
+	at org.jetbrains.kotlinx.serialization.compiler.backend.ir.SerializableIrGenerator.<init>(SerializableIrGenerator.kt:59)
+	at org.jetbrains.kotlinx.serialization.compiler.backend.ir.SerializableIrGenerator$Companion.generate(SerializableIrGenerator.kt:398)
+	at org.jetbrains.kotlinx.serialization.compiler.extensions.SerializerClassLowering.lower(SerializationLoweringExtension.kt:145)
+	... 55 more
+
+

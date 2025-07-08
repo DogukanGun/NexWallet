@@ -17,6 +17,14 @@ export async function raydiumCreateClmm(
   initialPrice: Decimal,
   startTime: BN,
 ): Promise<string> {
+  if (agent.isUiMode) {
+    throw new Error("Raydium CLMM creation is not supported in UI mode");
+  }
+
+  if (!agent.wallet) {
+    throw new Error("Wallet is required for Raydium CLMM creation");
+  }
+
   const raydium = await Raydium.load({
     owner: agent.wallet,
     connection: agent.connection,

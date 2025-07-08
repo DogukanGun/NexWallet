@@ -15,7 +15,7 @@ export async function rock_paper_scissor(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: agent.wallet.publicKey.toBase58(),
+          account: agent.wallet_address.toBase58(),
         }),
       },
     );
@@ -30,18 +30,18 @@ export async function rock_paper_scissor(
     };
     if (data.transaction) { 
       const txn = Transaction.from(Buffer.from(data.transaction, "base64"));
-      txn.sign(agent.wallet);
+      txn.sign(agent.wallet!);
       txn.recentBlockhash = (
         await agent.connection.getLatestBlockhash()
       ).blockhash;
       const sig = await sendAndConfirmTransaction(
         agent.connection,
         txn,
-        [agent.wallet],
+        [agent.wallet!],
         { commitment: "confirmed" },
       );
       const href = data.links?.next?.href;
-      return await outcome(agent, sig, href);
+      return await outcome(agent, sig, href!);
     } else {
       return "failed";
     }
@@ -64,7 +64,7 @@ async function outcome(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: agent.wallet.publicKey.toBase58(),
+          account: agent.wallet_address.toBase58(),
           signature: sig,
         }),
       },
@@ -92,7 +92,7 @@ async function won(agent: SolanaAgentKit, href: string): Promise<string> {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: agent.wallet.publicKey.toBase58(),
+          account: agent.wallet_address.toBase58(),
         }),
       },
     );
@@ -100,7 +100,11 @@ async function won(agent: SolanaAgentKit, href: string): Promise<string> {
     const data: any = await res.json();
     if (data.transaction) {
       const txn = Transaction.from(Buffer.from(data.transaction, "base64"));
-      txn.partialSign(agent.wallet);
+      if (agent.isUiMode) {
+        agent.onSignTransaction?.(txn.serialize().toString());
+        return "";
+      }
+      txn.partialSign(agent.wallet!);
       await agent.connection.sendRawTransaction(txn.serialize(), {
         preflightCommitment: "confirmed",
       });
@@ -124,7 +128,7 @@ async function postWin(agent: SolanaAgentKit, href: string): Promise<string> {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: agent.wallet.publicKey.toBase58(),
+          account: agent.wallet_address.toBase58(),
         }),
       },
     );

@@ -20,7 +20,7 @@ export async function stakeWithJup(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: agent.wallet.publicKey.toBase58(),
+          account: agent.wallet_address.toBase58(),
         }),
       },
     );
@@ -35,20 +35,28 @@ export async function stakeWithJup(
     txn.message.recentBlockhash = blockhash;
 
     // Sign and send transaction
-    txn.sign([agent.wallet]);
-    const signature = await agent.connection.sendTransaction(txn, {
-      preflightCommitment: "confirmed",
-      maxRetries: 3,
-    });
+    if (agent.isUiMode) {
+      agent.onSignTransaction?.(txn.serialize().toString());
+      return "";
+    } else {
+      if (!agent.wallet) {
+        throw new Error("Wallet is required for backend mode");
+      }
+      txn.sign([agent.wallet]);
+      const signature = await agent.connection.sendTransaction(txn, {
+        preflightCommitment: "confirmed",
+        maxRetries: 3,
+      });
 
-    const latestBlockhash = await agent.connection.getLatestBlockhash();
-    await agent.connection.confirmTransaction({
-      signature,
-      blockhash: latestBlockhash.blockhash,
-      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-    });
+      const latestBlockhash = await agent.connection.getLatestBlockhash();
+      await agent.connection.confirmTransaction({
+        signature,
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+      });
 
-    return signature;
+      return signature;
+    }
   } catch (error: any) {
     console.error(error);
     throw new Error(`jupSOL staking failed: ${error.message}`);

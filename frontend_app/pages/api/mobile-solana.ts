@@ -1,9 +1,7 @@
 import { withAuth } from "@/middleware/withAuth";
 import { NextApiRequest, NextApiResponse } from "next";
-import { createSolanaTools } from "@/solana-agent-kit-custom";
-import { SolanaAgentKit } from "../../solana-agent-kit-custom/agent";
-import { HumanMessage } from "@langchain/core/messages";
-import { createAgent } from "@/frontend_agent/agentHelpers";
+
+const INTERNAL_API_URL = process.env.INTERNAL_SOLANA_API_URL || "http://localhost:8004/api/mobile-solana";
 
 /**
  * Mobile-optimized API endpoint that only uses Solana functionality
@@ -13,7 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req;
 
   switch (method) {
-    case 'POST':
+    case 'POST': {
       const { message, wallet } = req.body;
 
       if (!message || typeof message !== "string") {
@@ -21,64 +19,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           error: "Message is required and should be a string." 
         });
       }
-      console.log("message", message);
-
       if (!wallet || typeof wallet !== "string") {
         return res.status(400).json({ 
           error: "Wallet address is required and should be a string." 
         });
       }
-      console.log("wallet", wallet);
       try {
-        console.log("Mobile Solana API request:", { message, wallet });
-        
-        const agent = new SolanaAgentKit(wallet, "https://api.mainnet-beta.solana.com", { OPENAI_API_KEY: process.env.OPENAI_API_KEY });
-        agent.isUiMode = true;
-        agent.onSignTransaction = async (transaction) => {
-          console.log("transaction", transaction);
-          res.status(200).json({
-            text: "Transaction created successfully",
-            transaction: transaction,
-            audio: null,
-            op: "solana"
-          });
-          return transaction;
-        };
-
-        const tools = createSolanaTools(agent);
-        const reactAgent = createAgent(
-          { modelName: "gpt-4o-mini", temperature: 0.5 },
-          tools,
-          `You are a helpful agent that can answer questions about the blockchain.
-          If an user asks you a questions about outside of Solana chain,
-          you must tell them mobile app only supports Solana chain.`,
-          false
-        );
-
-        let response = "";
-        const stream = await reactAgent.stream(
-          { messages: [new HumanMessage(message)] },
-          { configurable: { thread_id: "Frontend Agent" } },
-        );
-
-        for await (const chunk of stream) {
-          if ("agent" in chunk) {
-            console.log("agent-from-chat", chunk.agent.messages);
-            response = chunk.agent.messages[0].content;
-          }
-        }
-
-        return res.status(200).json({ text: response });
+        // Forward the request to the internal API
+        const apiRes = await fetch(INTERNAL_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message, wallet }),
+        });
+        const data = await apiRes.json();
+        return res.status(apiRes.status).json(data);
       } catch (error) {
-        console.error("Error in Mobile Solana API:", error);
+        console.error("Error forwarding to internal Solana API:", error);
         return res.status(500).json({ 
-          error: "An error occurred while processing your request",
+          error: "Failed to contact internal Solana API",
           text: error instanceof Error ? error.message : "Unknown error",
           success: false
         });
       }
-      break;
-
+    }
     default:
       res.setHeader('Allow', ['POST']);
       res.status(405).end(`Method ${method} Not Allowed`);

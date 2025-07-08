@@ -14,6 +14,9 @@ export async function listNFTForSale(
   nftMint: PublicKey,
   price: number,
 ): Promise<string> {
+  if (agent.isUiMode) {
+    throw new Error("Tensor list NFT for sale is not supported in UI mode");
+  }
   try {
     if (!PublicKey.isOnCurve(nftMint)) {
       throw new Error("Invalid NFT mint address");
@@ -41,7 +44,7 @@ export async function listNFTForSale(
 
     const provider = new AnchorProvider(
       agent.connection,
-      new Wallet(agent.wallet),
+      new Wallet(agent.wallet!),
       AnchorProvider.defaultOptions(),
     );
 
@@ -63,10 +66,15 @@ export async function listNFTForSale(
 
     const transaction = new Transaction();
     transaction.add(...tx.ixs);
-    return await agent.connection.sendTransaction(transaction, [
-      agent.wallet,
-      ...tx.extraSigners,
-    ]);
+    if (agent.isUiMode) {
+      agent.onSignTransaction?.(transaction.serialize().toString());
+      return "";
+    } else {
+      return await agent.connection.sendTransaction(transaction, [
+        agent.wallet!,
+        ...tx.extraSigners,
+      ]);
+    }
   } catch (error: any) {
     console.error("Full error details:", error);
     throw error;
@@ -77,9 +85,12 @@ export async function cancelListing(
   agent: SolanaAgentKit,
   nftMint: PublicKey,
 ): Promise<string> {
+  if (agent.isUiMode) {
+    throw new Error("Tensor cancel listing is not supported in UI mode");
+  }
   const provider = new AnchorProvider(
     agent.connection,
-    new Wallet(agent.wallet),
+    new Wallet(agent.wallet!),
     AnchorProvider.defaultOptions(),
   );
 
@@ -102,8 +113,13 @@ export async function cancelListing(
 
   const transaction = new Transaction();
   transaction.add(...tx.ixs);
-  return await agent.connection.sendTransaction(transaction, [
-    agent.wallet,
-    ...tx.extraSigners,
-  ]);
+  if (agent.isUiMode) {
+    agent.onSignTransaction?.(transaction.serialize().toString());
+    return "";
+  } else {
+    return await agent.connection.sendTransaction(transaction, [
+      agent.wallet!,
+      ...tx.extraSigners,
+    ]);
+  }
 }

@@ -78,6 +78,13 @@ export default function Home() {
       poweredBy: 'Gaia OnChain - Coinbase Agent Kit',
       isWalletRequired: true
     },
+    {
+      id: '9',
+      name: 'Stellar AI Wallet',
+      description: 'Manage Stellar wallets, send payments, swap assets, and more with AI assistance. Works in text mode only.',
+      poweredBy: 'NexWallet',
+      isWalletRequired: true
+    },
   ])
   const { setConfig, isAuthenticated, userData } = useConfigStore();
   const { handleLogout } = useAuthModal();
@@ -149,6 +156,10 @@ export default function Home() {
   }, []);
 
   const handleAgentSelect = (agent: Agent) => {
+    if (agent.id === '9') {
+      router.push('/wallet/stellar');
+      return;
+    }
     // Determine if this is an onchain LLM
     const llmProvider = agent.id === '1' || agent.id === '2' || agent.id === '3' ? 'OpenAI' : 
                          agent.id === '4' ? 'llama_onchain' : ''; 

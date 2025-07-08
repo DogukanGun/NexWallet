@@ -34,9 +34,12 @@ export async function mintCollectionNFT(
   recipient?: PublicKey,
 ): Promise<MintCollectionNFTResponse> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Metaplex mint NFT is not supported in UI mode");
+    }
     // Create UMI instance from agent
     const umi = createUmi(agent.connection.rpcEndpoint).use(mplCore());
-    umi.use(keypairIdentity(fromWeb3JsKeypair(agent.wallet)));
+    umi.use(keypairIdentity(fromWeb3JsKeypair(agent.wallet!)));
 
     // Convert collection mint to UMI format
     const umiCollectionMint = fromWeb3JsPublicKey(collectionMint);
@@ -53,7 +56,7 @@ export async function mintCollectionNFT(
       collection: collection,
       name: metadata.name,
       uri: metadata.uri,
-      owner: fromWeb3JsPublicKey(recipient ?? agent.wallet.publicKey),
+      owner: fromWeb3JsPublicKey(recipient ?? agent.wallet_address),
     }).sendAndConfirm(umi);
 
     return {

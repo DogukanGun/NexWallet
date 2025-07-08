@@ -18,6 +18,14 @@ export async function raydiumCreateCpmm(
   mintBAmount: BN,
   startTime: BN,
 ): Promise<string> {
+  if (agent.isUiMode) {
+    throw new Error("Raydium CPMM creation is not supported in UI mode");
+  }
+
+  if (!agent.wallet) {
+    throw new Error("Wallet is required for Raydium CPMM creation");
+  }
+
   const raydium = await Raydium.load({
     owner: agent.wallet,
     connection: agent.connection,

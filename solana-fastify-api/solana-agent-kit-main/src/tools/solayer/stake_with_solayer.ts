@@ -12,6 +12,9 @@ export async function stakeWithSolayer(
   amount: number,
 ): Promise<string> {
   try {
+    if (agent.isUiMode) {
+      throw new Error("Solayer sSOL staking is not supported in UI mode");
+    }
     const response = await fetch(
       `https://app.solayer.org/api/action/restake/ssol?amount=${amount}`,
       {
@@ -20,7 +23,7 @@ export async function stakeWithSolayer(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: agent.wallet.publicKey.toBase58(),
+          account: agent.wallet!.publicKey.toBase58(),
         }),
       },
     );
@@ -42,7 +45,7 @@ export async function stakeWithSolayer(
     txn.message.recentBlockhash = blockhash;
 
     // Sign and send transaction
-    txn.sign([agent.wallet]);
+    txn.sign([agent.wallet!]);
     const signature = await agent.connection.sendTransaction(txn, {
       preflightCommitment: "confirmed",
       maxRetries: 3,
