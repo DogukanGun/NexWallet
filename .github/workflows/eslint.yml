@@ -1,0 +1,62 @@
+name: ESLint
+
+on:
+  push:
+    branches: 
+      - "main"
+      - "develop"
+  pull_request:
+    branches: 
+      - "main"
+      - "develop"
+  schedule:
+    - cron: '19 18 * * 4'
+
+jobs:
+  eslint:
+    name: Run ESLint scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read  # Only required for private repositories
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8  # Ensure this matches your project's pnpm version
+
+      - name: Install dependencies
+        run: pnpm install
+      - name: Validate ESLint Config
+        run: pnpm exec eslint --print-config .eslintrc.js
+      - name: Install ESLint and SARIF formatter
+        run: |
+          pnpm add eslint@8.10.0
+          pnpm add @microsoft/eslint-formatter-sarif@3.1.0
+      - name: Run ESLint
+        env:
+          SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
+        run: pnpm exec eslint . \
+          --config .eslintrc.js \
+          --ext .js,.jsx,.ts,.tsx \
+          --format @microsoft/eslint-formatter-sarif \
+          --output-file eslint-results.sarif
+        continue-on-error: true
+      - name: Print files
+        run: ls -la
+      - name: Check if SARIF file exists
+        run: |
+          if [ ! -f eslint-results.sarif ]; then
+            echo "SARIF file not found!"
+            exit 1
+          fi
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
